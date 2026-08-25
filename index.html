@@ -171,15 +171,15 @@
         }
 </style>
 </head>
-<body class="font-body-default min-h-screen flex flex-col">
+<body class="font-body-default min-h-screen flex flex-col overflow-x-hidden">
 
 <!-- Top AgriCore Notification Container -->
 <div id="topNotificationContainer"></div>
 
 <!-- TopNavBar -->
 <nav class="bg-surface dark:bg-inverse-surface text-primary dark:text-inverse-primary docked full-width top-0 z-50 shadow-[0_4px_18px_rgba(23,49,34,0.07)] sticky">
-  <div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-4 max-w-max-width mx-auto">
-    <div class="flex items-center gap-6">
+  <div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-3 md:py-4 max-w-max-width mx-auto">
+    <div class="flex items-center gap-3 sm:gap-6">
       <a class="flex items-center" href="#" onclick="showScreen('landing')" title="KrishiSetu Home">
         <img src="images/logo.png" class="navbar-logo" alt="KrishiSetu Logo">
       </a>
@@ -191,21 +191,33 @@
         <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" onclick="showScreen('about')" type="button">About Us</button>
       </div>
     </div>
-    <div class="flex items-center gap-4">
-      <div class="hidden md:flex items-center gap-3">
-        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors flex items-center gap-1" onclick="detectMyLocation()" title="Detect Geolocation" type="button">
-          <span class="material-symbols-outlined" data-icon="location_on">location_on</span>
-          <span id="topLocationText" class="text-xs font-semibold">Detect Location</span>
-        </button>
-        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors relative" onclick="showScreen('cart')" type="button" title="View Cart">
-          <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
-          <span id="cartCountBadge" class="absolute -top-2 -right-2 bg-harvest-gold text-inverse-surface font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center">0</span>
-        </button>
-      </div>
-      <span id="userRoleBadge" class="hidden text-xs font-extrabold px-3 py-1.5 rounded-full bg-surface text-primary border border-primary/20"></span>
-      <button id="profileNavBtn" class="hidden text-body-sm font-body-sm text-soil-brown hover:text-primary font-bold transition-colors" onclick="showScreen('profile')" type="button">Profile</button>
-      <button id="authHeaderBtn" class="text-body-sm font-body-sm bg-primary text-white rounded-lg px-4 py-2 hover:bg-primary-container transition-colors font-bold" onclick="openAuthModal()" type="button">Login</button>
+    <div class="flex items-center gap-2 sm:gap-4">
+      <button class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 text-xs" onclick="detectMyLocation()" title="Detect Geolocation" type="button">
+        <span class="material-symbols-outlined text-sm sm:text-base" data-icon="location_on">location_on</span>
+        <span id="topLocationText" class="hidden sm:inline text-xs font-semibold">Detect Location</span>
+      </button>
+      <button class="text-on-surface-variant hover:text-primary transition-colors relative p-1.5" onclick="showScreen('cart')" type="button" title="View Cart">
+        <span class="material-symbols-outlined text-xl" data-icon="shopping_cart">shopping_cart</span>
+        <span id="cartCountBadge" class="absolute -top-1 -right-1 bg-harvest-gold text-inverse-surface font-bold text-[10px] w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center">0</span>
+      </button>
+      <span id="userRoleBadge" class="hidden text-xs font-extrabold px-2.5 py-1 rounded-full bg-surface text-primary border border-primary/20"></span>
+      <button id="profileNavBtn" class="hidden text-xs sm:text-body-sm text-soil-brown hover:text-primary font-bold transition-colors" onclick="showScreen('profile')" type="button">Profile</button>
+      <button id="authHeaderBtn" class="text-xs sm:text-body-sm bg-primary text-white rounded-lg px-3 py-2 sm:px-4 sm:py-2 hover:bg-primary-container transition-colors font-bold" onclick="openAuthModal()" type="button">Login</button>
+      
+      <!-- Mobile Menu Toggle Button -->
+      <button class="md:hidden text-primary p-2 focus:outline-none flex items-center justify-center" onclick="toggleMobileMenu()" type="button" aria-label="Toggle Menu">
+        <span class="material-symbols-outlined text-2xl">menu</span>
+      </button>
     </div>
+  </div>
+
+  <!-- Mobile Dropdown Navigation Menu Drawer -->
+  <div id="mobileNavMenu" class="hidden md:hidden border-t border-border-subtle bg-white px-4 py-3 space-y-2 shadow-lg">
+    <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); onNavMarketplaceClick();" type="button">🛒 Marketplace</button>
+    <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); showScreen('price');" type="button">📊 Mandi Rates</button>
+    <button id="mobileSellBtn" class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface hidden" onclick="toggleMobileMenu(); showScreen('sell');" type="button">👨‍🌾 Sell Produce</button>
+    <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); showScreen('orders');" type="button">📦 Orders Tracking</button>
+    <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); showScreen('about');" type="button">🌾 About Us</button>
   </div>
 </nav>
 
@@ -214,18 +226,18 @@
 
   <!-- 1. PUBLIC HERO LANDING SCREEN (BEFORE LOGIN) -->
   <section class="screen active" id="landing">
-    <div class="relative w-full h-[540px] flex items-center justify-center overflow-hidden">
+    <div class="relative w-full min-h-[460px] md:h-[540px] flex items-center justify-center overflow-hidden py-10 md:py-0">
       <div class="absolute inset-0 z-0">
         <div class="w-full h-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDisDKyeGOZ-2eRL2SgUKulhvi9UcF2uPBPCFMkgyne345_reOKgNbJe-RVeovIx30oWc9IXKROQCJUDIDZX4bfkEhiYNrZrJsk6Rsaya3mHWg5IW9N_i4lbEgLCB3He2cCzcCE5OpUKoyVPLGzgMlOO5SY9xUtMpNOct8FMuhZPI_ot_pX4GK9ECS1LT8TUMEI0kJQGZnL5hxoBQUGirb-mPn8_iFyAlX5IEZftiHLM6urXGVTpdeqsg')"></div>
         <div class="absolute inset-0 bg-surface-muted/75 backdrop-blur-sm"></div>
       </div>
       <div class="relative z-10 max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop text-center">
-        <span class="inline-block bg-primary/10 text-primary text-xs font-extrabold px-4 py-1.5 rounded-full mb-4 border border-primary/20 uppercase tracking-wider">Direct Farm-to-Customer Marketplace</span>
-        <h1 class="text-display font-display text-primary mb-6">From Farm to Customer, Without the Middleman</h1>
-        <p class="text-headline-md font-headline-md text-on-surface-variant mb-10 max-w-3xl mx-auto">KrishiSetu connects farmers directly with buyers, ensuring fair prices, freshness, transparent platform fees, and real-time mandi intelligence.</p>
-        <div class="flex flex-col sm:flex-row justify-center gap-4">
-          <button class="bg-primary text-white px-8 py-3 rounded-lg text-section-head font-section-head shadow-[0_4px_18px_rgba(23,49,34,0.07)] hover:bg-primary-container transition-all font-bold" onclick="onExploreClick()" type="button">Explore Marketplace</button>
-          <button class="border-2 border-primary text-primary px-8 py-3 rounded-lg text-section-head font-section-head hover:bg-primary hover:text-white transition-all bg-white/50 backdrop-blur-md font-bold" onclick="onSellClick()" type="button">Sell Your Produce</button>
+        <span class="inline-block bg-primary/10 text-primary text-[10px] sm:text-xs font-extrabold px-3 py-1 sm:px-4 sm:py-1.5 rounded-full mb-3 sm:mb-4 border border-primary/20 uppercase tracking-wider">Direct Farm-to-Customer Marketplace</span>
+        <h1 class="text-headline-lg-mobile md:text-display font-display text-primary mb-4 md:mb-6">From Farm to Customer, Without the Middleman</h1>
+        <p class="text-body-default md:text-headline-md font-headline-md text-on-surface-variant mb-6 md:mb-10 max-w-3xl mx-auto">KrishiSetu connects farmers directly with buyers, ensuring fair prices, freshness, transparent platform fees, and real-time mandi intelligence.</p>
+        <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+          <button class="bg-primary text-white px-6 py-3 rounded-lg text-sm md:text-section-head font-section-head shadow-[0_4px_18px_rgba(23,49,34,0.07)] hover:bg-primary-container transition-all font-bold min-h-[44px]" onclick="onExploreClick()" type="button">Explore Marketplace</button>
+          <button class="border-2 border-primary text-primary px-6 py-3 rounded-lg text-sm md:text-section-head font-section-head hover:bg-primary hover:text-white transition-all bg-white/50 backdrop-blur-md font-bold min-h-[44px]" onclick="onSellClick()" type="button">Sell Your Produce</button>
         </div>
       </div>
     </div>
@@ -763,6 +775,11 @@ async function resendRegistrationOtp() {
   }
 }
 
+function toggleMobileMenu() {
+  const menu = $('mobileNavMenu');
+  if (menu) menu.classList.toggle('hidden');
+}
+
 function onUserSignedIn(user) {
   currentRole = user.role;
   localStorage.setItem('krishisetu_current_user', JSON.stringify(user));
@@ -777,6 +794,7 @@ function onUserSignedIn(user) {
 
   $('profileNavBtn').classList.remove('hidden');
   $('sellNavBtn').style.display = currentRole === 'seller' ? 'inline-block' : 'none';
+  if ($('mobileSellBtn')) $('mobileSellBtn').classList.toggle('hidden', currentRole !== 'seller');
 
   if (currentRole === 'seller') {
     showScreen('sell');
@@ -794,6 +812,7 @@ function logoutUser() {
   $('profileNavBtn').classList.add('hidden');
   currentRole = 'customer';
   $('sellNavBtn').style.display = 'none';
+  if ($('mobileSellBtn')) $('mobileSellBtn').classList.add('hidden');
   notify('Signed out successfully.', 'info');
   showScreen('landing');
 }
