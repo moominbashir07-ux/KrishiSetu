@@ -53,9 +53,34 @@ app.use('/api/orders', ordersRouter);
 app.use('/api/seller/verification', sellerVerificationRouter);
 app.use('/api/admin', adminRouter);
 
-// ==================================================
-// MANDI MARKET INTELLIGENCE & PRICE PROXY (RESILIENT)
-// ==================================================
+// Helper functions for Mandi price and date normalization
+function parseMandiPrice(val) {
+  if (val === null || val === undefined) return null;
+  if (typeof val === 'number') {
+    return (Number.isFinite(val) && val > 0) ? val : null;
+  }
+  if (typeof val === 'string') {
+    const clean = val.trim().replace(/[^0-9.]/g, '');
+    if (!clean || clean === '0') return null;
+    const num = parseFloat(clean);
+    return (Number.isFinite(num) && num > 0) ? num : null;
+  }
+  return null;
+}
+
+function parseMandiDate(val) {
+  if (!val) return new Date().toISOString().split('T')[0];
+  const str = String(val).trim();
+  if (str.includes('/')) {
+    const parts = str.split('/');
+    if (parts.length === 3) {
+      const [d, m, y] = parts;
+      return `${y.length === 2 ? '20' + y : y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+    }
+  }
+  return str;
+}
+
 function getDemoMarketRecords(commodity = 'Onion', state = 'Maharashtra') {
   const basePrice = { Onion: 5760, Tomato: 2600, Potato: 2200, Wheat: 2900, Rice: 3200, Soybean: 5700, Cotton: 7200, Apple: 8500, Chilli: 6800 }[commodity] || 3000;
   const demoMarkets = ['Azadpur APMC', 'Lasalgaon APMC', 'Pune APMC', 'Nashik APMC', 'Ahmednagar APMC', 'Vashi APMC'];
@@ -102,26 +127,46 @@ app.get('/api/market-prices', async (req, res) => {
       if (response.ok) {
         const body = await response.text();
         const json = JSON.parse(body);
-        const records = Array.isArray(json.records) ? json.records : [];
-        if (records.length > 0) {
-          for (const r of records) {
-            if (r.market && r.commodity && r.modal_price) {
-              const snapId = `SNAP_${r.state}_${r.market}_${r.commodity}_${r.arrival_date || Date.now()}`;
+        const rawRecords = Array.isArray(json.records) ? json.records : [];
+        if (rawRecords.length > 0) {
+          const normalizedRecords = rawRecords.map(r => {
+            const minP = parseMandiPrice(r.min_price);
+            const modalP = parseMandiPrice(r.modal_price);
+            const maxP = parseMandiPrice(r.max_price);
+            const arrDate = parseMandiDate(r.arrival_date);
+            return {
+              state: r.state || state,
+              district: r.district || r.market || '',
+              market: r.market || 'APMC Market',
+              commodity: r.commodity || commodity,
+              variety: r.variety || 'Local',
+              grade: r.grade || 'FAQ',
+              arrival_date: arrDate,
+              min_price: minP,
+              modal_price: modalP,
+              max_price: maxP,
+              unit: r.unit || 'quintal'
+            };
+          }).filter(r => r.market && r.modal_price !== null);
+
+          if (normalizedRecords.length > 0) {
+            for (const r of normalizedRecords) {
+              const snapId = `SNAP_${r.state}_${r.market}_${r.commodity}_${r.arrival_date}`;
               db.query(
                 `INSERT INTO market_price_snapshots (id, state, district, market, commodity, variety, grade, arrival_date, min_price, max_price, modal_price, unit)
                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-                [snapId, r.state, r.district || null, r.market, r.commodity, r.variety || 'Local', r.grade || 'FAQ', r.arrival_date || null, Number(r.min_price || 0), Number(r.max_price || 0), Number(r.modal_price || 0), 'quintal']
-              ).catch(err => console.warn('[SNAPSHOT ARCHIVE WARNING]', err.message));
+                [snapId, r.state, r.district || null, r.market, r.commodity, r.variety, r.grade, r.arrival_date, r.min_price, r.max_price, r.modal_price, r.unit]
+              ).catch(() => {});
             }
-          }
 
-          return res.json({
-            records,
-            total: json.total || records.length,
-            sourceUpdatedAt: json.updated_date || json.updated || new Date().toISOString(),
-            fetchedAt: new Date().toISOString(),
-            source: 'data.gov.in / AGMARKNET'
-          });
+            return res.json({
+              records: normalizedRecords,
+              total: normalizedRecords.length,
+              sourceUpdatedAt: json.updated_date || json.updated || new Date().toISOString(),
+              fetchedAt: new Date().toISOString(),
+              source: 'data.gov.in / AGMARKNET'
+            });
+          }
         }
       } else {
         console.warn(`[MANDI PROXY WARNING] data.gov.in returned HTTP ${response.status}. Using local market fallback.`);

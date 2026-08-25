@@ -170,9 +170,8 @@
 <nav class="bg-surface dark:bg-inverse-surface text-primary dark:text-inverse-primary docked full-width top-0 z-50 shadow-[0_4px_18px_rgba(23,49,34,0.07)] sticky">
   <div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-4 max-w-max-width mx-auto">
     <div class="flex items-center gap-6">
-      <a class="text-headline-md font-headline-md font-black text-primary dark:text-inverse-primary flex items-center gap-2" href="#" onclick="showScreen('landing')">
-        <img src="images/logo.png" class="h-9 w-auto object-contain" alt="KrishiSetu Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-        <span style="display:none">🌾</span> KrishiSetu
+      <a class="flex items-center" href="#" onclick="showScreen('landing')" title="KrishiSetu Home">
+        <img src="images/logo.png" class="h-9 w-auto object-contain" alt="KrishiSetu Logo">
       </a>
       <div class="hidden md:flex gap-6 items-center">
         <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" onclick="onNavMarketplaceClick()" type="button">Marketplace</button>
@@ -1279,53 +1278,113 @@ async function loadMarketPrices() {
   }
 }
 
-function renderMandiUI(records, commodity, state) {
+function parseMandiPrice(val) {
+  if (val === null || val === undefined) return null;
+  if (typeof val === 'number') {
+    return (Number.isFinite(val) && val > 0) ? val : null;
+  }
+  if (typeof val === 'string') {
+    const clean = val.trim().replace(/[^0-9.]/g, '');
+    if (!clean || clean === '0') return null;
+    const num = parseFloat(clean);
+    return (Number.isFinite(num) && num > 0) ? num : null;
+  }
+  return null;
+}
+
+function normalizePriceToKg(priceInQuintal, unit = 'quintal') {
+  const price = parseMandiPrice(priceInQuintal);
+  if (price === null) return null;
+  const u = String(unit || 'quintal').toLowerCase();
+  if (u.includes('kg') || u.includes('kilogram')) return price;
+  if (u.includes('quintal') || u.includes('100 kg') || u.includes('qtl')) return price / 100;
+  if (u.includes('ton') || u.includes('tonne')) return price / 1000;
+  return price / 100;
+}
+
+function renderMandiUI(rawRecords, commodity, state) {
   $('mandiHeroTitle').textContent = `${commodity} — ${state} Mandis`;
 
-  if (!records.length) {
-    $('mandiModalVal').textContent = '—';
+  if (!rawRecords || !rawRecords.length) {
+    $('mandiModalVal').textContent = 'Unavailable';
     $('mandiModalKgVal').textContent = '—';
-    $('mandiSummaryRows').innerHTML = `<tr><td colspan="5" class="py-4 text-center text-soil-brown">No market records reported.</td></tr>`;
+    $('mandiMinVal').textContent = '—';
+    $('mandiMaxVal').textContent = '—';
+    $('mandiChangeVal').textContent = 'Live mandi data temporarily unavailable';
+    $('mandiChangeVal').className = 'text-xs font-bold px-3 py-1 rounded-full bg-input-bg text-soil-brown';
+    $('mandiSummaryRows').innerHTML = `<tr><td colspan="5" class="py-4 text-center text-soil-brown font-semibold">No valid market price observations available.</td></tr>`;
     return;
   }
 
-  const modals = records.map(r => r.modal_price).filter(Number.isFinite);
-  const mins = records.map(r => r.min_price).filter(Number.isFinite);
-  const maxs = records.map(r => r.max_price).filter(Number.isFinite);
+  const validRecords = rawRecords.map(r => {
+    const minP = parseMandiPrice(r.min_price);
+    const modalP = parseMandiPrice(r.modal_price);
+    const maxP = parseMandiPrice(r.max_price);
+    return {
+      ...r,
+      min_price: minP,
+      modal_price: modalP,
+      max_price: maxP,
+      unit: r.unit || 'quintal'
+    };
+  }).filter(r => r.modal_price !== null);
 
-  const avgModal = modals.length ? modals.reduce((a, b) => a + b, 0) / modals.length : 0;
-  const lowest = mins.length ? Math.min(...mins) : 0;
-  const highest = maxs.length ? Math.max(...maxs) : 0;
+  if (!validRecords.length) {
+    $('mandiModalVal').textContent = 'Unavailable';
+    $('mandiModalKgVal').textContent = '—';
+    $('mandiMinVal').textContent = '—';
+    $('mandiMaxVal').textContent = '—';
+    $('mandiChangeVal').textContent = 'Live mandi data temporarily unavailable';
+    $('mandiChangeVal').className = 'text-xs font-bold px-3 py-1 rounded-full bg-input-bg text-soil-brown';
+    $('mandiSummaryRows').innerHTML = `<tr><td colspan="5" class="py-4 text-center text-soil-brown font-semibold">No valid market price observations available.</td></tr>`;
+    return;
+  }
 
-  $('mandiModalVal').textContent = '₹' + Math.round(avgModal).toLocaleString();
-  $('mandiModalKgVal').textContent = '₹' + (avgModal / 100).toFixed(1) + '/kg';
-  $('mandiMinVal').textContent = '₹' + lowest;
-  $('mandiMaxVal').textContent = '₹' + highest;
+  const validModals = validRecords.map(r => r.modal_price);
+  const validMins = validRecords.map(r => r.min_price).filter(v => v !== null);
+  const validMaxs = validRecords.map(r => r.max_price).filter(v => v !== null);
 
-  if (modals.length >= 2 && modals[1] > 0) {
-    const current = modals[0];
-    const prev = modals[1];
+  const avgModalQuintal = validModals.reduce((a, b) => a + b, 0) / validModals.length;
+  const avgModalKg = avgModalQuintal / 100;
+
+  const minQuintal = validMins.length ? Math.min(...validMins) : Math.min(...validModals);
+  const maxQuintal = validMaxs.length ? Math.max(...validMaxs) : Math.max(...validModals);
+
+  $('mandiModalVal').textContent = '₹' + Math.round(avgModalQuintal).toLocaleString();
+  $('mandiModalKgVal').textContent = '₹' + avgModalKg.toFixed(2) + '/kg';
+  $('mandiMinVal').textContent = '₹' + Math.round(minQuintal) + ' (₹' + (minQuintal / 100).toFixed(1) + '/kg)';
+  $('mandiMaxVal').textContent = '₹' + Math.round(maxQuintal) + ' (₹' + (maxQuintal / 100).toFixed(1) + '/kg)';
+
+  if (validModals.length >= 2 && validModals[1] > 0) {
+    const current = validModals[0];
+    const prev = validModals[1];
     const pct = (((current - prev) / prev) * 100).toFixed(1);
     const isUp = pct >= 0;
-    $('mandiChangeVal').textContent = `${isUp ? '↑' : '↓'} ${Math.abs(pct)}% vs previous record`;
+    $('mandiChangeVal').textContent = `${isUp ? '↑' : '↓'} ${Math.abs(pct)}% vs previous record (Based on ${validRecords.length} mandis)`;
     $('mandiChangeVal').className = `text-xs font-bold px-3 py-1 rounded-full ${isUp ? 'bg-surface text-success-emerald' : 'bg-error-container text-error'}`;
   } else {
-    $('mandiChangeVal').textContent = 'Insufficient historical data';
+    $('mandiChangeVal').textContent = `Based on ${validRecords.length} mandi observations`;
     $('mandiChangeVal').className = 'text-xs font-bold px-3 py-1 rounded-full bg-input-bg text-soil-brown';
   }
 
-  $('mandiSummaryRows').innerHTML = records.slice(0, 10).map(r => `
-    <tr class="border-b border-border-subtle">
-      <td class="py-2 font-semibold">${r.market}</td>
-      <td class="py-2">₹${r.min_price}</td>
-      <td class="py-2 font-bold text-success-emerald">₹${r.modal_price}</td>
-      <td class="py-2">₹${r.max_price}</td>
-      <td class="py-2 font-bold">₹${(r.modal_price / 100).toFixed(1)}</td>
-    </tr>
-  `).join('');
+  $('mandiSummaryRows').innerHTML = validRecords.slice(0, 10).map(r => {
+    const minStr = r.min_price !== null ? '₹' + Math.round(r.min_price) : '—';
+    const maxStr = r.max_price !== null ? '₹' + Math.round(r.max_price) : '—';
+    const modalStr = '₹' + Math.round(r.modal_price);
+    const kgStr = '₹' + (r.modal_price / 100).toFixed(1);
+    return `
+      <tr class="border-b border-border-subtle">
+        <td class="py-2 font-semibold text-on-surface">${r.market}</td>
+        <td class="py-2 text-soil-brown">${minStr}</td>
+        <td class="py-2 font-bold text-success-emerald">${modalStr}</td>
+        <td class="py-2 text-soil-brown">${maxStr}</td>
+        <td class="py-2 font-bold text-primary">${kgStr}/kg</td>
+      </tr>
+    `;
+  }).join('');
 
-  drawMandiChart(records);
-  drawCompareChart(records);
+  drawMandiChart(validRecords);
+  drawCompareChart(validRecords);
 }
 
 function drawMandiChart(records) {
@@ -1341,29 +1400,80 @@ function drawMandiChart(records) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, cssW, cssH);
 
-  if (!records.length) return;
+  if (!records || !records.length) return;
 
-  const pts = records.map((r, i) => ({
-    x: i, y: r[currentChartMetric] || r.modal_price
-  }));
+  const validPts = records.map(r => {
+    const p = parseMandiPrice(r[currentChartMetric] || r.modal_price);
+    return p !== null ? { date: r.arrival_date, price: p, priceKg: p / 100, market: r.market } : null;
+  }).filter(Boolean);
 
-  const vals = pts.map(p => p.y);
-  const minV = Math.min(...vals) * 0.9 || 0;
-  const maxV = Math.max(...vals) * 1.1 || 100;
+  if (validPts.length < 2) {
+    ctx.font = 'bold 14px Inter, sans-serif';
+    ctx.fillStyle = '#6D786F';
+    ctx.textAlign = 'center';
+    ctx.fillText('Insufficient historical data for trend line', cssW / 2, cssH / 2);
+    return;
+  }
 
-  const pad = { l: 45, r: 15, t: 15, b: 25 };
+  validPts.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  const vals = validPts.map(p => p.priceKg);
+  const minV = Math.min(...vals) * 0.95;
+  const maxV = Math.max(...vals) * 1.05 || 10;
+
+  const pad = { l: 55, r: 25, t: 25, b: 35 };
   const w = cssW - pad.l - pad.r;
   const h = cssH - pad.t - pad.b;
 
+  ctx.strokeStyle = '#e5e7eb';
+  ctx.lineWidth = 1;
+  ctx.font = '10px Inter, sans-serif';
+  ctx.fillStyle = '#6D786F';
+  ctx.textAlign = 'right';
+
+  for (let i = 0; i <= 4; i++) {
+    const yVal = minV + (i / 4) * (maxV - minV);
+    const y = pad.t + h - (i / 4) * h;
+    ctx.beginPath();
+    ctx.moveTo(pad.l, y);
+    ctx.lineTo(cssW - pad.r, y);
+    ctx.stroke();
+    ctx.fillText('₹' + yVal.toFixed(1) + '/kg', pad.l - 8, y + 3);
+  }
+
   ctx.beginPath();
-  pts.forEach((p, i) => {
-    const x = pad.l + (pts.length > 1 ? (i / (pts.length - 1)) * w : w / 2);
-    const y = pad.t + h - ((p.y - minV) / (maxV - minV || 1)) * h;
-    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-  });
-  ctx.strokeStyle = '#0F7B45';
+  ctx.strokeStyle = '#006033';
   ctx.lineWidth = 3;
+
+  const screenPts = validPts.map((p, i) => {
+    const x = pad.l + (i / (validPts.length - 1)) * w;
+    const y = pad.t + h - ((p.priceKg - minV) / (maxV - minV || 1)) * h;
+    return { x, y, pt: p };
+  });
+
+  screenPts.forEach((sp, i) => {
+    if (i === 0) ctx.moveTo(sp.x, sp.y);
+    else ctx.lineTo(sp.x, sp.y);
+  });
   ctx.stroke();
+
+  ctx.textAlign = 'center';
+  screenPts.forEach((sp, i) => {
+    ctx.beginPath();
+    ctx.arc(sp.x, sp.y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#006033';
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    if (i === 0 || i === screenPts.length - 1 || screenPts.length <= 6) {
+      const dateLabel = sp.pt.date ? sp.pt.date.substring(5) : '';
+      ctx.fillStyle = '#6D786F';
+      ctx.font = '10px Inter, sans-serif';
+      ctx.fillText(dateLabel, sp.x, cssH - 10);
+    }
+  });
 }
 
 function drawCompareChart(records) {
@@ -1379,7 +1489,7 @@ function drawCompareChart(records) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, cssW, cssH);
 
-  const mandis = records.slice(0, 5);
+  const mandis = (records || []).slice(0, 5).filter(m => m.modal_price !== null);
   if (!mandis.length) return;
 
   const max = Math.max(...mandis.map(m => m.modal_price)) * 1.15 || 1000;
