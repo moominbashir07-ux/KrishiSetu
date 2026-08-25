@@ -442,8 +442,11 @@ app.get('/api/market-prices/compare', async (req, res) => {
   }
 });
 
-// EXPLICIT PRODUCTION ROUTE FOR /admin frontend dashboard
-app.get('/admin', (req, res) => {
+// EXPLICIT PRODUCTION ROUTE FOR /admin frontend dashboard (NO-CACHE FOR IMMEDIATE SPA RENDERING)
+app.get(['/admin', '/admin/*'], (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
@@ -452,6 +455,9 @@ app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api/')) {
     return next();
   }
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 

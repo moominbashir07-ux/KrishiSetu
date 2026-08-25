@@ -44,7 +44,7 @@ JWT_SECRET=your_super_secret_jwt_key_here
 ADMIN_BOOTSTRAP_KEY=krishisetu_admin_seed_secret_2026
 
 # Government Mandi API Key (data.gov.in)
-DATA_GOV_IN_API_KEY=579b464db66ec23bdd0000019cce4e7900cb46714270c3f2f0723216
+DATA_GOV_IN_API_KEY=your_data_gov_in_api_key_here
 
 # EmailJS OTP Integration
 EMAIL_OTP_PROVIDER=emailjs
