@@ -1,23 +1,20 @@
-const OtpService = require('../services/otpService');
-const db = require('../db/db');
 require('dotenv').config();
+const OtpService = require('../services/otpService');
 
 async function testLiveEmailJs() {
-  await db.initDb();
-  console.log('Testing live EmailJS dispatch...');
-  console.log('Provider:', process.env.EMAIL_OTP_PROVIDER);
-  console.log('Service ID:', process.env.EMAILJS_SERVICE_ID);
-  console.log('Template ID:', process.env.EMAILJS_TEMPLATE_ID);
+  const targetEmail = 'moominbashir07@gmail.com';
+  console.log(`[TEST] Dispatching live EmailJS OTP to ${targetEmail}...`);
 
   try {
-    const res = await OtpService.generateAndSendOtp({
-      contact: 'test_receiver@example.com',
+    const res = await OtpService.sendEmailJsOtp({
+      contact: targetEmail,
+      otpCode: '854912',
       purpose: 'email_verification',
-      userName: 'KrishiSetu Test User'
+      userName: 'Moomin Bashir'
     });
-    console.log('Live EmailJS dispatch result:', res);
+    console.log('[SUCCESS] EmailJS API returned 200 OK! Check inbox for code 854912.');
   } catch (err) {
-    console.error('Live EmailJS dispatch error:', err.statusCode, err.message);
+    console.error('[FAILURE] EmailJS API dispatch failed:', err.message);
   }
 }
 
