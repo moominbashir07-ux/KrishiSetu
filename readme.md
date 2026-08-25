@@ -98,4 +98,4 @@ Access the local server at `http://localhost:3000/`.
 
 ## 📜 Credits & License
 
-Made with ❤️ by **Team Red**.
+Made with ❤️ by **Code Red**.

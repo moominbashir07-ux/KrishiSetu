@@ -39,6 +39,20 @@ router.get('/users', async (req, res, next) => {
   }
 });
 
+// AUDIT LOG HELPER FUNCTION
+async function logAdminAction(adminId, action, targetId, details) {
+  try {
+    const id = 'LOG_' + Date.now() + Math.random().toString(36).substring(2, 5);
+    await db.query(
+      `INSERT INTO admin_audit_logs (id, admin_id, action, target_id, details)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [id, adminId, action, targetId, details]
+    );
+  } catch (err) {
+    console.warn('Admin audit logging failed:', err.message);
+  }
+}
+
 // UPDATE USER ACCOUNT STATUS (FREEZE / UNFREEZE / SUSPEND)
 router.put('/users/:id/status', async (req, res, next) => {
   const { status } = req.body;
@@ -58,6 +72,8 @@ router.put('/users/:id/status', async (req, res, next) => {
       'UPDATE users SET account_status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
       [status, userId]
     );
+
+    await logAdminAction(req.user.id, `ACCOUNT_${status.toUpperCase()}`, userId, `Set user '${userId}' account status to '${status}'`);
 
     res.json({
       message: `User account '${userId}' status updated to '${status}'.`,
@@ -88,6 +104,7 @@ router.get('/products', async (req, res, next) => {
 router.delete('/products/:id', async (req, res, next) => {
   try {
     await db.query("UPDATE products SET status = 'inactive', updated_at = CURRENT_TIMESTAMP WHERE id = $1", [req.params.id]);
+    await logAdminAction(req.user.id, 'DELETE_PRODUCT', req.params.id, `Deactivated product '${req.params.id}'`);
     res.json({ message: 'Product listing removed by admin.', productId: req.params.id });
   } catch (err) {
     next(err);
@@ -124,106 +141,118 @@ router.get('/reviews', async (req, res, next) => {
 router.delete('/reviews/:id', async (req, res, next) => {
   try {
     await db.query('DELETE FROM reviews WHERE id = $1', [req.params.id]);
+    await logAdminAction(req.user.id, 'DELETE_REVIEW', req.params.id, `Deleted review '${req.params.id}'`);
     res.json({ message: 'Review removed by admin.', reviewId: req.params.id });
   } catch (err) {
     next(err);
   }
 });
 
-// GET ALL SELLER VERIFICATION APPLICATIONS
-router.get('/verifications', async (req, res, next) => {
-  const { status } = req.query;
-
-  try {
-    let sql = `
-      SELECT sv.*, u.name as "sellerName", u.contact as "sellerContact", sp.business_name as "businessName"
-      FROM seller_verifications sv
-      JOIN users u ON sv.seller_id = u.id
-      LEFT JOIN seller_profiles sp ON sv.seller_id = sp.user_id
-    `;
-    const params = [];
-
-    if (status && ['pending', 'verified', 'rejected'].includes(status)) {
-      params.push(status);
-      sql += ` WHERE sv.status = $1`;
-    }
-
-    sql += ' ORDER BY sv.submitted_at DESC';
-
-    const result = await db.query(sql, params);
-    res.json({ verifications: result.rows });
-  } catch (err) {
-    next(err);
-  }
-});
-
-// GET SINGLE VERIFICATION DETAILS
-router.get('/verifications/:id', async (req, res, next) => {
+// GET PAYMENTS SUBMISSIONS (ADMIN)
+router.get('/payments', async (req, res, next) => {
   try {
     const result = await db.query(
-      `SELECT sv.*, u.name as "sellerName", u.contact as "sellerContact", sp.business_name as "businessName", sp.description
-       FROM seller_verifications sv
-       JOIN users u ON sv.seller_id = u.id
-       LEFT JOIN seller_profiles sp ON sv.seller_id = sp.user_id
-       WHERE sv.id = $1`,
-      [req.params.id]
+      `SELECT o.id, o.order_number, o.customer_id, o.seller_id, o.total_amount as total, o.payment_method, o.payment_status, o.created_at,
+              u_cust.name as "customerName", u_cust.contact as "customerContact", u_sell.name as "sellerName"
+       FROM orders o
+       JOIN users u_cust ON o.customer_id = u_cust.id
+       JOIN users u_sell ON o.seller_id = u_sell.id
+       ORDER BY o.created_at DESC`
     );
-
-    if (!result.rows.length) {
-      return res.status(404).json({ error: 'Verification application not found.' });
-    }
-
-    res.json({ verification: result.rows[0] });
+    res.json({ payments: result.rows });
   } catch (err) {
     next(err);
   }
 });
 
-// REVIEW SELLER VERIFICATION (APPROVE / REJECT)
-router.put('/verifications/:id', async (req, res, next) => {
-  const { status, rejectionReason } = req.body;
-  const verificationId = req.params.id;
+// UPDATE PAYMENT STATUS (VERIFIED / REJECTED / PENDING)
+router.put('/payments/:id/status', async (req, res, next) => {
+  const { status } = req.body;
+  const orderId = req.params.id;
 
-  if (!['verified', 'rejected'].includes(status)) {
-    return res.status(400).json({ error: 'Status must be either "verified" or "rejected".' });
-  }
-
-  if (status === 'rejected' && (!rejectionReason || typeof rejectionReason !== 'string' || !rejectionReason.trim())) {
-    return res.status(400).json({ error: 'Rejection reason is required when rejecting a verification application.' });
+  if (!['submitted', 'verified', 'rejected', 'pending', 'cod'].includes(status)) {
+    return res.status(400).json({ error: 'Status must be one of: submitted, verified, rejected, pending, cod.' });
   }
 
   try {
-    const verifRes = await db.query('SELECT id, seller_id FROM seller_verifications WHERE id = $1', [verificationId]);
-    if (!verifRes.rows.length) {
-      return res.status(404).json({ error: 'Verification application not found.' });
+    const orderRes = await db.query('SELECT id, order_number, customer_id, seller_id FROM orders WHERE id = $1 OR order_number = $1', [orderId]);
+    if (!orderRes.rows.length) {
+      return res.status(404).json({ error: 'Order record not found.' });
     }
+    const order = orderRes.rows[0];
 
-    const verification = verifRes.rows[0];
-    const sellerId = verification.seller_id;
-    const adminId = req.user.id;
-    const reasonText = status === 'rejected' ? rejectionReason.trim() : null;
+    await db.query('UPDATE orders SET payment_status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [status, order.id]);
+    await logAdminAction(req.user.id, 'UPDATE_PAYMENT_STATUS', order.id, `Updated payment status for order '${order.order_number}' to '${status}'`);
 
-    await db.withTransaction(async (client) => {
-      await client.query(
-        `UPDATE seller_verifications 
-         SET status = $1, admin_id = $2, rejection_reason = $3, reviewed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
-         WHERE id = $4`,
-        [status, adminId, reasonText, verificationId]
-      );
+    // Dispatch notifications
+    const notifCustomer = 'NOTIF_' + Date.now() + Math.random().toString(36).substring(2, 5);
+    await db.query(
+      `INSERT INTO notifications (id, user_id, type, title, message, read, order_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [notifCustomer, order.customer_id, 'payment_update', `💳 Payment Status Updated #${order.order_number}`, `Payment status has been marked as '${status}'.`, false, order.id]
+    );
 
-      await client.query(
-        `UPDATE seller_profiles SET verification_status = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2`,
-        [status, sellerId]
-      );
+    res.json({ message: `Payment status for order '${order.order_number}' updated to '${status}'.`, orderId: order.id, status });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// SECURE WHITELISTED DATABASE TABLE INSPECTOR (ADMIN)
+const WHITELISTED_TABLES = [
+  'users', 'seller_profiles', 'customer_profiles', 'products', 'orders', 
+  'order_items', 'cart_items', 'reviews', 'feedback', 'notifications', 
+  'seller_verifications', 'admin_audit_logs'
+];
+
+router.get('/database/tables', async (req, res) => {
+  res.json({ tables: WHITELISTED_TABLES });
+});
+
+router.get('/database/tables/:tableName', async (req, res, next) => {
+  const { tableName } = req.params;
+  const page = Math.max(1, Number(req.query.page || 1));
+  const limit = Math.min(100, Math.max(10, Number(req.query.limit || 20)));
+  const offset = (page - 1) * limit;
+
+  if (!WHITELISTED_TABLES.includes(tableName)) {
+    return res.status(400).json({ error: `Access denied. Table '${tableName}' is not in the allowed admin inspection whitelist.` });
+  }
+
+  try {
+    const result = await db.query(`SELECT * FROM ${tableName} ORDER BY 1 DESC LIMIT $1 OFFSET $2`, [limit, offset]);
+    
+    // Mask sensitive fields in returned database rows
+    const maskedRows = result.rows.map(row => {
+      const clone = { ...row };
+      if (clone.password_hash) clone.password_hash = '[MASKED_HASH]';
+      if (clone.otp_code) clone.otp_code = '[MASKED_OTP]';
+      if (clone.jwt_secret) clone.jwt_secret = '[MASKED_SECRET]';
+      return clone;
     });
 
     res.json({
-      message: `Seller verification status updated to '${status}'.`,
-      verificationId,
-      sellerId,
-      status,
-      rejectionReason: reasonText
+      table: tableName,
+      page,
+      limit,
+      count: maskedRows.length,
+      rows: maskedRows
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET ADMIN AUDIT LOGS
+router.get('/audit-logs', async (req, res, next) => {
+  try {
+    const result = await db.query(
+      `SELECT l.*, u.name as "adminName" 
+       FROM admin_audit_logs l 
+       JOIN users u ON l.admin_id = u.id 
+       ORDER BY l.created_at DESC LIMIT 100`
+    );
+    res.json({ auditLogs: result.rows });
   } catch (err) {
     next(err);
   }

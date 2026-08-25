@@ -25,7 +25,8 @@ class LocalFallbackDB {
       market_price_snapshots: [],
       reviews: [],
       feedback: [],
-      notifications: []
+      notifications: [],
+      admin_audit_logs: []
     };
   }
 
@@ -167,7 +168,10 @@ class LocalFallbackDB {
 
     if (q.includes('FROM feedback')) {
       let fbs = [...this.tables.feedback];
-      if (params.length > 0 && params[0]) {
+      if (q.includes('WHERE id = $1')) {
+        const id = params[0];
+        fbs = fbs.filter(f => f.id === id);
+      } else if (params.length > 0 && params[0]) {
         fbs = fbs.filter(f => f.status === params[0]);
       }
       return { rows: fbs };
@@ -468,6 +472,16 @@ class LocalFallbackDB {
       return { rows: enriched };
     }
     if (q.startsWith('UPDATE orders')) {
+      if (q.includes('payment_status = $1')) {
+        const payStatus = params[0];
+        const orderId = params[1];
+        const o = this.tables.orders.find(x => x.id === orderId || x.order_number === orderId);
+        if (o) {
+          o.payment_status = payStatus;
+          o.updated_at = new Date().toISOString();
+        }
+        return { rows: o ? [{ ...o }] : [] };
+      }
       const newStatus = params[0];
       const newStep = Number(params[1]);
       const orderId = params[2];
@@ -476,6 +490,21 @@ class LocalFallbackDB {
         o.status = newStatus; o.step = newStep; o.updated_at = new Date().toISOString();
       }
       return { rows: o ? [{ ...o }] : [] };
+    }
+
+    // 18. ADMIN AUDIT LOGS
+    if (q.startsWith('INSERT INTO admin_audit_logs')) {
+      const log = {
+        id: params[0], admin_id: params[1], action: params[2],
+        target_id: params[3] || null, details: params[4] || '',
+        created_at: new Date().toISOString()
+      };
+      this.tables.admin_audit_logs.unshift(log);
+      return { rows: [{ ...log }] };
+    }
+
+    if (q.includes('FROM admin_audit_logs')) {
+      return { rows: [...this.tables.admin_audit_logs] };
     }
 
     // 9. ORDER ITEMS

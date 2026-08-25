@@ -32,6 +32,21 @@ function validateProductInput(req, res, next) {
   next();
 }
 
+const WEAK_PASSWORDS = ['password', 'password123', '12345678', 'qwerty', 'abcdefgh', 'admin123', 'krishisetu'];
+
+function isStrongPassword(password) {
+  if (typeof password !== 'string') return false;
+  if (password.length < 8) return false;
+  if (WEAK_PASSWORDS.includes(password.toLowerCase())) return false;
+  
+  const hasUpper = /[A-Z]/.test(password);
+  const hasLower = /[a-z]/.test(password);
+  const hasDigit = /\d/.test(password);
+  const hasSpecial = /[@$!%*?&_\-#.]/.test(password);
+
+  return hasUpper && hasLower && hasDigit && hasSpecial;
+}
+
 function validateAuthInput(req, res, next) {
   const { contact, password, role } = req.body;
 
@@ -39,8 +54,17 @@ function validateAuthInput(req, res, next) {
     return res.status(400).json({ error: 'Phone or email contact is required.' });
   }
 
-  if (!password || typeof password !== 'string' || password.length < 6) {
-    return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
+  const isSignup = req.path && req.path.includes('signup');
+  if (isSignup) {
+    if (!isStrongPassword(password)) {
+      return res.status(400).json({
+        error: 'Your password is too weak. Use at least 8 characters with uppercase, lowercase, numbers, and a special character.'
+      });
+    }
+  } else {
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
+    }
   }
 
   if (role && !['customer', 'seller'].includes(role)) {

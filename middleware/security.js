@@ -38,9 +38,12 @@ function errorHandler(err, req, res, next) {
   console.error('[SERVER ERROR]', err.stack || err.message || err);
   
   const statusCode = err.statusCode || err.status || 500;
-  const publicMessage = statusCode === 500 
-    ? 'An internal server error occurred.' 
-    : (err.message || 'Error processing request.');
+  let publicMessage = err.message || 'Error processing request.';
+
+  // Mask database connection/internal crash details safely if 500
+  if (statusCode === 500 && (publicMessage.includes('ECONNREFUSED') || publicMessage.includes('ENOTFOUND') || publicMessage.includes('FATAL'))) {
+    publicMessage = 'A backend database service error occurred. Please try again.';
+  }
 
   res.status(statusCode).json({
     error: publicMessage,

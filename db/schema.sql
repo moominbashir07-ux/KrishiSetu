@@ -261,5 +261,21 @@ CREATE INDEX IF NOT EXISTS idx_reviews_buyer ON reviews(buyer_id);
 CREATE INDEX IF NOT EXISTS idx_feedback_status ON feedback(status);
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read);
+CREATE INDEX IF NOT EXISTS idx_orders_customer_seller ON orders(customer_id, seller_id);
+CREATE INDEX IF NOT EXISTS idx_orders_created_status ON orders(created_at DESC, status);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON notifications(user_id, read);
+
+-- 18. ADMIN AUDIT LOGS TABLE
+CREATE TABLE IF NOT EXISTS admin_audit_logs (
+    id VARCHAR(50) PRIMARY KEY,
+    admin_id VARCHAR(50) NOT NULL REFERENCES users(id),
+    action VARCHAR(100) NOT NULL,
+    target_id VARCHAR(50),
+    details TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_admin ON admin_audit_logs(admin_id);
+
 
 

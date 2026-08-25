@@ -81,19 +81,25 @@ router.post('/', authenticateUser, requireRole('customer'), async (req, res, nex
         );
 
         if (!prodRes.rows.length) {
-          throw new Error(`Product ${item.productId} not found.`);
+          const err = new Error(`Product ${item.productId} not found.`);
+          err.statusCode = 400;
+          throw err;
         }
 
         const product = prodRes.rows[0];
         if (product.status === 'inactive') {
-          throw new Error(`Product "${product.name}" is no longer available.`);
+          const err = new Error(`Product "${product.name}" is no longer available.`);
+          err.statusCode = 400;
+          throw err;
         }
 
         const availableQty = Number(product.quantity);
         const requestedQty = Number(item.quantity);
 
         if (requestedQty <= 0) {
-          throw new Error(`Invalid requested quantity for "${product.name}".`);
+          const err = new Error(`Invalid requested quantity for "${product.name}".`);
+          err.statusCode = 400;
+          throw err;
         }
 
         if (requestedQty > availableQty) {
@@ -389,15 +395,18 @@ router.put('/:id/status', authenticateUser, requireAnyRole('seller', 'admin'), a
 
       // Send notification to Customer
       const notifId = 'NOTIF_' + Date.now() + Math.random().toString(36).substring(2, 6);
+      const isConfirmed = targetStatus === 'Farmer Confirmed';
+      const notifTitle = isConfirmed 
+        ? `✅ Order Confirmed #${order.order_number || order.id}`
+        : `📦 Order Update #${order.order_number || order.id}`;
+      const notifMsg = isConfirmed
+        ? `Order #${order.order_number || order.id} has been confirmed by the seller.`
+        : `Your order status has been updated to "${targetStatus}".`;
+
       await client.query(
         `INSERT INTO notifications (id, user_id, type, title, message, read, order_id)
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [
-          notifId, order.customer_id, 'order_status',
-          `📦 Order Update #${order.order_number || order.id}`,
-          `Your order status has been updated to "${targetStatus}".`,
-          false, order.id
-        ]
+        [notifId, order.customer_id, 'order_status', notifTitle, notifMsg, false, order.id]
       );
     });
 

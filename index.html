@@ -186,8 +186,7 @@
       <div class="hidden md:flex gap-6 items-center">
         <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" onclick="onNavMarketplaceClick()" type="button">Marketplace</button>
         <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" onclick="showScreen('price')" type="button">Mandi Rates</button>
-        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" id="sellNavBtn" onclick="showScreen('sell')" type="button" style="display:none">Sell Produce</button>
-        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" id="adminNavBtn" onclick="showScreen('adminView'); loadAdminDashboard();" type="button" style="display:none">🛡 Admin Panel</button>
+        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" id="sellNavBtn" onclick="showScreen('sell')" type="button" style="display:none">Sell Products</button>
         <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" onclick="showScreen('orders')" type="button">Orders</button>
         <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" onclick="showScreen('about')" type="button">About Us</button>
       </div>
@@ -234,8 +233,7 @@
   <div id="mobileNavMenu" class="hidden md:hidden border-t border-border-subtle bg-white px-4 py-3 space-y-2 shadow-lg">
     <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); onNavMarketplaceClick();" type="button">🛒 Marketplace</button>
     <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); showScreen('price');" type="button">📊 Mandi Rates</button>
-    <button id="mobileSellBtn" class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface hidden" onclick="toggleMobileMenu(); showScreen('sell');" type="button">👨‍🌾 Sell Produce</button>
-    <button id="mobileAdminBtn" class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface hidden" onclick="toggleMobileMenu(); showScreen('adminView'); loadAdminDashboard();" type="button">🛡 Admin Panel</button>
+    <button id="mobileSellBtn" class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface hidden" onclick="toggleMobileMenu(); showScreen('sell');" type="button">👨‍🌾 Sell Products</button>
     <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); showScreen('orders');" type="button">📦 Orders Tracking</button>
     <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); showScreen('about');" type="button">🌾 About Us</button>
     <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); openFeedbackModal();" type="button">💬 Platform Feedback</button>
@@ -362,14 +360,14 @@
     </div>
   </section>
 
-  <!-- 4. ADD / PUBLISH PRODUCE LISTING SCREEN (SELLER) -->
+  <!-- 4. ADD / PUBLISH PRODUCT LISTING SCREEN (SELLER) -->
   <section class="screen max-w-2xl mx-auto px-margin-mobile md:px-margin-desktop py-8" id="sell">
     <div class="bg-white p-8 rounded-2xl border border-border-subtle shadow-sm">
-      <h2 class="text-headline-md font-bold text-primary mb-2">Publish Produce Listing</h2>
+      <h2 class="text-headline-md font-bold text-primary mb-2">Publish Product Listing</h2>
       <p class="text-body-sm text-soil-brown mb-6">List your fresh harvest with photos, quality grade, and location for buyers.</p>
       <div class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-soil-brown uppercase mb-1">PRODUCE NAME *</label>
+          <label class="block text-xs font-bold text-soil-brown uppercase mb-1">PRODUCT NAME *</label>
           <input id="prodName" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-sm outline-none focus:border-primary" placeholder="e.g. Fresh Tomatoes, Wheat, Onion">
         </div>
         <div class="grid grid-cols-2 gap-4">
@@ -417,7 +415,7 @@
           <label class="block text-xs font-bold text-soil-brown uppercase mb-1">SELLER LOCATION</label>
           <input id="prodLocation" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-sm outline-none focus:border-primary" placeholder="Detect or enter city/mandi name">
         </div>
-        <button class="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary-container transition-colors mt-4" onclick="publishProduct()" type="button">Publish Produce Listing</button>
+        <button class="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary-container transition-colors mt-4" onclick="publishProduct()" type="button">Publish Product Listing</button>
       </div>
     </div>
   </section>
@@ -561,7 +559,7 @@
         KrishiSetu is an agricultural price intelligence and direct farm-to-customer marketplace designed to empower local farmers with direct consumer access, transparent platform fees, and live AGMARKNET mandi rates.
       </p>
       <div class="inline-block bg-surface px-6 py-3 rounded-xl border border-primary/20 text-primary font-bold text-sm mb-6">
-        🚀 Made by Team Red
+        🚀 Made by Code Red
       </div>
       <div class="mt-4">
         <button class="bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors px-6 py-2.5 rounded-xl font-bold text-xs" onclick="openFeedbackModal()" type="button">💬 Give Platform Feedback</button>
@@ -601,12 +599,16 @@
       </div>
     </div>
 
-    <!-- Admin Tabs -->
-    <div class="flex gap-2 border-b border-border-subtle mb-6 overflow-x-auto pb-1">
-      <button id="admTabUsers" class="px-4 py-2 text-xs font-bold text-primary border-b-2 border-primary" onclick="switchAdminTab('users')" type="button">Users Security & Freeze</button>
-      <button id="admTabProducts" class="px-4 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('products')" type="button">Product Listings</button>
-      <button id="admTabReviews" class="px-4 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('reviews')" type="button">Reviews Moderation</button>
-      <button id="admTabFeedback" class="px-4 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('feedback')" type="button">Platform Feedback</button>
+    <!-- Admin Control Center Tabs -->
+    <div class="flex gap-2 border-b border-border-subtle mb-6 overflow-x-auto pb-1 whitespace-nowrap">
+      <button id="admTabUsers" class="px-3.5 py-2 text-xs font-bold text-primary border-b-2 border-primary" onclick="switchAdminTab('users')" type="button">👥 Users & Freeze</button>
+      <button id="admTabProducts" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('products')" type="button">🌾 Products</button>
+      <button id="admTabOrders" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('orders')" type="button">📦 Orders Control</button>
+      <button id="admTabPayments" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('payments')" type="button">💳 Payments Verification</button>
+      <button id="admTabFeedback" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('feedback')" type="button">💬 Feedback</button>
+      <button id="admTabReviews" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('reviews')" type="button">⭐ Reviews</button>
+      <button id="admTabAudit" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('audit')" type="button">📜 Audit Logs</button>
+      <button id="admTabDatabase" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('database')" type="button">🗄 Database Inspector</button>
     </div>
 
     <!-- Admin Users Table Container -->
@@ -660,11 +662,47 @@
       </div>
     </div>
 
-    <!-- Admin Reviews Container -->
-    <div id="adminTabContentReviews" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
-      <h4 class="font-bold text-primary mb-4">Customer Reviews Moderation</h4>
-      <div id="adminReviewsContainer" class="space-y-3">
-        <div class="p-4 text-center text-soil-brown">Loading reviews...</div>
+    <!-- Admin Orders Table Container -->
+    <div id="adminTabContentOrders" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
+      <h4 class="font-bold text-primary mb-4">All System Orders Control</h4>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr class="border-b border-border-subtle text-soil-brown uppercase">
+              <th class="py-2">Order #</th>
+              <th class="py-2">Customer</th>
+              <th class="py-2">Seller</th>
+              <th class="py-2">Total</th>
+              <th class="py-2">Payment</th>
+              <th class="py-2">Status</th>
+            </tr>
+          </thead>
+          <tbody id="adminOrdersRows">
+            <tr><td colspan="6" class="py-4 text-center text-soil-brown">Loading orders...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Admin Payments Verification Container -->
+    <div id="adminTabContentPayments" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
+      <h4 class="font-bold text-primary mb-4">UPI Payments Verification & Control</h4>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr class="border-b border-border-subtle text-soil-brown uppercase">
+              <th class="py-2">Order #</th>
+              <th class="py-2">Customer</th>
+              <th class="py-2">Method</th>
+              <th class="py-2">Total Amount</th>
+              <th class="py-2">Payment Status</th>
+              <th class="py-2">Action</th>
+            </tr>
+          </thead>
+          <tbody id="adminPaymentsRows">
+            <tr><td colspan="6" class="py-4 text-center text-soil-brown">Loading payment submissions...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -673,6 +711,51 @@
       <h4 class="font-bold text-primary mb-4">Platform Feedback Submissions</h4>
       <div id="adminFeedbackContainer" class="space-y-3">
         <div class="p-4 text-center text-soil-brown">Loading feedback...</div>
+      </div>
+    </div>
+
+    <!-- Admin Reviews Container -->
+    <div id="adminTabContentReviews" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
+      <h4 class="font-bold text-primary mb-4">Customer Reviews Moderation</h4>
+      <div id="adminReviewsContainer" class="space-y-3">
+        <div class="p-4 text-center text-soil-brown">Loading reviews...</div>
+      </div>
+    </div>
+
+    <!-- Admin Audit Logs Container -->
+    <div id="adminTabContentAudit" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
+      <h4 class="font-bold text-primary mb-4">Admin Security Audit Logs</h4>
+      <div id="adminAuditLogsContainer" class="space-y-2 text-xs">
+        <div class="p-4 text-center text-soil-brown">Loading audit logs...</div>
+      </div>
+    </div>
+
+    <!-- Whitelisted Database Table Inspector -->
+    <div id="adminTabContentDatabase" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
+      <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
+        <div>
+          <h4 class="font-bold text-primary text-base">Whitelisted Database Inspector</h4>
+          <p class="text-xs text-soil-brown">Inspect database table records. Sensitive credentials (passwords, OTPs) are masked.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <select id="dbInspectorTableSelect" class="p-2 border border-border-subtle rounded-lg text-xs bg-input-bg font-bold text-primary">
+            <option value="users">users</option>
+            <option value="seller_profiles">seller_profiles</option>
+            <option value="products">products</option>
+            <option value="orders">orders</option>
+            <option value="order_items">order_items</option>
+            <option value="cart_items">cart_items</option>
+            <option value="reviews">reviews</option>
+            <option value="feedback">feedback</option>
+            <option value="notifications">notifications</option>
+            <option value="seller_verifications">seller_verifications</option>
+            <option value="admin_audit_logs">admin_audit_logs</option>
+          </select>
+          <button class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary-container" onclick="inspectSelectedAdminTable()" type="button">Inspect Table</button>
+        </div>
+      </div>
+      <div id="dbInspectorContainer" class="overflow-x-auto border border-border-subtle rounded-xl p-3 bg-input-bg text-xs">
+        <div class="p-6 text-center text-soil-brown">Select a table above and click "Inspect Table" to view masked database records.</div>
       </div>
     </div>
   </section>
@@ -714,7 +797,11 @@
 
       <div class="mb-3">
         <label class="block text-[10px] font-bold text-soil-brown uppercase mb-1">PASSWORD *</label>
-        <input id="modalPasswordInput" type="password" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-xs outline-none" placeholder="Enter password (min 6 chars)">
+        <input id="modalPasswordInput" type="password" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-xs outline-none" placeholder="Enter password (min 8 chars)" oninput="evaluatePasswordStrength(this.value)">
+        <div id="passwordStrengthMeter" class="hidden mt-1.5 text-[10px] font-bold flex justify-between items-center px-1">
+          <span id="strengthText" class="text-error font-bold">Strength: Weak</span>
+          <span class="text-soil-brown/70 font-normal">8+ chars, A-Z, a-z, 0-9, symbol</span>
+        </div>
       </div>
 
       <div id="modalConfirmField" class="mb-4 hidden">
@@ -846,7 +933,7 @@
     <div>
       <a class="text-headline-md font-headline-md font-black text-primary dark:text-inverse-primary mb-2 block" href="#">KrishiSetu</a>
       <p class="text-body-sm font-body-sm text-on-surface-variant dark:text-surface-variant mb-2">Direct Farm-to-Customer Marketplace & Mandi Price Intelligence.</p>
-      <span class="text-xs font-bold text-primary">Made by Team Red</span>
+      <span class="text-xs font-bold text-primary">Made by Code Red</span>
     </div>
     <div class="flex flex-col gap-2">
       <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" onclick="onNavMarketplaceClick()">Marketplace</a>
@@ -855,7 +942,7 @@
     </div>
     <div class="flex flex-col gap-2">
       <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" onclick="showScreen('orders')">Orders Tracking</a>
-      <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" onclick="openAuthModal()">Login / Register</a>
+      <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" onclick="onFooterAuthClick()">Login / Register</a>
     </div>
   </div>
 </footer>
@@ -935,6 +1022,51 @@ function isValidEmail(email) {
   return regex.test(str);
 }
 
+const WEAK_PASSWORDS_LIST = ['password', 'password123', '12345678', 'qwerty', 'abcdefgh', 'admin123', 'krishisetu'];
+
+function isStrongPassword(pass) {
+  if (typeof pass !== 'string') return false;
+  if (pass.length < 8) return false;
+  if (WEAK_PASSWORDS_LIST.includes(pass.toLowerCase())) return false;
+
+  const hasUpper = /[A-Z]/.test(pass);
+  const hasLower = /[a-z]/.test(pass);
+  const hasDigit = /\d/.test(pass);
+  const hasSpecial = /[@$!%*?&_\-#.]/.test(pass);
+
+  return hasUpper && hasLower && hasDigit && hasSpecial;
+}
+
+function evaluatePasswordStrength(pass) {
+  const meter = $('passwordStrengthMeter');
+  const txt = $('strengthText');
+  if (!meter || !txt) return;
+
+  if (authMode !== 'signup') {
+    meter.classList.add('hidden');
+    return;
+  }
+
+  meter.classList.remove('hidden');
+
+  if (!pass || pass.length === 0) {
+    txt.textContent = 'Strength: Weak';
+    txt.className = 'text-error font-bold';
+    return;
+  }
+
+  if (isStrongPassword(pass)) {
+    txt.textContent = 'Strength: Strong ✓';
+    txt.className = 'text-success-emerald font-extrabold';
+  } else if (pass.length >= 6) {
+    txt.textContent = 'Strength: Medium (needs 8+ chars, A-Z, 0-9, symbol)';
+    txt.className = 'text-harvest-gold font-bold';
+  } else {
+    txt.textContent = 'Strength: Weak (too short)';
+    txt.className = 'text-error font-bold';
+  }
+}
+
 async function submitAuthModal() {
   const contact = $('modalContactInput').value.trim().toLowerCase();
   const password = $('modalPasswordInput').value;
@@ -955,7 +1087,9 @@ async function submitAuthModal() {
 
     if (!selectedRole) return notify('Please select Buyer or Seller role.', 'error');
     if (!name) return notify('Please enter your full name.', 'error');
-    if (password.length < 6) return notify('Password must be at least 6 characters long.', 'error');
+    if (!isStrongPassword(password)) {
+      return notify('Your password is too weak. Use at least 8 characters with uppercase, lowercase, numbers, and a special character.', 'error');
+    }
     if (password !== confirm) return notify('Passwords do not match.', 'error');
 
     try {
@@ -1141,6 +1275,19 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return (R * c).toFixed(1);
 }
 
+function getSellerAvatarHtml(sellerName, photoUrl, sizeClass = 'w-5 h-5') {
+  if (photoUrl) {
+    return `<img src="${photoUrl}" class="${sizeClass} rounded-full object-cover border border-primary/20 shrink-0 shadow-sm" alt="${sellerName || 'Farmer'}">`;
+  }
+  return `
+    <span class="${sizeClass} rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-[9px] shrink-0">
+      <svg class="w-3.5 h-3.5 text-primary" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+      </svg>
+    </span>
+  `;
+}
+
 function renderProductCard(p, isMyListing = false) {
   let distStr = p.location || 'Maharashtra';
   if (userLocation.lat && p.latitude && p.longitude) {
@@ -1155,13 +1302,15 @@ function renderProductCard(p, isMyListing = false) {
     ? `<img src="${p.image_url}" class="w-full h-36 object-cover rounded-lg mb-3 border border-border-subtle cursor-pointer" onclick="openProductDetailsModal('${p.id}')" alt="${p.name}">`
     : `<div class="w-full h-36 bg-surface rounded-lg flex items-center justify-center text-4xl mb-3 border border-border-subtle cursor-pointer" onclick="openProductDetailsModal('${p.id}')">${emoji(p.name)}</div>`;
 
+  const sellerAvatar = getSellerAvatarHtml(p.sellerName, p.sellerPhoto);
+
   return `
     <div class="bg-white p-4 rounded-2xl border border-border-subtle shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
       <div>
         ${imgHtml}
         <div class="flex justify-between items-center mb-1">
           <span class="text-[10px] font-bold text-success-emerald bg-surface px-2 py-0.5 rounded border border-success-emerald/20">${p.grade || 'Fresh'}</span>
-          <button class="text-[10px] font-bold text-soil-brown hover:text-primary underline" onclick="viewSellerModal('${p.seller_id}')" type="button">👨‍🌾 ${p.sellerName || 'Farmer'}</button>
+          <button class="text-[10px] font-bold text-soil-brown hover:text-primary flex items-center gap-1.5" onclick="viewSellerModal('${p.seller_id}')" type="button">${sellerAvatar} <span class="hover:underline">${p.sellerName || 'Verified Seller ✓'}</span></button>
         </div>
         <h4 class="font-bold text-on-surface text-base cursor-pointer hover:text-primary" onclick="openProductDetailsModal('${p.id}')">${p.name}</h4>
         <p class="text-xs text-soil-brown mt-1 line-clamp-2">${p.description || 'Fresh direct farm produce'}</p>
@@ -1684,6 +1833,51 @@ async function viewSellerModal(sellerId) {
     content.innerHTML = `<div class="text-center py-6 text-error">Failed to load seller: ${err.message}</div>`;
   }
 }
+function openFeedbackModal() {
+  const modal = $('feedbackModal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+      if ($('fbMessage')) $('fbMessage').focus();
+    }, 100);
+  }
+}
+
+function closeFeedbackModal() {
+  const modal = $('feedbackModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function submitFeedbackForm() {
+  const rating = Number($('fbRating')?.value || 5);
+  const category = $('fbCategory')?.value || 'Website';
+  const message = $('fbMessage')?.value?.trim();
+
+  if (!message || message.length < 5) {
+    return notify('Please describe your feedback (at least 5 characters).', 'error');
+  }
+
+  const token = AuthService.getToken();
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch('/api/feedback', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ rating, category, message })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to submit feedback.');
+
+    notify('🎉 Thank you for your feedback! Submission received.', 'success');
+    if ($('fbMessage')) $('fbMessage').value = '';
+    closeFeedbackModal();
+  } catch (err) {
+    notify('Feedback error: ' + err.message, 'error');
+  }
+}
+
 function closeSellerModal() {
   $('sellerModal').classList.add('hidden');
 }
@@ -2027,9 +2221,404 @@ function drawCompareChart(records) {
   });
 }
 
-function setChartMetric(m) {
-  currentChartMetric = m;
-  loadMarketPrices();
+function onFooterAuthClick() {
+  const token = AuthService.getToken();
+  if (!token) {
+    openAuthModal();
+  } else if (currentRole === 'admin') {
+    showScreen('adminView');
+    loadAdminDashboard();
+  } else if (currentRole === 'seller') {
+    showScreen('sell');
+  } else {
+    showScreen('buyer-market');
+  }
+}
+
+function handleUrlHashRouting() {
+  const hash = window.location.hash;
+  const path = window.location.pathname;
+
+  if (path === '/admin' || hash === '#admin') {
+    if (currentRole === 'admin') {
+      showScreen('adminView');
+      loadAdminDashboard();
+    } else {
+      notify('Access denied. Protected admin route.', 'error');
+      showScreen('buyer-market');
+    }
+  }
+}
+
+window.addEventListener('hashchange', handleUrlHashRouting);
+
+// ADMIN DASHBOARD & CONTROL CENTER ENGINE
+let currentAdminTab = 'users';
+
+function switchAdminTab(tab) {
+  currentAdminTab = tab;
+  const tabs = ['users', 'products', 'orders', 'payments', 'feedback', 'reviews', 'audit', 'database'];
+  
+  tabs.forEach(t => {
+    const btnName = `admTab${t.charAt(0).toUpperCase() + t.slice(1)}`;
+    const contentName = `adminTabContent${t.charAt(0).toUpperCase() + t.slice(1)}`;
+    const btn = $(btnName);
+    const content = $(contentName);
+    
+    if (btn) {
+      if (t === tab) {
+        btn.className = 'px-3.5 py-2 text-xs font-bold text-primary border-b-2 border-primary';
+      } else {
+        btn.className = 'px-3.5 py-2 text-xs font-bold text-soil-brown';
+      }
+    }
+    if (content) {
+      content.classList.toggle('hidden', t !== tab);
+    }
+  });
+
+  if (tab === 'users') loadAdminUsers();
+  if (tab === 'products') loadAdminProducts();
+  if (tab === 'orders') loadAdminOrders();
+  if (tab === 'payments') loadAdminPayments();
+  if (tab === 'feedback') loadAdminFeedback();
+  if (tab === 'reviews') loadAdminReviews();
+  if (tab === 'audit') loadAdminAuditLogs();
+  if (tab === 'database') loadAdminDatabaseTables();
+}
+
+async function loadAdminDashboard() {
+  const token = AuthService.getToken();
+  if (!token || currentRole !== 'admin') {
+    notify('Access denied. Protected admin route.', 'error');
+    showScreen('buyer-market');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/admin/metrics', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const m = res.metrics || {};
+    if ($('admTotalUsers')) $('admTotalUsers').textContent = m.totalUsers || 0;
+    if ($('admFrozenUsers')) $('admFrozenUsers').textContent = m.frozenUsers || 0;
+    if ($('admTotalProducts')) $('admTotalProducts').textContent = m.totalProducts || 0;
+    if ($('admTotalOrders')) $('admTotalOrders').textContent = m.totalOrders || 0;
+
+    switchAdminTab(currentAdminTab);
+  } catch (err) {
+    notify('Failed to load admin metrics: ' + err.message, 'error');
+  }
+}
+
+async function loadAdminUsers() {
+  const token = AuthService.getToken();
+  if (!token) return;
+  const roleFilter = $('adminUserFilter')?.value || '';
+  const rowsEl = $('adminUsersRows');
+  if (!rowsEl) return;
+
+  try {
+    const query = roleFilter ? `?role=${roleFilter}` : '';
+    const res = await fetch(`/api/admin/users${query}`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const users = res.users || [];
+
+    rowsEl.innerHTML = users.length ? users.map(u => `
+      <tr class="border-b border-border-subtle hover:bg-surface">
+        <td class="py-2.5 font-bold text-primary flex items-center gap-2">
+          ${getSellerAvatarHtml(u.name, u.profile_photo, 'w-6 h-6')}
+          <span>${u.name}</span>
+        </td>
+        <td class="py-2.5 text-soil-brown">${u.contact}</td>
+        <td class="py-2.5 uppercase font-semibold text-soil-brown text-[10px]">${u.role}</td>
+        <td class="py-2.5">
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${u.account_status === 'active' ? 'bg-surface text-success-emerald border border-success-emerald/20' : 'bg-error-container text-error'}">${u.account_status || 'active'}</span>
+        </td>
+        <td class="py-2.5">
+          ${u.account_status === 'active'
+            ? `<button class="bg-error-container text-error px-2.5 py-1 rounded text-[10px] font-bold hover:bg-error/20" onclick="updateUserAccountStatus('${u.id}', 'frozen')" type="button">Freeze</button>`
+            : `<button class="bg-surface text-success-emerald border border-success-emerald/20 px-2.5 py-1 rounded text-[10px] font-bold hover:bg-success-emerald hover:text-white" onclick="updateUserAccountStatus('${u.id}', 'active')" type="button">Unfreeze</button>`
+          }
+        </td>
+      </tr>
+    `).join('') : '<tr><td colspan="5" class="py-4 text-center text-soil-brown">No user accounts found.</td></tr>';
+  } catch (err) {
+    rowsEl.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-error">${err.message}</td></tr>`;
+  }
+}
+
+async function updateUserAccountStatus(userId, status) {
+  const token = AuthService.getToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch(`/api/admin/users/${userId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ status })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to update user status.');
+
+    notify(`User status updated to '${status}'.`, 'success');
+    loadAdminUsers();
+    loadAdminDashboard();
+  } catch (err) {
+    notify('User status error: ' + err.message, 'error');
+  }
+}
+
+async function loadAdminProducts() {
+  const token = AuthService.getToken();
+  if (!token) return;
+  const rowsEl = $('adminProductsRows');
+  if (!rowsEl) return;
+
+  try {
+    const res = await fetch('/api/admin/products', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const products = res.products || [];
+
+    rowsEl.innerHTML = products.length ? products.map(p => `
+      <tr class="border-b border-border-subtle hover:bg-surface">
+        <td class="py-2.5 font-bold text-primary">${p.name}</td>
+        <td class="py-2.5 text-soil-brown">${p.sellerName || p.seller_id}</td>
+        <td class="py-2.5 font-semibold text-on-surface">₹${p.price} / kg</td>
+        <td class="py-2.5 text-soil-brown">${p.quantity} kg</td>
+        <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${p.status === 'active' ? 'bg-surface text-success-emerald' : 'bg-input-bg text-soil-brown'}">${p.status}</span></td>
+        <td class="py-2.5">
+          ${p.status === 'active' 
+            ? `<button class="bg-error-container text-error px-2.5 py-1 rounded text-[10px] font-bold hover:bg-error/20" onclick="removeAdminProduct('${p.id}')" type="button">Deactivate</button>`
+            : `<span class="text-[10px] text-soil-brown">Deactivated</span>`
+          }
+        </td>
+      </tr>
+    `).join('') : '<tr><td colspan="6" class="py-4 text-center text-soil-brown">No products found.</td></tr>';
+  } catch (err) {
+    rowsEl.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-error">${err.message}</td></tr>`;
+  }
+}
+
+async function removeAdminProduct(productId) {
+  if (!confirm('Are you sure you want to deactivate this product listing?')) return;
+  const token = AuthService.getToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch(`/api/admin/products/${productId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+    if (!res.ok) throw new Error('Failed to deactivate product.');
+    notify('Product listing deactivated.', 'success');
+    loadAdminProducts();
+  } catch (err) {
+    notify('Product error: ' + err.message, 'error');
+  }
+}
+
+async function loadAdminOrders() {
+  const token = AuthService.getToken();
+  if (!token) return;
+  const rowsEl = $('adminOrdersRows');
+  if (!rowsEl) return;
+
+  try {
+    const res = await fetch('/api/admin/orders', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const orders = res.orders || [];
+
+    rowsEl.innerHTML = orders.length ? orders.map(o => `
+      <tr class="border-b border-border-subtle hover:bg-surface">
+        <td class="py-2.5 font-bold text-primary">#${o.order_number || o.id}</td>
+        <td class="py-2.5 text-soil-brown">${o.customer_id}</td>
+        <td class="py-2.5 text-soil-brown">${o.seller_id}</td>
+        <td class="py-2.5 font-bold text-on-surface">₹${o.total_amount || 0}</td>
+        <td class="py-2.5 font-semibold text-soil-brown uppercase text-[10px]">${o.payment_method || 'cod'} (${o.payment_status || 'cod'})</td>
+        <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-surface text-success-emerald border border-success-emerald/20">${o.status}</span></td>
+      </tr>
+    `).join('') : '<tr><td colspan="6" class="py-4 text-center text-soil-brown">No orders found.</td></tr>';
+  } catch (err) {
+    rowsEl.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-error">${err.message}</td></tr>`;
+  }
+}
+
+async function loadAdminPayments() {
+  const token = AuthService.getToken();
+  if (!token) return;
+  const rowsEl = $('adminPaymentsRows');
+  if (!rowsEl) return;
+
+  try {
+    const res = await fetch('/api/admin/payments', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const payments = res.payments || [];
+
+    rowsEl.innerHTML = payments.length ? payments.map(p => `
+      <tr class="border-b border-border-subtle hover:bg-surface">
+        <td class="py-2.5 font-bold text-primary">#${p.order_number || p.id}</td>
+        <td class="py-2.5 text-soil-brown">${p.customerName || p.customer_id}</td>
+        <td class="py-2.5 font-semibold text-soil-brown uppercase text-[10px]">${p.payment_method || 'cod'}</td>
+        <td class="py-2.5 font-bold text-primary">₹${p.total || 0}</td>
+        <td class="py-2.5">
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${p.payment_status === 'verified' ? 'bg-surface text-success-emerald border border-success-emerald/20' : p.payment_status === 'submitted' ? 'bg-harvest-gold/20 text-harvest-gold' : 'bg-input-bg text-soil-brown'}">${p.payment_status || 'pending'}</span>
+        </td>
+        <td class="py-2.5 flex items-center gap-1.5">
+          <button class="bg-surface text-success-emerald border border-success-emerald/20 px-2 py-1 rounded text-[10px] font-bold hover:bg-success-emerald hover:text-white" onclick="updateAdminPaymentStatus('${p.id}', 'verified')" type="button">Verify</button>
+          <button class="bg-error-container text-error px-2 py-1 rounded text-[10px] font-bold hover:bg-error/20" onclick="updateAdminPaymentStatus('${p.id}', 'rejected')" type="button">Reject</button>
+        </td>
+      </tr>
+    `).join('') : '<tr><td colspan="6" class="py-4 text-center text-soil-brown">No payment submissions.</td></tr>';
+  } catch (err) {
+    rowsEl.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-error">${err.message}</td></tr>`;
+  }
+}
+
+async function updateAdminPaymentStatus(orderId, status) {
+  const token = AuthService.getToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch(`/api/admin/payments/${orderId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ status })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to update payment status.');
+
+    notify(`Payment status updated to '${status}'.`, 'success');
+    loadAdminPayments();
+  } catch (err) {
+    notify('Payment error: ' + err.message, 'error');
+  }
+}
+
+async function loadAdminFeedback() {
+  const token = AuthService.getToken();
+  if (!token) return;
+  const container = $('adminFeedbackContainer');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/feedback', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const feedback = res.feedback || [];
+
+    container.innerHTML = feedback.length ? feedback.map(f => `
+      <div class="p-4 bg-input-bg rounded-xl border border-border-subtle text-xs">
+        <div class="flex justify-between items-center mb-1">
+          <span class="font-bold text-primary">${f.user_name || 'User'} (${f.user_email || 'No email'})</span>
+          <span class="text-harvest-gold font-bold">⭐ ${f.rating} / 5 · <span class="text-soil-brown">${f.category}</span></span>
+        </div>
+        <p class="text-soil-brown text-xs my-2">${f.message}</p>
+        <span class="text-[10px] text-soil-brown/70">${new Date(f.created_at || Date.now()).toLocaleString()}</span>
+      </div>
+    `).join('') : '<div class="p-4 text-center text-soil-brown">No feedback submissions found.</div>';
+  } catch (err) {
+    container.innerHTML = `<div class="p-4 text-center text-error">${err.message}</div>`;
+  }
+}
+
+async function loadAdminReviews() {
+  const token = AuthService.getToken();
+  if (!token) return;
+  const container = $('adminReviewsContainer');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/admin/reviews', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const reviews = res.reviews || [];
+
+    container.innerHTML = reviews.length ? reviews.map(r => `
+      <div class="p-4 bg-input-bg rounded-xl border border-border-subtle text-xs flex justify-between items-start gap-4">
+        <div>
+          <div class="font-bold text-primary mb-0.5">${r.productName || 'Product'} — ⭐ ${r.rating} / 5</div>
+          <span class="text-soil-brown text-[11px] block">By: ${r.buyerName || r.buyer_id}</span>
+          <p class="text-soil-brown mt-2">${r.comment || ''}</p>
+        </div>
+        <button class="bg-error-container text-error px-2.5 py-1 rounded text-[10px] font-bold hover:bg-error/20 shrink-0" onclick="deleteAdminReview('${r.id}')" type="button">Delete</button>
+      </div>
+    `).join('') : '<div class="p-4 text-center text-soil-brown">No customer reviews found.</div>';
+  } catch (err) {
+    container.innerHTML = `<div class="p-4 text-center text-error">${err.message}</div>`;
+  }
+}
+
+async function deleteAdminReview(reviewId) {
+  if (!confirm('Are you sure you want to delete this customer review?')) return;
+  const token = AuthService.getToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch(`/api/admin/reviews/${reviewId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+    if (!res.ok) throw new Error('Failed to delete review.');
+    notify('Review removed by admin.', 'success');
+    loadAdminReviews();
+  } catch (err) {
+    notify('Review error: ' + err.message, 'error');
+  }
+}
+
+async function loadAdminAuditLogs() {
+  const token = AuthService.getToken();
+  if (!token) return;
+  const container = $('adminAuditLogsContainer');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/admin/audit-logs', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const logs = res.auditLogs || [];
+
+    container.innerHTML = logs.length ? logs.map(l => `
+      <div class="p-3 bg-input-bg rounded-xl border border-border-subtle flex justify-between items-center text-xs">
+        <div>
+          <span class="font-bold text-primary">${l.action}</span>
+          <span class="text-soil-brown block text-[11px]">${l.details || ''}</span>
+        </div>
+        <span class="text-[10px] text-soil-brown/70 shrink-0">${new Date(l.created_at || Date.now()).toLocaleTimeString()}</span>
+      </div>
+    `).join('') : '<div class="p-4 text-center text-soil-brown">No audit logs recorded yet.</div>';
+  } catch (err) {
+    container.innerHTML = `<div class="p-4 text-center text-error">${err.message}</div>`;
+  }
+}
+
+async function loadAdminDatabaseTables() {
+  inspectSelectedAdminTable();
+}
+
+async function inspectSelectedAdminTable() {
+  const token = AuthService.getToken();
+  if (!token) return;
+  const tableName = $('dbInspectorTableSelect')?.value || 'users';
+  const container = $('dbInspectorContainer');
+  if (!container) return;
+
+  container.innerHTML = `<div class="p-4 text-center text-soil-brown">Loading database table '${tableName}'...</div>`;
+
+  try {
+    const res = await fetch(`/api/admin/database/tables/${tableName}`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const rows = res.rows || [];
+
+    if (!rows.length) {
+      container.innerHTML = `<div class="p-4 text-center text-soil-brown">Table '${tableName}' is empty.</div>`;
+      return;
+    }
+
+    const cols = Object.keys(rows[0]);
+    container.innerHTML = `
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-[11px]">
+          <thead>
+            <tr class="border-b border-border-subtle font-bold text-primary uppercase">
+              ${cols.map(c => `<th class="py-2 px-2 whitespace-nowrap">${c}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(r => `
+              <tr class="border-b border-border-subtle/50 hover:bg-white">
+                ${cols.map(c => `<td class="py-2 px-2 text-soil-brown font-mono max-w-xs truncate">${r[c] !== null && r[c] !== undefined ? String(r[c]) : '<span class="text-soil-brown/40">null</span>'}</td>`).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div class="p-4 text-center text-error">Database Inspector Error: ${err.message}</div>`;
+  }
 }
 
 (function init() {
@@ -2042,6 +2631,7 @@ function setChartMetric(m) {
   } else {
     showScreen('landing');
   }
+  handleUrlHashRouting();
   updateCartBadge();
 })();
 </script>
