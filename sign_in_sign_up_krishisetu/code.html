@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KrishiSetu - Login &amp; Signup</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#715d00",
+                    "on-primary-container": "#aeffc4",
+                    "primary": "#006033",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#7bda9a",
+                    "background": "#e9ffed",
+                    "input-bg": "#F3F3F0",
+                    "surface": "#e9ffed",
+                    "surface-bright": "#e9ffed",
+                    "error": "#ba1a1a",
+                    "tertiary": "#8a3c00",
+                    "surface-container-high": "#d1f0d9",
+                    "error-alert": "#E64B3C",
+                    "surface-container": "#d7f5de",
+                    "on-tertiary-fixed": "#331200",
+                    "on-error": "#ffffff",
+                    "success-emerald": "#0F7B45",
+                    "soil-brown": "#6D786F",
+                    "tertiary-fixed": "#ffdbca",
+                    "on-secondary-fixed-variant": "#554500",
+                    "on-secondary-fixed": "#231b00",
+                    "secondary-fixed-dim": "#e7c43c",
+                    "tertiary-container": "#af4f04",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#745f00",
+                    "secondary-container": "#ffda51",
+                    "on-primary-fixed-variant": "#00522b",
+                    "on-surface": "#062012",
+                    "on-primary": "#ffffff",
+                    "surface-variant": "#cbead3",
+                    "on-tertiary-container": "#ffe9de",
+                    "primary-fixed": "#97f7b4",
+                    "primary-container": "#0f7b45",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#1c3626",
+                    "secondary-fixed": "#ffe177",
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#7bda9a",
+                    "surface-dim": "#c3e1cb",
+                    "on-background": "#062012",
+                    "surface-container-highest": "#cbead3",
+                    "on-tertiary-fixed-variant": "#763300",
+                    "outline-variant": "#becabd",
+                    "inverse-on-surface": "#d9f8e1",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-fixed": "#00210e",
+                    "surface-container-low": "#dcfbe4",
+                    "tertiary-fixed-dim": "#ffb68e",
+                    "on-surface-variant": "#3f4940",
+                    "border-subtle": "#E7E7E2",
+                    "harvest-gold": "#F7D34A",
+                    "outline": "#6f7a6f",
+                    "surface-tint": "#006d3b",
+                    "surface-muted": "#F7F7F5"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-desktop": "28px",
+                    "xs": "4px",
+                    "xl": "32px",
+                    "lg": "24px",
+                    "gutter": "14px",
+                    "sm": "8px",
+                    "max-width": "1420px",
+                    "md": "16px",
+                    "margin-mobile": "16px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "section-head": ["Inter"],
+                    "display": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "body-default": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "caption": ["Inter"],
+                    "ui-label-bold": ["Inter"],
+                    "micro": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "headline-md": ["Inter"]
+            },
+            "fontSize": {
+                    "section-head": ["19px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "display": ["55px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "34px", "fontWeight": "800"}],
+                    "body-default": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.01em", "fontWeight": "800"}],
+                    "caption": ["11px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "ui-label-bold": ["10px", {"lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "900"}],
+                    "micro": ["9px", {"lineHeight": "10px", "fontWeight": "900"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="bg-surface-muted min-h-screen flex w-full font-body-default text-on-surface">
+<div class="hidden lg:flex lg:w-[45%] relative flex-col justify-between p-xl bg-surface-tint overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-multiply" data-alt="A sprawling, hyper-realistic, sunlit agricultural field with lush green crops ready for harvest, viewed from a slight aerial perspective. The scene is bathed in golden hour light, casting long, soft shadows and highlighting the organic vitality of the farm. The overall mood is prosperous, professional, and deeply grounded in the natural world, matching the tactile, modern corporate aesthetic of a premier agricultural platform." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAgN2OtO4WHXYg7MR25w2Yac4kduI_lWZh3qm9FZ83yMeujX6elkGzLB8jhrtko9HARQJVKX9N9my3VMXcn5-OUK39z4iP3dm_KhqFQ41eiDuHHEjnM5-OjW5tqYZW73ce1Hj5ug1vD9eoyIBeF5VE5xBnDFfYXOfQ3cjcWFPeHiAvBRltlRYM_j7PtF8-f1bO9n1AGJK4ScyzM__BqIp2-sW5ihwGja53efjzQMWbcD9QwjVdmrupDNw')"></div>
+<div class="relative z-10">
+<div class="flex items-center gap-sm text-on-primary">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">eco</span>
+<span class="font-headline-md text-headline-md font-black tracking-tight">KrishiSetu</span>
+</div>
+</div>
+<div class="relative z-10 max-w-md">
+<h1 class="font-display text-display text-on-primary mb-lg">Digital Stewardship.</h1>
+<p class="font-body-default text-body-default text-primary-fixed-dim">
+                Bridging the gap between the raw, organic vitality of farming and the precision of modern commerce. Join a network designed for growth, security, and clarity.
+            </p>
+</div>
+</div>
+<div class="w-full lg:w-[55%] flex flex-col justify-center items-center p-margin-mobile md:p-margin-desktop bg-surface-container-lowest relative shadow-[0_25px_70px_rgba(0,0,0,0.16)] lg:shadow-none z-10">
+<div class="w-full max-w-[460px]">
+<div class="flex items-center gap-lg mb-xl border-b border-border-subtle pb-sm">
+<button class="font-section-head text-section-head text-primary border-b-2 border-primary pb-sm translate-y-[9px] transition-colors" id="tab-login">Sign In</button>
+<button class="font-section-head text-section-head text-on-surface-variant hover:text-primary pb-sm translate-y-[9px] transition-colors" id="tab-signup">Create Account</button>
+</div>
+<div class="block" id="view-login">
+<div class="mb-lg">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-xs">Welcome back</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Enter your credentials to access your dashboard.</p>
+</div>
+<form class="flex flex-col gap-lg" onsubmit="event.preventDefault();">
+<div class="flex flex-col gap-xs">
+<label class="font-ui-label-bold text-ui-label-bold text-soil-brown">MOBILE NUMBER OR EMAIL</label>
+<input class="w-full bg-input-bg rounded-lg border border-transparent focus:border-primary focus:ring-0 px-md py-3 font-body-default text-body-default text-on-surface outline-none transition-colors" placeholder="e.g. +91 9876543210" type="text"/>
+</div>
+<div class="flex flex-col gap-xs relative">
+<div class="flex justify-between items-end">
+<label class="font-ui-label-bold text-ui-label-bold text-soil-brown">PASSWORD</label>
+<a class="font-ui-label-bold text-ui-label-bold text-primary hover:underline" href="#">FORGOT?</a>
+</div>
+<input class="w-full bg-input-bg rounded-lg border border-error-alert focus:border-error-alert focus:ring-0 px-md py-3 font-body-default text-body-default text-on-surface outline-none transition-colors" placeholder="••••••••" type="password" value="invalidpass"/>
+<div class="flex items-center gap-xs mt-xs text-error-alert">
+<span class="material-symbols-outlined text-sm">error</span>
+<span class="font-caption text-caption">Incorrect password. Please try again.</span>
+</div>
+</div>
+<button class="w-full bg-primary hover:bg-surface-tint text-on-primary font-section-head text-section-head rounded-lg py-3 mt-sm transition-colors shadow-[0_4px_18px_rgba(23,49,34,0.07)]" type="submit">
+                        Sign In Securely
+                    </button>
+<div class="relative flex py-sm items-center">
+<div class="flex-grow border-t border-border-subtle"></div>
+<span class="flex-shrink-0 mx-md font-caption text-caption text-soil-brown">OR VERIFY WITH</span>
+<div class="flex-grow border-t border-border-subtle"></div>
+</div>
+<button class="w-full bg-surface-container-lowest border border-border-subtle hover:bg-surface-muted text-on-surface font-section-head text-section-head rounded-lg py-3 transition-colors flex items-center justify-center gap-sm" type="button">
+<span class="material-symbols-outlined text-primary">dialpad</span>
+                        Request OTP
+                    </button>
+</form>
+</div>
+<div class="hidden" id="view-signup">
+<div class="mb-lg">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-xs">Join the Network</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Select how you intend to use KrishiSetu.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter mb-xl">
+<button class="role-select-btn flex flex-col items-start p-md bg-surface-container-lowest border border-border-subtle rounded-xl hover:border-primary transition-colors text-left relative group">
+<div class="w-10 h-10 rounded-full bg-surface-muted flex items-center justify-center mb-md group-hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-primary group-hover:text-on-primary-container transition-colors">agriculture</span>
+</div>
+<span class="font-section-head text-section-head text-on-surface mb-xs">I am a Farmer</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Sell produce directly to buyers and track market trends.</span>
+<div class="absolute inset-0 border-[1.5px] border-primary rounded-xl opacity-0 pointer-events-none transition-opacity select-ring"></div>
+</button>
+<button class="role-select-btn flex flex-col items-start p-md bg-surface-container-lowest border border-border-subtle rounded-xl hover:border-primary transition-colors text-left relative group">
+<div class="w-10 h-10 rounded-full bg-surface-muted flex items-center justify-center mb-md group-hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-primary group-hover:text-on-primary-container transition-colors">storefront</span>
+</div>
+<span class="font-section-head text-section-head text-on-surface mb-xs">I am a Customer</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Procure high-quality produce with transparent pricing.</span>
+<div class="absolute inset-0 border-[1.5px] border-primary rounded-xl opacity-0 pointer-events-none transition-opacity select-ring"></div>
+</button>
+</div>
+<div class="hidden opacity-0 transition-opacity duration-300" id="signup-details">
+<form class="flex flex-col gap-lg" onsubmit="event.preventDefault();">
+<div class="flex flex-col gap-xs">
+<label class="font-ui-label-bold text-ui-label-bold text-soil-brown">FULL NAME</label>
+<input class="w-full bg-input-bg rounded-lg border border-transparent focus:border-primary focus:ring-0 px-md py-3 font-body-default text-body-default text-on-surface outline-none transition-colors" placeholder="Enter your full name" type="text"/>
+</div>
+<div class="flex flex-col gap-xs">
+<label class="font-ui-label-bold text-ui-label-bold text-soil-brown">MOBILE NUMBER</label>
+<div class="relative">
+<span class="absolute left-md top-1/2 -translate-y-1/2 font-body-default text-body-default text-on-surface-variant">+91</span>
+<input class="w-full bg-input-bg rounded-lg border border-transparent focus:border-primary focus:ring-0 pl-12 pr-md py-3 font-body-default text-body-default text-on-surface outline-none transition-colors" placeholder="10-digit number" type="tel"/>
+</div>
+</div>
+<button class="w-full bg-primary hover:bg-surface-tint text-on-primary font-section-head text-section-head rounded-lg py-3 mt-sm transition-colors shadow-[0_4px_18px_rgba(23,49,34,0.07)] flex items-center justify-center gap-sm" type="submit">
+                            Continue
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</form>
+</div>
+</div>
+</div>
+</div>
+<script>
+        const tabLogin = document.getElementById('tab-login');
+        const tabSignup = document.getElementById('tab-signup');
+        const viewLogin = document.getElementById('view-login');
+        const viewSignup = document.getElementById('view-signup');
+        const roleBtns = document.querySelectorAll('.role-select-btn');
+        const signupDetails = document.getElementById('signup-details');
+
+        function switchTab(activeId) {
+            if (activeId === 'login') {
+                viewLogin.classList.remove('hidden');
+                viewSignup.classList.add('hidden');
+                
+                tabLogin.classList.add('text-primary', 'border-primary');
+                tabLogin.classList.remove('text-on-surface-variant', 'border-transparent');
+                
+                tabSignup.classList.remove('text-primary', 'border-primary');
+                tabSignup.classList.add('text-on-surface-variant', 'border-transparent');
+                tabSignup.style.borderBottomWidth = '0px';
+                tabLogin.style.borderBottomWidth = '2px';
+            } else {
+                viewSignup.classList.remove('hidden');
+                viewLogin.classList.add('hidden');
+                
+                tabSignup.classList.add('text-primary', 'border-primary');
+                tabSignup.classList.remove('text-on-surface-variant', 'border-transparent');
+                
+                tabLogin.classList.remove('text-primary', 'border-primary');
+                tabLogin.classList.add('text-on-surface-variant', 'border-transparent');
+                tabLogin.style.borderBottomWidth = '0px';
+                tabSignup.style.borderBottomWidth = '2px';
+            }
+        }
+
+        tabLogin.addEventListener('click', () => switchTab('login'));
+        tabSignup.addEventListener('click', () => switchTab('signup'));
+
+        roleBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                roleBtns.forEach(b => {
+                    b.querySelector('.select-ring').classList.remove('opacity-100');
+                    b.classList.remove('bg-surface-muted');
+                });
+                
+                this.querySelector('.select-ring').classList.add('opacity-100');
+                this.classList.add('bg-surface-muted');
+                
+                signupDetails.classList.remove('hidden');
+                setTimeout(() => {
+                    signupDetails.classList.remove('opacity-0');
+                }, 50);
+            });
+        });
+    </script>
+</body></html>

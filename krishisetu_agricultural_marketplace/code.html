@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KrishiSetu - Agricultural Marketplace</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary": "#715d00",
+                      "on-primary-container": "#aeffc4",
+                      "primary": "#006033",
+                      "surface-container-lowest": "#ffffff",
+                      "inverse-primary": "#7bda9a",
+                      "background": "#e9ffed",
+                      "input-bg": "#F3F3F0",
+                      "surface": "#e9ffed",
+                      "surface-bright": "#e9ffed",
+                      "error": "#ba1a1a",
+                      "tertiary": "#8a3c00",
+                      "surface-container-high": "#d1f0d9",
+                      "error-alert": "#E64B3C",
+                      "surface-container": "#d7f5de",
+                      "on-tertiary-fixed": "#331200",
+                      "on-error": "#ffffff",
+                      "success-emerald": "#0F7B45",
+                      "soil-brown": "#6D786F",
+                      "tertiary-fixed": "#ffdbca",
+                      "on-secondary-fixed-variant": "#554500",
+                      "on-secondary-fixed": "#231b00",
+                      "secondary-fixed-dim": "#e7c43c",
+                      "tertiary-container": "#af4f04",
+                      "on-secondary": "#ffffff",
+                      "on-secondary-container": "#745f00",
+                      "secondary-container": "#ffda51",
+                      "on-primary-fixed-variant": "#00522b",
+                      "on-surface": "#062012",
+                      "on-primary": "#ffffff",
+                      "surface-variant": "#cbead3",
+                      "on-tertiary-container": "#ffe9de",
+                      "primary-fixed": "#97f7b4",
+                      "primary-container": "#0f7b45",
+                      "error-container": "#ffdad6",
+                      "inverse-surface": "#1c3626",
+                      "secondary-fixed": "#ffe177",
+                      "on-error-container": "#93000a",
+                      "primary-fixed-dim": "#7bda9a",
+                      "surface-dim": "#c3e1cb",
+                      "on-background": "#062012",
+                      "surface-container-highest": "#cbead3",
+                      "on-tertiary-fixed-variant": "#763300",
+                      "outline-variant": "#becabd",
+                      "inverse-on-surface": "#d9f8e1",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed": "#00210e",
+                      "surface-container-low": "#dcfbe4",
+                      "tertiary-fixed-dim": "#ffb68e",
+                      "on-surface-variant": "#3f4940",
+                      "border-subtle": "#E7E7E2",
+                      "harvest-gold": "#F7D34A",
+                      "outline": "#6f7a6f",
+                      "surface-tint": "#006d3b",
+                      "surface-muted": "#F7F7F5"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-desktop": "28px",
+                      "xs": "4px",
+                      "xl": "32px",
+                      "lg": "24px",
+                      "gutter": "14px",
+                      "sm": "8px",
+                      "max-width": "1420px",
+                      "md": "16px",
+                      "margin-mobile": "16px",
+                      "base": "4px"
+              },
+              "fontFamily": {
+                      "section-head": [
+                              "Inter"
+                      ],
+                      "display": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ],
+                      "body-default": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "caption": [
+                              "Inter"
+                      ],
+                      "ui-label-bold": [
+                              "Inter"
+                      ],
+                      "micro": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "section-head": [
+                              "19px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display": [
+                              "55px",
+                              {
+                                      "lineHeight": "1.1",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "900"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "34px",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "body-default": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "36px",
+                              {
+                                      "lineHeight": "44px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "caption": [
+                              "11px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "ui-label-bold": [
+                              "10px",
+                              {
+                                      "lineHeight": "12px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "900"
+                              }
+                      ],
+                      "micro": [
+                              "9px",
+                              {
+                                      "lineHeight": "10px",
+                                      "fontWeight": "900"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.surface-muted');
+            color: theme('colors.on-surface');
+        }
+    </style>
+</head>
+<body class="font-body-default min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="bg-surface dark:bg-inverse-surface text-primary dark:text-inverse-primary docked full-width top-0 z-50 shadow-[0_4px_18px_rgba(23,49,34,0.07)] sticky">
+<div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-4 max-w-max-width mx-auto">
+<div class="flex items-center gap-6">
+<a class="text-headline-md font-headline-md font-black text-primary dark:text-inverse-primary" href="#">KrishiSetu</a>
+<div class="hidden md:flex gap-6 items-center">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors text-body-default font-body-default" href="#">Marketplace</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors text-body-default font-body-default" href="#">Mandi Rates</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors text-body-default font-body-default" href="#">How it Works</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center gap-3">
+<button class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+</button>
+<button class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+<button class="text-body-sm font-body-sm text-neutral-color-hex border border-border-subtle rounded-lg px-4 py-2 hover:bg-surface-variant transition-colors">Switch to Farmer</button>
+<button class="text-body-sm font-body-sm bg-primary text-white rounded-lg px-4 py-2 hover:bg-primary-container transition-colors">Login</button>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-grow">
+<!-- Hero Section -->
+<section class="relative w-full h-[600px] flex items-center justify-center">
+<div class="absolute inset-0 z-0">
+<div class="w-full h-full bg-cover bg-center" data-alt="A sweeping, cinematic view of a lush green agricultural field at sunrise. The warm golden light illuminates healthy crops, conveying growth and natural vitality. In the background, modern farming equipment hints at professional agriculture. The mood is optimistic and deeply connected to the earth, using organic greens and warm earth tones typical of a modern corporate-tactile design system." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDisDKyeGOZ-2eRL2SgUKulhvi9UcF2uPBPCFMkgyne345_reOKgNbJe-RVeovIx30oWc9IXKROQCJUDIDZX4bfkEhiYNrZrJsk6Rsaya3mHWg5IW9N_i4lbEgLCB3He2cCzcCE5OpUKoyVPLGzgMlOO5SY9xUtMpNOct8FMuhZPI_ot_pX4GK9ECS1LT8TUMEI0kJQGZnL5hxoBQUGirb-mPn8_iFyAlX5IEZftiHLM6urXGVTpdeqsg')"></div>
+<div class="absolute inset-0 bg-surface-muted/70 backdrop-blur-sm"></div>
+</div>
+<div class="relative z-10 max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop text-center">
+<h1 class="text-display font-display text-primary mb-6">From Farm to Customer, Without the Middleman</h1>
+<p class="text-headline-md font-headline-md text-on-surface-variant mb-10 max-w-3xl mx-auto">KrishiSetu connects farmers directly with buyers, ensuring fair prices, freshness, and transparency in every transaction.</p>
+<div class="flex flex-col sm:flex-row justify-center gap-4">
+<button class="bg-primary text-white px-8 py-3 rounded-lg text-section-head font-section-head shadow-[0_4px_18px_rgba(23,49,34,0.07)] hover:bg-primary-container transition-all">Explore Marketplace</button>
+<button class="border-2 border-primary text-primary px-8 py-3 rounded-lg text-section-head font-section-head hover:bg-primary hover:text-white transition-all bg-white/50 backdrop-blur-md">Sell Your Produce</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full mt-auto bg-surface-container-highest dark:bg-inverse-surface border-t border-border-subtle">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-lg px-margin-mobile md:px-margin-desktop py-xl max-w-max-width mx-auto">
+<div>
+<a class="text-headline-md font-headline-md font-black text-primary dark:text-inverse-primary mb-4 block" href="#">KrishiSetu</a>
+<p class="text-body-sm font-body-sm text-on-surface-variant dark:text-surface-variant">© 2024 KrishiSetu. Digital Stewardship for Rural Growth.</p>
+</div>
+<div class="flex flex-col gap-2">
+<a class="text-body-sm font-body-sm text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary underline transition-all" href="#">About Us</a>
+<a class="text-body-sm font-body-sm text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary underline transition-all" href="#">How it Works</a>
+<a class="text-body-sm font-body-sm text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary underline transition-all" href="#">Privacy Policy</a>
+</div>
+<div class="flex flex-col gap-2">
+<a class="text-body-sm font-body-sm text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary underline transition-all" href="#">Terms of Service</a>
+<a class="text-body-sm font-body-sm text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary underline transition-all" href="#">Farmer Support</a>
+<a class="text-body-sm font-body-sm text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary underline transition-all" href="#">Contact</a>
+</div>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KrishiSetu - Direct Farm-to-Customer Agricultural Marketplace</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#97f7b4",
+                        "secondary-fixed": "#ffe177",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#00210e",
+                        "outline": "#6f7a6f",
+                        "surface": "#e9ffed",
+                        "surface-tint": "#006d3b",
+                        "inverse-on-surface": "#d9f8e1",
+                        "success-emerald": "#0F7B45",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#cbead3",
+                        "background": "#e9ffed",
+                        "secondary-container": "#ffda51",
+                        "on-secondary-fixed": "#231b00",
+                        "on-secondary-fixed-variant": "#554500",
+                        "surface-bright": "#e9ffed",
+                        "on-error-container": "#93000a",
+                        "on-background": "#062012",
+                        "on-error": "#ffffff",
+                        "border-subtle": "#E7E7E2",
+                        "surface-dim": "#c3e1cb",
+                        "tertiary-fixed-dim": "#ffb68e",
+                        "surface-muted": "#F7F7F5",
+                        "tertiary": "#8a3c00",
+                        "tertiary-container": "#af4f04",
+                        "inverse-surface": "#1c3626",
+                        "surface-container": "#d7f5de",
+                        "surface-container-highest": "#cbead3",
+                        "on-surface": "#062012",
+                        "outline-variant": "#becabd",
+                        "error-alert": "#E64B3C",
+                        "harvest-gold": "#F7D34A",
+                        "on-primary-container": "#aeffc4",
+                        "surface-container-low": "#dcfbe4",
+                        "primary-fixed-dim": "#7bda9a",
+                        "inverse-primary": "#7bda9a",
+                        "surface-container-high": "#d1f0d9",
+                        "on-tertiary-fixed-variant": "#763300",
+                        "secondary-fixed-dim": "#e7c43c",
+                        "on-tertiary-fixed": "#331200",
+                        "tertiary-fixed": "#ffdbca",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#0f7b45",
+                        "secondary": "#715d00",
+                        "primary": "#006033",
+                        "on-surface-variant": "#3f4940",
+                        "input-bg": "#F3F3F0",
+                        "soil-brown": "#6D786F",
+                        "on-secondary-container": "#745f00",
+                        "on-tertiary-container": "#ffe9de",
+                        "on-primary-fixed-variant": "#00522b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "28px",
+                        "gutter": "14px",
+                        "xs": "4px",
+                        "max-width": "1420px",
+                        "base": "4px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "ui-label-bold": ["Inter"],
+                        "caption": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-default": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "display": ["Inter"],
+                        "section-head": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "micro": ["Inter"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "ui-label-bold": ["10px", { "lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "900" }],
+                        "caption": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-default": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "34px", "fontWeight": "800" }],
+                        "display": ["55px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900" }],
+                        "section-head": ["19px", { "lineHeight": "24px", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "micro": ["9px", { "lineHeight": "10px", "fontWeight": "900" }],
+                        "headline-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.01em", "fontWeight": "800" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.surface-muted');
+            color: theme('colors.on-surface');
+            font-family: 'Inter', sans-serif;
+        }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        .rolecard.selected { border-color: #0f7b45; background-color: #eef8f1; }
+        
+        /* AgriCore Top Notification Component */
+        #topNotificationContainer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .agri-notification {
+            pointer-events: auto;
+            min-w: 300px;
+            max-w: 420px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            background: #ffffff;
+            box-shadow: 0 10px 25px rgba(6, 32, 18, 0.12);
+            border-left: 5px solid #006033;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .agri-notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .agri-notification.error { border-left-color: #E64B3C; }
+        .agri-notification.warning { border-left-color: #F7D34A; }
+        .agri-notification.success { border-left-color: #0F7B45; }
+</style>
+</head>
+<body class="font-body-default min-h-screen flex flex-col">
+
+<!-- Top AgriCore Notification Container -->
+<div id="topNotificationContainer"></div>
+
+<!-- TopNavBar -->
+<nav class="bg-surface dark:bg-inverse-surface text-primary dark:text-inverse-primary docked full-width top-0 z-50 shadow-[0_4px_18px_rgba(23,49,34,0.07)] sticky">
+  <div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-4 max-w-max-width mx-auto">
+    <div class="flex items-center gap-6">
+      <a class="text-headline-md font-headline-md font-black text-primary dark:text-inverse-primary flex items-center gap-2" href="#" onclick="showScreen('landing')">
+        <span>🌾</span> KrishiSetu
+      </a>
+      <div class="hidden md:flex gap-6 items-center">
+        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" onclick="onNavMarketplaceClick()" type="button">Marketplace</button>
+        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" onclick="showScreen('price')" type="button">Mandi Rates</button>
+        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" id="sellNavBtn" onclick="showScreen('sell')" type="button" style="display:none">Sell Produce</button>
+        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" onclick="showScreen('orders')" type="button">Orders</button>
+        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" onclick="showScreen('about')" type="button">About Us</button>
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="hidden md:flex items-center gap-3">
+        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors flex items-center gap-1" onclick="detectMyLocation()" title="Detect Geolocation" type="button">
+          <span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+          <span id="topLocationText" class="text-xs font-semibold">Detect Location</span>
+        </button>
+        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors relative" onclick="showScreen('cart')" type="button" title="View Cart">
+          <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+          <span id="cartCountBadge" class="absolute -top-2 -right-2 bg-harvest-gold text-inverse-surface font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center">0</span>
+        </button>
+      </div>
+      <span id="userRoleBadge" class="hidden text-xs font-extrabold px-3 py-1.5 rounded-full bg-surface text-primary border border-primary/20"></span>
+      <button id="profileNavBtn" class="hidden text-body-sm font-body-sm text-soil-brown hover:text-primary font-bold transition-colors" onclick="showScreen('profile')" type="button">Profile</button>
+      <button id="authHeaderBtn" class="text-body-sm font-body-sm bg-primary text-white rounded-lg px-4 py-2 hover:bg-primary-container transition-colors font-bold" onclick="openAuthModal()" type="button">Login</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content Area -->
+<main class="flex-grow">
+
+  <!-- 1. PUBLIC HERO LANDING SCREEN (BEFORE LOGIN) -->
+  <section class="screen active" id="landing">
+    <div class="relative w-full h-[540px] flex items-center justify-center overflow-hidden">
+      <div class="absolute inset-0 z-0">
+        <div class="w-full h-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDisDKyeGOZ-2eRL2SgUKulhvi9UcF2uPBPCFMkgyne345_reOKgNbJe-RVeovIx30oWc9IXKROQCJUDIDZX4bfkEhiYNrZrJsk6Rsaya3mHWg5IW9N_i4lbEgLCB3He2cCzcCE5OpUKoyVPLGzgMlOO5SY9xUtMpNOct8FMuhZPI_ot_pX4GK9ECS1LT8TUMEI0kJQGZnL5hxoBQUGirb-mPn8_iFyAlX5IEZftiHLM6urXGVTpdeqsg')"></div>
+        <div class="absolute inset-0 bg-surface-muted/75 backdrop-blur-sm"></div>
+      </div>
+      <div class="relative z-10 max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop text-center">
+        <span class="inline-block bg-primary/10 text-primary text-xs font-extrabold px-4 py-1.5 rounded-full mb-4 border border-primary/20 uppercase tracking-wider">Direct Farm-to-Customer Marketplace</span>
+        <h1 class="text-display font-display text-primary mb-6">From Farm to Customer, Without the Middleman</h1>
+        <p class="text-headline-md font-headline-md text-on-surface-variant mb-10 max-w-3xl mx-auto">KrishiSetu connects farmers directly with buyers, ensuring fair prices, freshness, transparent platform fees, and real-time mandi intelligence.</p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+          <button class="bg-primary text-white px-8 py-3 rounded-lg text-section-head font-section-head shadow-[0_4px_18px_rgba(23,49,34,0.07)] hover:bg-primary-container transition-all font-bold" onclick="onExploreClick()" type="button">Explore Marketplace</button>
+          <button class="border-2 border-primary text-primary px-8 py-3 rounded-lg text-section-head font-section-head hover:bg-primary hover:text-white transition-all bg-white/50 backdrop-blur-md font-bold" onclick="onSellClick()" type="button">Sell Your Produce</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Value Propositions Section -->
+    <div class="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-12">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+        <div class="bg-white p-8 rounded-2xl border border-border-subtle shadow-sm">
+          <div class="w-16 h-16 bg-surface text-primary rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">👨‍🌾</div>
+          <h3 class="text-headline-md font-bold text-primary mb-2">Direct Farmer Profits</h3>
+          <p class="text-body-sm text-soil-brown">Farmers set their own pricing and sell directly to nearby consumers without middleman commissions.</p>
+        </div>
+        <div class="bg-white p-8 rounded-2xl border border-border-subtle shadow-sm">
+          <div class="w-16 h-16 bg-surface text-primary rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">📈</div>
+          <h3 class="text-headline-md font-bold text-primary mb-2">AGMARKNET Mandi Rates</h3>
+          <p class="text-body-sm text-soil-brown">Live Government mandi arrival data, historical price trends, and APMC comparison charts.</p>
+        </div>
+        <div class="bg-white p-8 rounded-2xl border border-border-subtle shadow-sm">
+          <div class="w-16 h-16 bg-surface text-primary rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">🚚</div>
+          <h3 class="text-headline-md font-bold text-primary mb-2">Transparent Low Fees</h3>
+          <p class="text-body-sm text-soil-brown">Clear platform fee structure (0.5% for bulk orders, 2% for standard purchases) calculated server-side.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. AUTHENTICATED BUYER MARKETPLACE SCREEN -->
+  <section class="screen max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-8" id="buyer-market">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+      <div>
+        <h2 class="text-headline-md font-bold text-primary">Fresh Produce Near You</h2>
+        <p class="text-body-sm text-soil-brown">Browse fresh harvest directly from verified local farmers.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <select id="marketCategoryFilter" class="p-2.5 border border-border-subtle rounded-lg bg-white text-xs font-bold outline-none" onchange="renderProducts()">
+          <option value="All">All Categories</option>
+          <option value="Vegetables">Vegetables</option>
+          <option value="Fruits">Fruits</option>
+          <option value="Grains">Grains</option>
+          <option value="Pulses">Pulses</option>
+          <option value="Spices">Spices</option>
+        </select>
+        <button class="bg-primary text-white px-4 py-2.5 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors" onclick="detectMyLocation()" type="button">📍 Update GPS Location</button>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6" id="marketplaceProductsGrid">
+      <div class="p-8 text-center text-soil-brown bg-white rounded-xl border border-border-subtle col-span-full">Loading marketplace produce...</div>
+    </div>
+  </section>
+
+  <!-- 3. DEDICATED CART SCREEN (CHECKOUT SEPARATE FROM ADD TO CART) -->
+  <section class="screen max-w-4xl mx-auto px-margin-mobile md:px-margin-desktop py-8" id="cart">
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h2 class="text-headline-md font-bold text-primary">Your Produce Cart</h2>
+        <p class="text-body-sm text-soil-brown">Review selected produce items before placing your server order.</p>
+      </div>
+      <button class="text-primary text-xs font-bold underline" onclick="showScreen('buyer-market')" type="button">← Continue Shopping</button>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" id="cartContentLayout">
+      <div class="lg:col-span-2 space-y-4" id="cartItemsList">
+        <div class="p-8 text-center text-soil-brown bg-white rounded-xl border border-border-subtle">Loading your cart...</div>
+      </div>
+      
+      <!-- Cart Summary Card -->
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm h-fit">
+        <h3 class="text-lg font-bold text-primary mb-4 pb-3 border-b border-border-subtle">Order Summary</h3>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between text-soil-brown">
+            <span>Items Subtotal</span>
+            <span class="font-bold text-on-surface" id="cartSubtotal">₹0</span>
+          </div>
+          <div class="flex justify-between text-soil-brown">
+            <span id="cartFeeLabel">Platform Fee (2%)</span>
+            <span class="font-bold text-on-surface" id="cartFeeVal">₹0</span>
+          </div>
+          <div class="pt-3 border-t border-border-subtle flex justify-between text-base font-extrabold text-primary">
+            <span>Total Payable</span>
+            <span id="cartTotalVal">₹0</span>
+          </div>
+        </div>
+        <button id="cartCheckoutBtn" class="w-full bg-primary text-white py-3 rounded-xl font-bold mt-6 hover:bg-primary-container transition-colors shadow-md" onclick="checkoutCart()" type="button">Proceed to Checkout →</button>
+        <p class="text-[11px] text-soil-brown text-center mt-3">⚡ Orders with subtotal ≥ ₹5,000 qualify for discounted 0.5% bulk platform fee.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. ADD / PUBLISH PRODUCE LISTING SCREEN (SELLER) -->
+  <section class="screen max-w-2xl mx-auto px-margin-mobile md:px-margin-desktop py-8" id="sell">
+    <div class="bg-white p-8 rounded-2xl border border-border-subtle shadow-sm">
+      <h2 class="text-headline-md font-bold text-primary mb-2">Publish Produce Listing</h2>
+      <p class="text-body-sm text-soil-brown mb-6">List your fresh harvest with photos, quality grade, and location for buyers.</p>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-soil-brown uppercase mb-1">PRODUCE NAME *</label>
+          <input id="prodName" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-sm outline-none focus:border-primary" placeholder="e.g. Fresh Tomatoes, Wheat, Onion">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-soil-brown uppercase mb-1">CATEGORY</label>
+            <select id="prodCategory" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-sm outline-none focus:border-primary">
+              <option value="Vegetables">Vegetables</option>
+              <option value="Fruits">Fruits</option>
+              <option value="Grains">Grains</option>
+              <option value="Pulses">Pulses</option>
+              <option value="Spices">Spices</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-soil-brown uppercase mb-1">QUALITY GRADE</label>
+            <select id="prodGrade" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-sm outline-none focus:border-primary">
+              <option value="Grade A">Grade A (Premium)</option>
+              <option value="Grade B">Grade B (Standard)</option>
+              <option value="Standard">Standard FAQ</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-soil-brown uppercase mb-1">DESCRIPTION</label>
+          <textarea id="prodDesc" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-sm outline-none focus:border-primary h-20" placeholder="Harvest date, packaging, organicity, etc..."></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-soil-brown uppercase mb-1">PRICE PER KG (₹) *</label>
+            <input id="prodPrice" type="number" min="1" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-sm outline-none focus:border-primary" placeholder="e.g. 35">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-soil-brown uppercase mb-1">AVAILABLE QTY (KG) *</label>
+            <input id="prodQty" type="number" min="1" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-sm outline-none focus:border-primary" placeholder="e.g. 200">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-soil-brown uppercase mb-1">PRODUCT PHOTO (IMAGE UPLOAD)</label>
+          <input id="prodImageInput" type="file" accept="image/*" class="w-full p-2 border border-border-subtle rounded-lg bg-input-bg text-xs" onchange="previewProductImage(event)">
+          <div id="imagePreviewContainer" class="mt-2 hidden">
+            <img id="imagePreviewThumb" class="w-24 h-24 object-cover rounded-lg border border-border-subtle" alt="Preview">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-soil-brown uppercase mb-1">SELLER LOCATION</label>
+          <input id="prodLocation" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-sm outline-none focus:border-primary" placeholder="Detect or enter city/mandi name">
+        </div>
+        <button class="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary-container transition-colors mt-4" onclick="publishProduct()" type="button">Publish Produce Listing</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. ORDERS & LIVE STATUS SCREEN -->
+  <section class="screen max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-8" id="orders">
+    <div class="mb-6">
+      <h2 class="text-headline-md font-bold text-primary">Orders & Live Tracking</h2>
+      <p class="text-body-sm text-soil-brown">Track order state transitions from placement to delivery completion.</p>
+    </div>
+    <div class="space-y-4" id="ordersContainer">
+      <div class="p-8 text-center text-soil-brown bg-white rounded-xl border border-border-subtle">Loading your orders...</div>
+    </div>
+  </section>
+
+  <!-- 6. MANDI MARKET INTELLIGENCE TERMINAL SCREEN -->
+  <section class="screen max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-8" id="price">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+      <div>
+        <div class="flex items-center gap-3">
+          <h2 class="text-headline-md font-bold text-primary">Mandi Market Intelligence</h2>
+          <span class="bg-success-emerald/10 text-success-emerald text-xs font-extrabold px-3 py-1 rounded-full flex items-center gap-1 border border-success-emerald/20">
+            <span class="w-2 h-2 rounded-full bg-success-emerald animate-pulse"></span> AGMARKNET LIVE
+          </span>
+        </div>
+        <p class="text-body-sm text-soil-brown">Source: Government of India — AGMARKNET / Data.gov.in official market arrival observations.</p>
+      </div>
+      <button class="bg-primary text-white px-4 py-2.5 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors" onclick="loadMarketPrices(true)" type="button">↻ Refresh Mandi Data</button>
+    </div>
+
+    <!-- Controls & Selectors -->
+    <div class="bg-white p-6 rounded-2xl border border-border-subtle mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4 shadow-sm">
+      <div>
+        <label class="block text-xs font-bold text-soil-brown uppercase mb-1">COMMODITY</label>
+        <select id="mandiCommodity" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg font-semibold text-sm outline-none" onchange="loadMarketPrices()">
+          <option value="Onion">Onion</option>
+          <option value="Tomato">Tomato</option>
+          <option value="Potato">Potato</option>
+          <option value="Wheat">Wheat</option>
+          <option value="Rice">Rice</option>
+          <option value="Soybean">Soybean</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-soil-brown uppercase mb-1">STATE</label>
+        <select id="mandiState" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg font-semibold text-sm outline-none" onchange="loadMarketPrices()">
+          <option value="Maharashtra">Maharashtra</option>
+          <option value="Delhi">Delhi</option>
+          <option value="Uttar Pradesh">Uttar Pradesh</option>
+          <option value="Madhya Pradesh">Madhya Pradesh</option>
+          <option value="Gujarat">Gujarat</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-soil-brown uppercase mb-1">DISTRICT FILTER</label>
+        <select id="mandiDistrict" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg font-semibold text-sm outline-none" onchange="loadMarketPrices()">
+          <option value="">All Districts</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Hero Price Summary Card -->
+    <div class="bg-white p-6 rounded-2xl border border-border-subtle mb-6 flex flex-col md:flex-row justify-between items-center gap-6 shadow-sm border-l-4 border-l-primary">
+      <div>
+        <span class="text-xs font-bold text-soil-brown uppercase tracking-wider">MODAL MARKET ARRIVAL PRICE</span>
+        <h3 class="text-2xl font-bold text-primary mt-1" id="mandiHeroTitle">Onion — Maharashtra Mandis</h3>
+        <div class="flex items-baseline gap-3 mt-3">
+          <span class="text-4xl font-extrabold text-success-emerald" id="mandiModalVal">—</span>
+          <span class="text-lg font-bold text-on-surface" id="mandiModalKgVal">—</span>
+          <span class="text-xs font-bold px-3 py-1 rounded-full bg-surface text-success-emerald" id="mandiChangeVal">Source: AGMARKNET</span>
+        </div>
+      </div>
+      <div class="bg-surface-muted p-4 rounded-xl border border-border-subtle min-w-[260px]">
+        <div class="flex justify-between text-xs font-bold text-soil-brown mb-2">
+          <span>Min: <b id="mandiMinVal" class="text-on-surface">—</b></span>
+          <span>Max: <b id="mandiMaxVal" class="text-on-surface">—</b></span>
+        </div>
+        <div class="w-full h-2 bg-border-subtle rounded-full overflow-hidden relative">
+          <div id="mandiRangeBar" class="absolute top-0 bottom-0 bg-success-emerald rounded-full" style="left:20%;right:20%"></div>
+        </div>
+        <p class="text-[10px] text-soil-brown text-center mt-2">Daily APMC Arrival Observations</p>
+      </div>
+    </div>
+
+    <!-- Canvas Line Chart -->
+    <div class="bg-white p-6 rounded-2xl border border-border-subtle mb-6 shadow-sm">
+      <div class="flex justify-between items-center mb-4">
+        <h4 class="font-bold text-primary">Price Movement Trend</h4>
+        <div class="flex gap-2">
+          <button class="px-3 py-1 text-xs font-bold bg-primary/10 text-primary rounded-lg" onclick="setChartMetric('modal_price')" type="button">Modal Price</button>
+          <button class="px-3 py-1 text-xs font-bold bg-input-bg text-soil-brown rounded-lg" onclick="setChartMetric('min_price')" type="button">Min Price</button>
+          <button class="px-3 py-1 text-xs font-bold bg-input-bg text-soil-brown rounded-lg" onclick="setChartMetric('max_price')" type="button">Max Price</button>
+        </div>
+      </div>
+      <div class="relative overflow-x-auto">
+        <canvas id="mandiChart" width="1100" height="320" class="w-full min-w-[650px] h-[320px]"></canvas>
+      </div>
+    </div>
+
+    <!-- Mandi Comparison Bar Chart & Table -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
+        <h4 class="font-bold text-primary mb-4">Top reported Mandis Comparison</h4>
+        <canvas id="compareChart" width="550" height="220" class="w-full h-[220px]"></canvas>
+      </div>
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
+        <h4 class="font-bold text-primary mb-4">Market Records Summary</h4>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-border-subtle text-soil-brown uppercase">
+                <th class="py-2">Mandi</th>
+                <th class="py-2">Min (₹/q)</th>
+                <th class="py-2">Modal (₹/q)</th>
+                <th class="py-2">Max (₹/q)</th>
+                <th class="py-2">₹/kg</th>
+              </tr>
+            </thead>
+            <tbody id="mandiSummaryRows">
+              <tr><td colspan="5" class="py-4 text-center text-soil-brown">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. PROFILE SCREEN -->
+  <section class="screen max-w-2xl mx-auto px-margin-mobile md:px-margin-desktop py-8" id="profile">
+    <div class="bg-white p-8 rounded-2xl border border-border-subtle shadow-sm" id="profileContainer">
+      <div class="text-center text-soil-brown">Loading profile details...</div>
+    </div>
+  </section>
+
+  <!-- 8. ABOUT US SCREEN -->
+  <section class="screen max-w-3xl mx-auto px-margin-mobile md:px-margin-desktop py-12 text-center" id="about">
+    <div class="bg-white p-10 rounded-2xl border border-border-subtle shadow-sm">
+      <span class="text-4xl">🌾</span>
+      <h2 class="text-headline-lg font-bold text-primary mt-2 mb-4">About KrishiSetu</h2>
+      <p class="text-body-default text-soil-brown mb-6 max-w-2xl mx-auto">
+        KrishiSetu is an agricultural price intelligence and farm-to-customer marketplace designed to empower local farmers with direct consumer access, transparent platform fees, and live AGMARKNET mandi rates.
+      </p>
+      <div class="inline-block bg-surface px-6 py-3 rounded-xl border border-primary/20 text-primary font-bold text-sm">
+        🚀 Made by Team Red
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- AUTHENTICATION MODAL -->
+<div id="authModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative">
+    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" onclick="closeAuthModal()" type="button">✕</button>
+    <h3 class="text-xl font-bold text-primary mb-1" id="authModalTitle">Sign in to KrishiSetu</h3>
+    <p class="text-xs text-soil-brown mb-4" id="authModalSub">Access direct farm produce marketplace.</p>
+    
+    <div class="flex bg-input-bg p-1 rounded-lg mb-4" id="authTabContainer">
+      <button id="modalTabSignin" class="flex-1 py-2 text-xs font-bold rounded-md bg-white text-primary shadow-sm" onclick="setAuthTab('signin')" type="button">Sign In</button>
+      <button id="modalTabSignup" class="flex-1 py-2 text-xs font-bold rounded-md text-soil-brown" onclick="setAuthTab('signup')" type="button">Create Account</button>
+    </div>
+
+    <!-- MAIN AUTH FORM VIEW -->
+    <div id="authFormView">
+      <div id="modalRoleSelector" class="grid grid-cols-2 gap-3 mb-3 hidden">
+        <button type="button" id="roleSellerBtn" class="rolecard selected p-3 border border-border-subtle rounded-xl text-left" onclick="selectAuthRole('seller')">
+          <span class="text-lg">👨‍🌾</span> <b class="block text-xs text-primary">Seller / Farmer</b>
+        </button>
+        <button type="button" id="roleBuyerBtn" class="rolecard p-3 border border-border-subtle rounded-xl text-left" onclick="selectAuthRole('customer')">
+          <span class="text-lg">🛒</span> <b class="block text-xs text-primary">Buyer / Customer</b>
+        </button>
+      </div>
+
+      <div id="modalNameField" class="mb-3 hidden">
+        <label class="block text-[10px] font-bold text-soil-brown uppercase mb-1">FULL NAME *</label>
+        <input id="modalNameInput" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-xs outline-none" placeholder="Enter full name">
+      </div>
+
+      <div class="mb-3">
+        <label class="block text-[10px] font-bold text-soil-brown uppercase mb-1">EMAIL ADDRESS *</label>
+        <input id="modalContactInput" type="email" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-xs outline-none" placeholder="name@example.com">
+      </div>
+
+      <div class="mb-3">
+        <label class="block text-[10px] font-bold text-soil-brown uppercase mb-1">PASSWORD *</label>
+        <input id="modalPasswordInput" type="password" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-xs outline-none" placeholder="Enter password (min 6 chars)">
+      </div>
+
+      <div id="modalConfirmField" class="mb-4 hidden">
+        <label class="block text-[10px] font-bold text-soil-brown uppercase mb-1">CONFIRM PASSWORD *</label>
+        <input id="modalConfirmInput" type="password" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-xs outline-none" placeholder="Re-enter password">
+      </div>
+
+      <button id="modalSubmitBtn" class="w-full bg-primary text-white py-3 rounded-lg font-bold text-sm hover:bg-primary-container transition-colors" onclick="submitAuthModal()" type="button">Sign In</button>
+    </div>
+
+    <!-- OTP VERIFICATION VIEW -->
+    <div id="authOtpView" class="hidden">
+      <p class="text-xs text-soil-brown mb-2">OTP has been sent to your email address.</p>
+      <div class="mb-4">
+        <label class="block text-[10px] font-bold text-soil-brown uppercase mb-1">6-DIGIT EMAIL OTP CODE</label>
+        <input id="modalOtpInput" maxlength="6" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-center font-bold tracking-widest text-lg outline-none" placeholder="000000">
+      </div>
+      <button class="w-full bg-primary text-white py-3 rounded-lg font-bold text-sm hover:bg-primary-container transition-colors mb-2" onclick="verifyRegistrationOtp()" type="button">Verify OTP & Complete Registration</button>
+      <button class="w-full border border-border-subtle text-soil-brown py-2 rounded-lg font-semibold text-xs hover:bg-input-bg" onclick="resendRegistrationOtp()" type="button">Resend Email OTP</button>
+    </div>
+  </div>
+</div>
+
+<!-- SELLER PROFILE MODAL (BUYER VIEW) -->
+<div id="sellerModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl relative max-h-[90vh] overflow-y-auto" id="sellerModalContent">
+    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" onclick="closeSellerModal()" type="button">✕</button>
+    <div class="text-center py-6 text-soil-brown">Loading seller profile...</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="w-full mt-auto bg-surface-container-highest dark:bg-inverse-surface border-t border-border-subtle">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-lg px-margin-mobile md:px-margin-desktop py-xl max-w-max-width mx-auto">
+    <div>
+      <a class="text-headline-md font-headline-md font-black text-primary dark:text-inverse-primary mb-2 block" href="#">KrishiSetu</a>
+      <p class="text-body-sm font-body-sm text-on-surface-variant dark:text-surface-variant mb-2">Direct Farm-to-Customer Marketplace & Mandi Price Intelligence.</p>
+      <span class="text-xs font-bold text-primary">Made by Team Red</span>
+    </div>
+    <div class="flex flex-col gap-2">
+      <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" onclick="onNavMarketplaceClick()">Marketplace</a>
+      <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" onclick="showScreen('price')">Mandi Rates</a>
+      <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" onclick="showScreen('about')">About Us</a>
+    </div>
+    <div class="flex flex-col gap-2">
+      <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" onclick="showScreen('orders')">Orders Tracking</a>
+      <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" onclick="openAuthModal()">Login / Register</a>
+    </div>
+  </div>
+</footer>
+
+<!-- API SERVICES -->
+<script src="js/api.js"></script>
+<script>
+let currentRole = 'customer';
+let selectedRole = 'seller';
+let authMode = 'signin';
+let pendingContact = '';
+let userLocation = { lat: null, lng: null, area: 'Location not set' };
+let currentProductImageBase64 = null;
+
+const $ = (id) => document.getElementById(id);
+
+// AgriCore Top Notification Component
+function notify(msg, type = 'info') {
+  const container = $('topNotificationContainer');
+  if (!container) return;
+
+  const notif = document.createElement('div');
+  notif.className = `agri-notification ${type}`;
+  
+  const icon = type === 'error' ? '⚠' : type === 'success' ? '✓' : 'ℹ';
+  notif.innerHTML = `
+    <div class="flex items-center gap-2 text-sm font-semibold">
+      <span>${icon}</span>
+      <span>${msg}</span>
+    </div>
+    <button onclick="this.parentElement.remove()" class="text-soil-brown font-bold text-xs hover:text-primary">✕</button>
+  `;
+
+  container.appendChild(notif);
+  setTimeout(() => notif.classList.add('show'), 10);
+  setTimeout(() => {
+    notif.classList.remove('show');
+    setTimeout(() => notif.remove(), 300);
+  }, 4000);
+}
+
+function openAuthModal() {
+  $('authModal').classList.remove('hidden');
+  $('authFormView').classList.remove('hidden');
+  $('authOtpView').classList.add('hidden');
+}
+function closeAuthModal() {
+  $('authModal').classList.add('hidden');
+}
+
+function setAuthTab(tab) {
+  authMode = tab;
+  const isSignup = tab === 'signup';
+  $('modalTabSignin').className = `flex-1 py-2 text-xs font-bold rounded-md ${!isSignup ? 'bg-white text-primary shadow-sm' : 'text-soil-brown'}`;
+  $('modalTabSignup').className = `flex-1 py-2 text-xs font-bold rounded-md ${isSignup ? 'bg-white text-primary shadow-sm' : 'text-soil-brown'}`;
+  
+  $('authModalTitle').textContent = isSignup ? 'Create KrishiSetu Account' : 'Sign in to KrishiSetu';
+  $('modalRoleSelector').classList.toggle('hidden', !isSignup);
+  $('modalNameField').classList.toggle('hidden', !isSignup);
+  $('modalConfirmField').classList.toggle('hidden', !isSignup);
+  $('modalSubmitBtn').textContent = isSignup ? 'Create Account' : 'Sign In';
+  $('authFormView').classList.remove('hidden');
+  $('authOtpView').classList.add('hidden');
+}
+
+function selectAuthRole(role) {
+  selectedRole = role;
+  $('roleSellerBtn').classList.toggle('selected', role === 'seller');
+  $('roleBuyerBtn').classList.toggle('selected', role === 'customer');
+}
+
+function isValidEmail(email) {
+  if (typeof email !== 'string') return false;
+  const str = email.trim();
+  if (str.includes('..')) return false;
+  const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return regex.test(str);
+}
+
+async function submitAuthModal() {
+  const contact = $('modalContactInput').value.trim().toLowerCase();
+  const password = $('modalPasswordInput').value;
+
+  if (!isValidEmail(contact)) {
+    notify('Please enter a valid email address.', 'error');
+    return;
+  }
+
+  if (!password) {
+    notify('Please enter your password.', 'error');
+    return;
+  }
+
+  if (authMode === 'signup') {
+    const name = $('modalNameInput').value.trim();
+    const confirm = $('modalConfirmInput').value;
+
+    if (!selectedRole) return notify('Please select Buyer or Seller role.', 'error');
+    if (!name) return notify('Please enter your full name.', 'error');
+    if (password.length < 6) return notify('Password must be at least 6 characters long.', 'error');
+    if (password !== confirm) return notify('Passwords do not match.', 'error');
+
+    try {
+      const res = await AuthService.signup({ name, contact, password, role: selectedRole });
+      pendingContact = contact;
+      
+      try {
+        const otpRes = await OtpService.sendOtp(contact, 'email_verification');
+        notify('OTP sent! Please check your email inbox.', 'success');
+        if (otpRes && otpRes.otp) $('modalOtpInput').value = otpRes.otp;
+      } catch (e) {
+        notify('OTP Dispatch: ' + e.message, 'warning');
+      }
+
+      $('authFormView').classList.add('hidden');
+      $('authOtpView').classList.remove('hidden');
+      $('authModalTitle').textContent = 'Verify Email OTP Code';
+    } catch (err) {
+      notify('Signup error: ' + err.message, 'error');
+    }
+  } else {
+    try {
+      const res = await AuthService.signin({ contact, password });
+      notify('Signed in successfully!', 'success');
+      closeAuthModal();
+      onUserSignedIn(res.user);
+    } catch (err) {
+      notify('Signin error: ' + err.message, 'error');
+    }
+  }
+}
+
+async function verifyRegistrationOtp() {
+  const otp = $('modalOtpInput').value.trim();
+  if (!otp || otp.length < 6) return notify('Please enter a valid 6-digit OTP code.', 'error');
+
+  try {
+    await OtpService.verifyOtp(pendingContact, 'email_verification', otp);
+    notify('Email OTP verified successfully!', 'success');
+    closeAuthModal();
+
+    const password = $('modalPasswordInput').value;
+    if (password) {
+      const res = await AuthService.signin({ contact: pendingContact, password });
+      onUserSignedIn(res.user);
+    }
+  } catch (err) {
+    notify('OTP Verification failed: ' + err.message, 'error');
+  }
+}
+
+async function resendRegistrationOtp() {
+  if (!pendingContact) return notify('No pending contact found.', 'error');
+  try {
+    const res = await OtpService.sendOtp(pendingContact, 'email_verification');
+    notify('New Email OTP sent successfully!', 'success');
+    if (res && res.otp) $('modalOtpInput').value = res.otp;
+  } catch (err) {
+    notify('Resend error: ' + err.message, 'error');
+  }
+}
+
+function onUserSignedIn(user) {
+  currentRole = user.role;
+  localStorage.setItem('krishisetu_current_user', JSON.stringify(user));
+  $('authHeaderBtn').textContent = 'Sign Out (' + user.name.split(' ')[0] + ')';
+  $('authHeaderBtn').onclick = logoutUser;
+  
+  const badge = $('userRoleBadge');
+  if (badge) {
+    badge.classList.remove('hidden');
+    badge.textContent = currentRole === 'seller' ? '👨‍🌾 Seller' : '🛒 Buyer';
+  }
+
+  $('profileNavBtn').classList.remove('hidden');
+  $('sellNavBtn').style.display = currentRole === 'seller' ? 'inline-block' : 'none';
+
+  if (currentRole === 'seller') {
+    showScreen('sell');
+  } else {
+    showScreen('buyer-market');
+  }
+}
+
+function logoutUser() {
+  AuthService.logout();
+  $('authHeaderBtn').textContent = 'Login';
+  $('authHeaderBtn').onclick = openAuthModal;
+  const badge = $('userRoleBadge');
+  if (badge) badge.classList.add('hidden');
+  $('profileNavBtn').classList.add('hidden');
+  currentRole = 'customer';
+  $('sellNavBtn').style.display = 'none';
+  notify('Signed out successfully.', 'info');
+  showScreen('landing');
+}
+
+function onNavMarketplaceClick() {
+  const userStr = localStorage.getItem('krishisetu_current_user');
+  if (!userStr) {
+    notify('Please login to view the produce marketplace.', 'info');
+    openAuthModal();
+  } else {
+    showScreen('buyer-market');
+  }
+}
+
+function onExploreClick() {
+  const userStr = localStorage.getItem('krishisetu_current_user');
+  if (!userStr) {
+    openAuthModal();
+  } else {
+    showScreen('buyer-market');
+  }
+}
+
+function onSellClick() {
+  const userStr = localStorage.getItem('krishisetu_current_user');
+  if (!userStr) {
+    openAuthModal();
+  } else if (currentRole === 'seller') {
+    showScreen('sell');
+  } else {
+    notify('You are logged in as a Buyer. Please create a Seller account to publish produce.', 'info');
+  }
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = $(id);
+  if (target) target.classList.add('active');
+
+  if (id === 'price') loadMarketPrices();
+  if (id === 'orders') renderOrders();
+  if (id === 'buyer-market') renderProducts();
+  if (id === 'cart') renderCartScreen();
+  if (id === 'profile') renderProfileScreen();
+}
+
+function emoji(c) {
+  const name = String(c || '').toLowerCase();
+  if (name.includes('onion')) return '🧅';
+  if (name.includes('tomato')) return '🍅';
+  if (name.includes('potato')) return '🥔';
+  if (name.includes('wheat')) return '🌾';
+  if (name.includes('rice')) return '🍚';
+  return '🥬';
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) return null;
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return (R * c).toFixed(1);
+}
+
+function renderProductCard(p) {
+  let distStr = p.location || 'Maharashtra';
+  if (userLocation.lat && p.latitude && p.longitude) {
+    const dist = calculateDistance(userLocation.lat, userLocation.lng, p.latitude, p.longitude);
+    if (dist) distStr = `${dist} km away (${p.location || 'Local'})`;
+  }
+
+  const imgHtml = p.image_url 
+    ? `<img src="${p.image_url}" class="w-full h-36 object-cover rounded-lg mb-3 border border-border-subtle" alt="${p.name}">`
+    : `<div class="w-full h-36 bg-surface rounded-lg flex items-center justify-center text-4xl mb-3 border border-border-subtle">${emoji(p.name)}</div>`;
+
+  return `
+    <div class="bg-white p-4 rounded-2xl border border-border-subtle shadow-sm flex flex-col justify-between">
+      <div>
+        ${imgHtml}
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-[10px] font-bold text-success-emerald bg-surface px-2 py-0.5 rounded border border-success-emerald/20">${p.grade || 'Fresh'}</span>
+          <button class="text-[10px] font-bold text-soil-brown hover:text-primary underline" onclick="viewSellerModal('${p.seller_id}')" type="button">👨‍🌾 ${p.sellerName || 'Farmer'}</button>
+        </div>
+        <h4 class="font-bold text-on-surface text-base">${p.name}</h4>
+        <p class="text-xs text-soil-brown mt-1 line-clamp-2">${p.description || 'Fresh direct farm produce'}</p>
+        <div class="text-xs text-soil-brown mt-2">📍 ${distStr} · ${p.quantity || 100} kg available</div>
+      </div>
+      <div class="flex items-center justify-between mt-4 pt-3 border-t border-border-subtle">
+        <div>
+          <span class="text-xl font-extrabold text-primary">₹${p.price}</span>
+          <span class="text-[10px] text-soil-brown block">per kg</span>
+        </div>
+        ${currentRole === 'seller' 
+          ? `<button class="bg-error-container text-on-error-container px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-error/10" onclick="deleteProduct('${p.id}')" type="button">Delete</button>`
+          : `<button class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary-container shadow-sm" onclick="addToCart('${p.id}')" type="button">+ ADD TO CART</button>`}
+      </div>
+    </div>
+  `;
+}
+
+async function renderProducts() {
+  const cat = $('marketCategoryFilter')?.value || 'All';
+  let ps = [];
+  try {
+    const res = await ProductService.getProducts(cat);
+    ps = res.products || [];
+  } catch (err) {
+    ps = [];
+  }
+
+  const gridHtml = ps.length 
+    ? ps.map(renderProductCard).join('') 
+    : `<div class="p-8 text-center text-soil-brown bg-white rounded-2xl border border-border-subtle col-span-full">No produce listings found in this category.</div>`;
+
+  if ($('marketplaceProductsGrid')) $('marketplaceProductsGrid').innerHTML = gridHtml;
+  updateCartBadge();
+}
+
+function previewProductImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 3 * 1024 * 1024) {
+    notify('Image file must be less than 3MB.', 'error');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    currentProductImageBase64 = e.target.result;
+    $('imagePreviewThumb').src = currentProductImageBase64;
+    $('imagePreviewContainer').classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function publishProduct() {
+  const name = $('prodName').value.trim();
+  const category = $('prodCategory').value;
+  const grade = $('prodGrade').value;
+  const description = $('prodDesc').value.trim();
+  const price = Number($('prodPrice').value);
+  const quantity = Number($('prodQty').value);
+  const location = $('prodLocation').value.trim() || 'Maharashtra';
+
+  if (!name || !price || !quantity) return notify('Please fill product name, price, and quantity.', 'error');
+
+  try {
+    await ProductService.createProduct({
+      name, category, grade, description, price, quantity, location,
+      image_url: currentProductImageBase64 || null,
+      latitude: userLocation.lat || 18.5204,
+      longitude: userLocation.lng || 73.8567
+    });
+    notify('Produce listing published successfully!', 'success');
+    $('prodName').value = '';
+    $('prodDesc').value = '';
+    $('prodImageInput').value = '';
+    currentProductImageBase64 = null;
+    $('imagePreviewContainer').classList.add('hidden');
+    showScreen('buyer-market');
+  } catch (err) {
+    notify('Failed to publish produce: ' + err.message, 'error');
+  }
+}
+
+async function deleteProduct(id) {
+  try {
+    await ProductService.deleteProduct(id);
+    notify('Produce listing removed.', 'success');
+    renderProducts();
+  } catch (err) {
+    notify('Error deleting produce: ' + err.message, 'error');
+  }
+}
+
+// CART ARCHITECTURE FIX (ADD TO CART DOES NOT CREATE ORDER)
+async function addToCart(productId) {
+  const userStr = localStorage.getItem('krishisetu_current_user');
+  if (!userStr) {
+    notify('Please sign in as a Buyer to add items to your cart.', 'info');
+    openAuthModal();
+    return;
+  }
+
+  try {
+    await CartService.addItem(productId, 1);
+    notify('Item added to your cart!', 'success');
+    updateCartBadge();
+  } catch (err) {
+    notify('Cart error: ' + err.message, 'error');
+  }
+}
+
+async function updateCartBadge() {
+  try {
+    const res = await CartService.getCart();
+    const items = res.items || [];
+    const count = items.reduce((sum, i) => sum + Number(i.quantity), 0);
+    const badge = $('cartCountBadge');
+    if (badge) badge.textContent = count;
+  } catch {
+    // Guest or unauth
+  }
+}
+
+// DEDICATED CART PAGE RENDERING
+async function renderCartScreen() {
+  const listEl = $('cartItemsList');
+  if (!listEl) return;
+
+  try {
+    const res = await CartService.getCart();
+    const items = res.items || [];
+    const subtotal = res.subtotal || 0;
+    const isBulk = res.isBulk || false;
+    const feeRatePct = isBulk ? '0.5%' : '2%';
+    const platformFee = res.platformFee || 0;
+    const totalAmount = res.totalAmount || 0;
+
+    $('cartSubtotal').textContent = `₹${subtotal.toLocaleString()}`;
+    $('cartFeeLabel').textContent = `Platform Fee (${feeRatePct})`;
+    $('cartFeeVal').textContent = `₹${platformFee.toLocaleString()}`;
+    $('cartTotalVal').textContent = `₹${totalAmount.toLocaleString()}`;
+
+    if (!items.length) {
+      listEl.innerHTML = `
+        <div class="p-10 text-center bg-white rounded-2xl border border-border-subtle shadow-sm">
+          <span class="text-4xl block mb-3">🛒</span>
+          <h4 class="text-lg font-bold text-primary mb-1">Your Cart is Empty</h4>
+          <p class="text-xs text-soil-brown mb-6">Browse fresh agricultural produce and add items to your cart.</p>
+          <button class="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-xs hover:bg-primary-container" onclick="showScreen('buyer-market')">Browse Produce</button>
+        </div>
+      `;
+      $('cartCheckoutBtn').disabled = true;
+      $('cartCheckoutBtn').classList.add('opacity-50', 'cursor-not-allowed');
+      return;
+    }
+
+    $('cartCheckoutBtn').disabled = false;
+    $('cartCheckoutBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+
+    listEl.innerHTML = items.map(i => `
+      <div class="bg-white p-5 rounded-2xl border border-border-subtle shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-16 h-16 bg-surface rounded-xl flex items-center justify-center text-2xl border border-border-subtle shrink-0">
+            ${emoji(i.product_name)}
+          </div>
+          <div>
+            <h4 class="font-bold text-primary text-base">${i.product_name}</h4>
+            <span class="text-xs text-soil-brown block">₹${i.unit_price} per kg</span>
+            <span class="text-[10px] font-bold text-success-emerald bg-surface px-2 py-0.5 rounded border border-success-emerald/20 mt-1 inline-block">Subtotal: ₹${i.subtotal}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center border border-border-subtle rounded-lg bg-input-bg">
+            <button class="px-3 py-1 font-bold text-primary text-sm hover:bg-white" onclick="changeCartQty('${i.id}', ${Number(i.quantity) - 1})">-</button>
+            <span class="px-3 font-bold text-xs text-on-surface">${i.quantity} kg</span>
+            <button class="px-3 py-1 font-bold text-primary text-sm hover:bg-white" onclick="changeCartQty('${i.id}', ${Number(i.quantity) + 1})">+</button>
+          </div>
+          <button class="text-error font-bold text-sm px-2 py-1 hover:bg-error-container rounded-lg" onclick="removeCartItem('${i.id}')" title="Remove item">✕</button>
+        </div>
+      </div>
+    `).join('');
+  } catch (err) {
+    listEl.innerHTML = `<div class="p-8 text-center text-error bg-white rounded-2xl border border-border-subtle">Failed to load cart: ${err.message}</div>`;
+  }
+}
+
+async function changeCartQty(itemId, newQty) {
+  if (newQty <= 0) return removeCartItem(itemId);
+  try {
+    await CartService.updateItem(itemId, newQty);
+    renderCartScreen();
+    updateCartBadge();
+  } catch (err) {
+    notify('Failed to update quantity: ' + err.message, 'error');
+  }
+}
+
+async function removeCartItem(itemId) {
+  try {
+    await CartService.removeItem(itemId);
+    notify('Item removed from cart.', 'info');
+    renderCartScreen();
+    updateCartBadge();
+  } catch (err) {
+    notify('Failed to remove item: ' + err.message, 'error');
+  }
+}
+
+async function checkoutCart() {
+  try {
+    await OrderService.createOrder({});
+    notify('Order placed successfully! Check tracking in Orders.', 'success');
+    updateCartBadge();
+    showScreen('orders');
+  } catch (err) {
+    notify('Checkout error: ' + err.message, 'error');
+  }
+}
+
+// PROFILE SCREEN
+async function renderProfileScreen() {
+  const container = $('profileContainer');
+  if (!container) return;
+
+  try {
+    const res = await AuthService.getProfile();
+    const user = res.user || {};
+    const profile = res.profile || {};
+
+    container.innerHTML = `
+      <div class="flex items-center gap-4 pb-6 mb-6 border-b border-border-subtle">
+        <div class="w-20 h-20 bg-surface text-primary rounded-2xl flex items-center justify-center text-3xl font-bold border border-primary/20">
+          ${user.role === 'seller' ? '👨‍🌾' : '🛒'}
+        </div>
+        <div>
+          <h3 class="text-xl font-bold text-primary">${user.name}</h3>
+          <span class="text-xs font-bold text-success-emerald bg-surface px-3 py-1 rounded-full uppercase inline-block mt-1 border border-success-emerald/20">${user.role === 'seller' ? 'Farmer / Producer' : 'Buyer / Customer'}</span>
+          <span class="text-xs text-soil-brown block mt-1">📧 ${user.contact}</span>
+        </div>
+      </div>
+      <div class="space-y-3 text-xs text-soil-brown">
+        <div class="flex justify-between py-2 border-b border-border-subtle">
+          <span>Account ID</span> <span class="font-bold text-on-surface">${user.id}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-border-subtle">
+          <span>Member Since</span> <span class="font-bold text-on-surface">${new Date(user.created_at || Date.now()).toLocaleDateString()}</span>
+        </div>
+        <div class="flex justify-between py-2">
+          <span>Verification Status</span> <span class="font-bold text-success-emerald">✓ Verified Account</span>
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div class="text-center text-error">Failed to load profile: ${err.message}</div>`;
+  }
+}
+
+// SELLER PROFILE MODAL (BUYER VIEW)
+async function viewSellerModal(sellerId) {
+  const modal = $('sellerModal');
+  const content = $('sellerModalContent');
+  if (!modal || !content) return;
+
+  modal.classList.remove('hidden');
+  content.innerHTML = `<div class="text-center py-8 text-soil-brown">Loading seller profile...</div>`;
+
+  try {
+    const res = await AuthService.getSellerProfile(sellerId);
+    const seller = res.seller || {};
+    const prods = res.products || [];
+
+    content.innerHTML = `
+      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" onclick="closeSellerModal()" type="button">✕</button>
+      <div class="flex items-center gap-4 pb-4 mb-4 border-b border-border-subtle">
+        <div class="w-16 h-16 bg-surface text-primary rounded-2xl flex items-center justify-center text-3xl font-bold border border-primary/20">👨‍🌾</div>
+        <div>
+          <h3 class="text-lg font-bold text-primary">${seller.businessName || seller.name}</h3>
+          <span class="text-xs text-soil-brown block">Producer: ${seller.name}</span>
+          <span class="text-xs text-soil-brown block">📧 ${seller.contact}</span>
+        </div>
+      </div>
+      <p class="text-xs text-soil-brown mb-4">${seller.description || 'Verified KrishiSetu Direct Local Producer.'}</p>
+      <h4 class="font-bold text-primary text-xs uppercase mb-2">Active Produce Listings (${prods.length})</h4>
+      <div class="space-y-2 max-h-48 overflow-y-auto">
+        ${prods.map(p => `
+          <div class="p-3 bg-surface-muted rounded-xl flex justify-between items-center text-xs">
+            <div>
+              <b class="text-on-surface block">${p.name}</b>
+              <span class="text-soil-brown">₹${p.price} / kg</span>
+            </div>
+            <button class="bg-primary text-white px-3 py-1 rounded-lg font-bold text-[10px]" onclick="closeSellerModal(); addToCart('${p.id}');">ADD</button>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } catch (err) {
+    content.innerHTML = `<div class="text-center py-6 text-error">Failed to load seller: ${err.message}</div>`;
+  }
+}
+function closeSellerModal() {
+  $('sellerModal').classList.add('hidden');
+}
+
+async function advanceOrderStatus(orderId, nextStatus) {
+  try {
+    await OrderService.updateStatus(orderId, nextStatus);
+    notify(`Order status updated to: ${nextStatus}`, 'success');
+    renderOrders();
+  } catch (err) {
+    notify('Failed to update status: ' + err.message, 'error');
+  }
+}
+
+async function renderOrders() {
+  let orders = [];
+  try {
+    const res = await OrderService.getOrders();
+    orders = res.orders || [];
+  } catch (err) {
+    orders = [];
+  }
+
+  const container = $('ordersContainer');
+  if (!container) return;
+
+  if (!orders.length) {
+    container.innerHTML = `<div class="p-8 text-center text-soil-brown bg-white rounded-2xl border border-border-subtle">No orders placed yet. Explore the produce marketplace!</div>`;
+    return;
+  }
+
+  container.innerHTML = orders.map(o => {
+    let actionBtn = '';
+    if (currentRole === 'seller') {
+      if (o.status === 'Order Placed') {
+        actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary-container mt-2" onclick="advanceOrderStatus('${o.id}', 'Farmer Confirmed')">Accept Order</button>`;
+      } else if (o.status === 'Farmer Confirmed') {
+        actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary-container mt-2" onclick="advanceOrderStatus('${o.id}', 'Preparing')">Start Preparing</button>`;
+      } else if (o.status === 'Preparing') {
+        actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary-container mt-2" onclick="advanceOrderStatus('${o.id}', 'Ready')">Mark Ready</button>`;
+      } else if (o.status === 'Ready') {
+        actionBtn = `<button class="bg-success-emerald text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary-container mt-2" onclick="advanceOrderStatus('${o.id}', 'Completed')">Mark Completed</button>`;
+      }
+    }
+
+    return `
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
+        <div class="flex justify-between items-center mb-3">
+          <div>
+            <h4 class="font-bold text-primary text-sm">Order #${o.id}</h4>
+            <span class="text-xs text-soil-brown">${new Date(o.createdAt || Date.now()).toLocaleDateString()}</span>
+          </div>
+          <span class="bg-surface text-success-emerald text-xs font-bold px-3 py-1 rounded-full border border-success-emerald/20">${o.status}</span>
+        </div>
+        <div class="text-sm font-bold text-on-surface">Total Amount: ₹${o.total || 0}</div>
+        ${actionBtn}
+      </div>
+    `;
+  }).join('');
+}
+
+function detectMyLocation() {
+  notify('Detecting GPS location...', 'info');
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      userLocation = { lat, lng, area: 'Locating...' };
+      try {
+        const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+        const geoData = await geoRes.json();
+        const addr = geoData.address || {};
+        const locality = addr.suburb || addr.neighbourhood || addr.village || addr.town || addr.city || addr.county || 'Detected Area';
+        const state = addr.state || '';
+        userLocation.area = state ? `${locality}, ${state}` : locality;
+        $('topLocationText').textContent = userLocation.area;
+        notify(`Location updated to ${userLocation.area}`, 'success');
+      } catch {
+        userLocation.area = `${lat.toFixed(2)}°, ${lng.toFixed(2)}°`;
+        $('topLocationText').textContent = userLocation.area;
+        notify('GPS coordinates detected', 'info');
+      }
+      renderProducts();
+    }, (err) => {
+      notify('Geolocation permission denied or unavailable.', 'warning');
+    }, { enableHighAccuracy: true, timeout: 10000 });
+  } else {
+    notify('Geolocation is not supported by your browser.', 'error');
+  }
+}
+
+// MARKET INTELLIGENCE TERMINAL ENGINE
+let currentChartMetric = 'modal_price';
+
+async function loadMarketPrices() {
+  const commodity = $('mandiCommodity')?.value || 'Onion';
+  const state = $('mandiState')?.value || 'Maharashtra';
+  const district = $('mandiDistrict')?.value || '';
+
+  try {
+    const res = await MarketIntelligenceService.getMarketPrices({ commodity, state, district });
+    const records = res.records || [];
+    renderMandiUI(records, commodity, state);
+  } catch (err) {
+    notify('Mandi data load failed: ' + err.message, 'error');
+  }
+}
+
+function renderMandiUI(records, commodity, state) {
+  $('mandiHeroTitle').textContent = `${commodity} — ${state} Mandis`;
+
+  if (!records.length) {
+    $('mandiModalVal').textContent = '—';
+    $('mandiModalKgVal').textContent = '—';
+    $('mandiSummaryRows').innerHTML = `<tr><td colspan="5" class="py-4 text-center text-soil-brown">No market records reported.</td></tr>`;
+    return;
+  }
+
+  const modals = records.map(r => r.modal_price).filter(Number.isFinite);
+  const mins = records.map(r => r.min_price).filter(Number.isFinite);
+  const maxs = records.map(r => r.max_price).filter(Number.isFinite);
+
+  const avgModal = modals.length ? modals.reduce((a, b) => a + b, 0) / modals.length : 0;
+  const lowest = mins.length ? Math.min(...mins) : 0;
+  const highest = maxs.length ? Math.max(...maxs) : 0;
+
+  $('mandiModalVal').textContent = '₹' + Math.round(avgModal).toLocaleString();
+  $('mandiModalKgVal').textContent = '₹' + (avgModal / 100).toFixed(1) + '/kg';
+  $('mandiMinVal').textContent = '₹' + lowest;
+  $('mandiMaxVal').textContent = '₹' + highest;
+
+  $('mandiSummaryRows').innerHTML = records.slice(0, 10).map(r => `
+    <tr class="border-b border-border-subtle">
+      <td class="py-2 font-semibold">${r.market}</td>
+      <td class="py-2">₹${r.min_price}</td>
+      <td class="py-2 font-bold text-success-emerald">₹${r.modal_price}</td>
+      <td class="py-2">₹${r.max_price}</td>
+      <td class="py-2 font-bold">₹${(r.modal_price / 100).toFixed(1)}</td>
+    </tr>
+  `).join('');
+
+  drawMandiChart(records);
+  drawCompareChart(records);
+}
+
+function drawMandiChart(records) {
+  const c = $('mandiChart');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = c.clientWidth || 1100;
+  const cssH = 320;
+
+  c.width = cssW * dpr;
+  c.height = cssH * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cssW, cssH);
+
+  if (!records.length) return;
+
+  const pts = records.map((r, i) => ({
+    x: i, y: r[currentChartMetric] || r.modal_price
+  }));
+
+  const vals = pts.map(p => p.y);
+  const minV = Math.min(...vals) * 0.9 || 0;
+  const maxV = Math.max(...vals) * 1.1 || 100;
+
+  const pad = { l: 45, r: 15, t: 15, b: 25 };
+  const w = cssW - pad.l - pad.r;
+  const h = cssH - pad.t - pad.b;
+
+  ctx.beginPath();
+  pts.forEach((p, i) => {
+    const x = pad.l + (pts.length > 1 ? (i / (pts.length - 1)) * w : w / 2);
+    const y = pad.t + h - ((p.y - minV) / (maxV - minV || 1)) * h;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = '#0F7B45';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+}
+
+function drawCompareChart(records) {
+  const c = $('compareChart');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = c.clientWidth || 550;
+  const cssH = 220;
+
+  c.width = cssW * dpr;
+  c.height = cssH * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cssW, cssH);
+
+  const mandis = records.slice(0, 5);
+  if (!mandis.length) return;
+
+  const max = Math.max(...mandis.map(m => m.modal_price)) * 1.15 || 1000;
+  const barW = (cssW / mandis.length) * 0.5;
+
+  mandis.forEach((m, i) => {
+    const x = (i + 0.5) * (cssW / mandis.length) - barW / 2;
+    const barH = (m.modal_price / max) * (cssH - 40);
+    const y = cssH - 25 - barH;
+
+    ctx.fillStyle = '#0F7B45';
+    ctx.beginPath();
+    ctx.roundRect(x, y, barW, barH, [4, 4, 0, 0]);
+    ctx.fill();
+
+    ctx.fillStyle = '#6D786F';
+    ctx.font = '10px Inter, Arial';
+    ctx.fillText((m.market || '').split(' ')[0], x, cssH - 8);
+  });
+}
+
+function setChartMetric(m) {
+  currentChartMetric = m;
+  loadMarketPrices();
+}
+
+(function init() {
+  const userStr = localStorage.getItem('krishisetu_current_user');
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      onUserSignedIn(user);
+    } catch {}
+  } else {
+    showScreen('landing');
+  }
+  updateCartBadge();
+})();
+</script>
+</body>
+</html>

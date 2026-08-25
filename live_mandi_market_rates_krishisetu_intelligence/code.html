@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Market Rates - KrishiSetu</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#715d00",
+                        "on-primary-container": "#aeffc4",
+                        "primary": "#006033",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#7bda9a",
+                        "background": "#e9ffed",
+                        "input-bg": "#F3F3F0",
+                        "surface": "#e9ffed",
+                        "surface-bright": "#e9ffed",
+                        "error": "#ba1a1a",
+                        "tertiary": "#8a3c00",
+                        "surface-container-high": "#d1f0d9",
+                        "error-alert": "#E64B3C",
+                        "surface-container": "#d7f5de",
+                        "on-tertiary-fixed": "#331200",
+                        "on-error": "#ffffff",
+                        "success-emerald": "#0F7B45",
+                        "soil-brown": "#6D786F",
+                        "tertiary-fixed": "#ffdbca",
+                        "on-secondary-fixed-variant": "#554500",
+                        "on-secondary-fixed": "#231b00",
+                        "secondary-fixed-dim": "#e7c43c",
+                        "tertiary-container": "#af4f04",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-container": "#745f00",
+                        "secondary-container": "#ffda51",
+                        "on-primary-fixed-variant": "#00522b",
+                        "on-surface": "#062012",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#cbead3",
+                        "on-tertiary-container": "#ffe9de",
+                        "primary-fixed": "#97f7b4",
+                        "primary-container": "#0f7b45",
+                        "error-container": "#ffdad6",
+                        "inverse-surface": "#1c3626",
+                        "secondary-fixed": "#ffe177",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#7bda9a",
+                        "surface-dim": "#c3e1cb",
+                        "on-background": "#062012",
+                        "surface-container-highest": "#cbead3",
+                        "on-tertiary-fixed-variant": "#763300",
+                        "outline-variant": "#becabd",
+                        "inverse-on-surface": "#d9f8e1",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#00210e",
+                        "surface-container-low": "#dcfbe4",
+                        "tertiary-fixed-dim": "#ffb68e",
+                        "on-surface-variant": "#3f4940",
+                        "border-subtle": "#E7E7E2",
+                        "harvest-gold": "#F7D34A",
+                        "outline": "#6f7a6f",
+                        "surface-tint": "#006d3b",
+                        "surface-muted": "#F7F7F5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "28px",
+                        "xs": "4px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "gutter": "14px",
+                        "sm": "8px",
+                        "max-width": "1420px",
+                        "md": "16px",
+                        "margin-mobile": "16px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "section-head": ["Inter"],
+                        "display": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-default": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "caption": ["Inter"],
+                        "ui-label-bold": ["Inter"],
+                        "micro": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "section-head": ["19px", { "lineHeight": "24px", "fontWeight": "700" }],
+                        "display": ["55px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "34px", "fontWeight": "800" }],
+                        "body-default": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.01em", "fontWeight": "800" }],
+                        "caption": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "ui-label-bold": ["10px", { "lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "900" }],
+                        "micro": ["9px", { "lineHeight": "10px", "fontWeight": "900" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: theme('colors.surface-muted'); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="text-on-surface flex flex-col min-h-screen">
+<!-- TopNavBar (Web & Mobile) -->
+<nav class="bg-surface dark:bg-inverse-surface text-primary dark:text-inverse-primary docked full-width top-0 z-50 bg-surface dark:bg-inverse-surface shadow-sm shadow-[0_4px_18px_rgba(23,49,34,0.07)]">
+<div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-4 max-w-max-width mx-auto">
+<div class="flex items-center gap-6">
+<span class="text-headline-md font-headline-md font-black text-primary dark:text-inverse-primary">KrishiSetu</span>
+<div class="hidden md:flex gap-4">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors text-body-default font-body-default px-2 py-1" href="#">Marketplace</a>
+<a class="text-primary dark:text-inverse-primary font-bold border-b-2 border-primary pb-1 hover:text-primary dark:hover:text-inverse-primary transition-colors text-body-default font-body-default px-2 py-1 scale-95 duration-150" href="#">Mandi Rates</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors text-body-default font-body-default px-2 py-1" href="#">How it Works</a>
+</div>
+</div>
+<!-- Search Bar (on_left in design, but placing here for typical layout) -->
+<div class="hidden md:flex items-center flex-1 max-w-md mx-6 relative">
+<span class="material-symbols-outlined absolute left-3 text-outline">search</span>
+<input class="w-full bg-input-bg border-none rounded-lg py-2 pl-10 pr-4 focus:ring-1 focus:ring-primary text-body-sm font-body-sm" placeholder="Search commodities, markets..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex gap-3">
+<button class="text-primary border border-border-subtle rounded-lg px-4 py-2 text-body-sm font-bold hover:bg-surface-variant transition">Switch to Farmer</button>
+<button class="bg-primary text-white rounded-lg px-4 py-2 text-body-sm font-bold hover:bg-surface-tint transition">Login</button>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined" data-icon="location_on">location_on</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined" data-icon="notifications">notifications</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined" data-icon="account_circle">account_circle</span></button>
+</div>
+</div>
+</div>
+</nav>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar (Web Only) -->
+<aside class="bg-surface-container-low dark:bg-inverse-surface text-primary dark:text-inverse-primary h-screen w-64 fixed left-0 top-0 hidden md:flex flex-col border-r border-border-subtle dark:border-outline py-lg z-40 mt-[72px]">
+<div class="px-4 mb-6">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full bg-surface-variant object-cover" data-alt="A small circular avatar placeholder image showing a generic profile silhouette in a light green tint." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCO_poBdNPAt575Wg0vXk9t_nkDeUL2uo3P3_bbA0W5iGVLZrSBcDQcgSwrdnKMavkKP-P73T_LsiGP79DEZ1vRXu5KItzuFKwU5xf89-JPsZiZ3NROqpotiMhUib1PtywYvxMIILxv9_fzUPC6CGCUrbJvf1pM4F07ZH47IQ8Eodfi6cFBiBYmDQX7lpRYQpmKVrogpMaafvczON1Lca4rzXuLcHT-Zd0jhC6-zYDsJXY4wTidFYivg"/>
+<div>
+<div class="text-section-head font-section-head font-extrabold text-primary dark:text-inverse-primary">Rajesh Kumar</div>
+<div class="text-body-sm font-body-sm text-on-surface-variant">Green Valley Farms</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col flex-1 gap-2">
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-ui-label-bold font-ui-label-bold uppercase">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_basket">shopping_basket</span>
+<span class="text-ui-label-bold font-ui-label-bold uppercase">My Orders</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="text-ui-label-bold font-ui-label-bold uppercase">Listings</span>
+</a>
+<a class="flex items-center gap-3 bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-lg px-4 py-3 mx-2 translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+<span class="text-ui-label-bold font-ui-label-bold uppercase">Market Trends</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-ui-label-bold font-ui-label-bold uppercase">Settings</span>
+</a>
+</div>
+<div class="px-4 mt-auto mb-4">
+<button class="w-full bg-primary text-white rounded-lg py-2 text-ui-label-bold font-ui-label-bold uppercase hover:bg-surface-tint transition">Add New Listing</button>
+</div>
+<div class="flex flex-col gap-2 mt-4 border-t border-border-subtle pt-4">
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-surface-variant px-4 py-2 mx-2 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="text-ui-label-bold font-ui-label-bold uppercase">Help Center</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-surface-variant px-4 py-2 mx-2 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="text-ui-label-bold font-ui-label-bold uppercase">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 ml-0 md:ml-64 p-margin-mobile md:p-margin-desktop bg-surface-muted mt-[72px] overflow-y-auto">
+<!-- Header Section -->
+<div class="mb-lg">
+<h1 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg text-primary mb-2">Market Rates (Mandi)</h1>
+<p class="text-body-default font-body-default text-soil-brown">Real-time commodity pricing from mandis across India.</p>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-gutter">
+<!-- Filters Card (Left Col or Top) -->
+<div class="xl:col-span-1 bg-surface-container-lowest rounded-xl shadow-[0_4px_18px_rgba(23,49,34,0.07)] p-md flex flex-col gap-md">
+<h2 class="text-section-head font-section-head text-primary border-b border-border-subtle pb-2">Filters</h2>
+<div>
+<label class="text-ui-label-bold font-ui-label-bold text-soil-brown uppercase block mb-1">Search</label>
+<input class="w-full bg-input-bg border-none rounded-lg py-2 px-3 focus:ring-1 focus:ring-primary text-body-sm" placeholder="e.g. Wheat, Pune..." type="text"/>
+</div>
+<div>
+<label class="text-ui-label-bold font-ui-label-bold text-soil-brown uppercase block mb-1">Commodity</label>
+<select class="w-full bg-input-bg border-none rounded-lg py-2 px-3 focus:ring-1 focus:ring-primary text-body-sm appearance-none">
+<option>All Commodities</option>
+<option>🌾 Wheat</option>
+<option>🍚 Rice</option>
+<option>🍅 Tomato</option>
+</select>
+</div>
+<div>
+<label class="text-ui-label-bold font-ui-label-bold text-soil-brown uppercase block mb-1">State / District</label>
+<select class="w-full bg-input-bg border-none rounded-lg py-2 px-3 focus:ring-1 focus:ring-primary text-body-sm appearance-none mb-2">
+<option>Maharashtra</option>
+<option>Punjab</option>
+</select>
+<select class="w-full bg-input-bg border-none rounded-lg py-2 px-3 focus:ring-1 focus:ring-primary text-body-sm appearance-none">
+<option>Pune</option>
+<option>Nashik</option>
+</select>
+</div>
+<div>
+<label class="text-ui-label-bold font-ui-label-bold text-soil-brown uppercase block mb-1">Date Range</label>
+<input class="w-full bg-input-bg border-none rounded-lg py-2 px-3 focus:ring-1 focus:ring-primary text-body-sm text-on-surface-variant" type="date"/>
+</div>
+<button class="mt-auto w-full bg-primary text-white rounded-lg py-2 text-ui-label-bold font-ui-label-bold uppercase hover:bg-surface-tint transition shadow-[0_4px_18px_rgba(23,49,34,0.07)]">Apply Filters</button>
+</div>
+<!-- Main Data Area (Right Col) -->
+<div class="xl:col-span-2 flex flex-col gap-gutter">
+<!-- Chart Card -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_18px_rgba(23,49,34,0.07)] p-md">
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-section-head font-section-head text-primary">Price Trend: 🌾 Wheat (Pune Mandi)</h2>
+<span class="bg-harvest-gold text-neutral_color_hex px-3 py-1 rounded-full text-ui-label-bold font-ui-label-bold">Last 30 Days</span>
+</div>
+<div class="h-64 w-full bg-input-bg rounded-lg border border-border-subtle relative flex items-center justify-center overflow-hidden">
+<!-- Skeleton Loader for Chart -->
+<div class="absolute inset-0 bg-gradient-to-r from-input-bg via-surface-variant to-input-bg bg-[length:200%_100%] animate-[pulse_2s_ease-in-out_infinite] opacity-50"></div>
+<span class="text-soil-brown text-body-sm font-body-sm relative z-10 flex items-center gap-2">
+<span class="material-symbols-outlined animate-spin">sync</span> Loading visualization...
+                             </span>
+</div>
+</div>
+<!-- Table Card -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_18px_rgba(23,49,34,0.07)] overflow-hidden flex flex-col">
+<div class="p-md border-b border-border-subtle flex justify-between items-center bg-surface-muted">
+<h2 class="text-section-head font-section-head text-primary">Current Market Rates</h2>
+<span class="text-caption font-caption text-soil-brown flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">info</span> Source: Agmarknet
+                            </span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-muted border-b border-border-subtle">
+<tr>
+<th class="p-3 text-ui-label-bold font-ui-label-bold text-soil-brown uppercase">Commodity</th>
+<th class="p-3 text-ui-label-bold font-ui-label-bold text-soil-brown uppercase">Mandi</th>
+<th class="p-3 text-ui-label-bold font-ui-label-bold text-soil-brown uppercase">Variety</th>
+<th class="p-3 text-ui-label-bold font-ui-label-bold text-soil-brown uppercase">Min Price</th>
+<th class="p-3 text-ui-label-bold font-ui-label-bold text-soil-brown uppercase">Max Price</th>
+<th class="p-3 text-ui-label-bold font-ui-label-bold text-soil-brown uppercase">Modal Price</th>
+<th class="p-3 text-ui-label-bold font-ui-label-bold text-soil-brown uppercase">Date</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-b border-border-subtle hover:bg-surface-variant/30 transition-colors">
+<td class="p-3 text-body-sm font-body-sm">🌾 Wheat</td>
+<td class="p-3 text-body-sm font-body-sm text-on-surface-variant">Pune (APMC)</td>
+<td class="p-3 text-body-sm font-body-sm text-on-surface-variant">Lokwan</td>
+<td class="p-3 text-body-sm font-body-sm">₹2,100</td>
+<td class="p-3 text-body-sm font-body-sm">₹2,450</td>
+<td class="p-3 text-body-sm font-body-sm font-bold text-primary flex items-center gap-1">₹2,300 <span class="material-symbols-outlined text-success-emerald text-[16px]">arrow_upward</span></td>
+<td class="p-3 text-caption font-caption text-soil-brown">Oct 24, 2023</td>
+</tr>
+<tr class="border-b border-border-subtle hover:bg-surface-variant/30 transition-colors">
+<td class="p-3 text-body-sm font-body-sm">🍅 Tomato</td>
+<td class="p-3 text-body-sm font-body-sm text-on-surface-variant">Nashik</td>
+<td class="p-3 text-body-sm font-body-sm text-on-surface-variant">Deshi</td>
+<td class="p-3 text-body-sm font-body-sm">₹800</td>
+<td class="p-3 text-body-sm font-body-sm">₹1,200</td>
+<td class="p-3 text-body-sm font-body-sm font-bold text-primary flex items-center gap-1">₹1,000 <span class="material-symbols-outlined text-error-alert text-[16px]">arrow_downward</span></td>
+<td class="p-3 text-caption font-caption text-soil-brown">Oct 24, 2023</td>
+</tr>
+<!-- Skeleton Row -->
+<tr class="border-b border-border-subtle animate-pulse">
+<td class="p-3"><div class="h-4 bg-border-subtle rounded w-3/4"></div></td>
+<td class="p-3"><div class="h-4 bg-border-subtle rounded w-full"></div></td>
+<td class="p-3"><div class="h-4 bg-border-subtle rounded w-1/2"></div></td>
+<td class="p-3"><div class="h-4 bg-border-subtle rounded w-3/4"></div></td>
+<td class="p-3"><div class="h-4 bg-border-subtle rounded w-3/4"></div></td>
+<td class="p-3"><div class="h-4 bg-border-subtle rounded w-full"></div></td>
+<td class="p-3"><div class="h-4 bg-border-subtle rounded w-1/2"></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-3 bg-surface-muted text-center border-t border-border-subtle">
+<button class="text-primary text-ui-label-bold font-ui-label-bold uppercase hover:underline">View All Rates</button>
+</div>
+</div>
+<!-- Error State Example (Hidden by default, shown for demonstration) -->
+<div class="bg-error-container text-on-error-container rounded-xl p-md flex items-center justify-between shadow-sm hidden">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error">warning</span>
+<span class="text-body-sm font-body-sm">Market data currently unavailable.</span>
+</div>
+<button class="text-error font-bold text-ui-label-bold font-ui-label-bold uppercase hover:underline">Retry</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container-highest dark:bg-inverse-surface text-primary dark:text-inverse-primary w-full mt-auto border-t border-border-subtle">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-lg px-margin-mobile md:px-margin-desktop py-xl max-w-max-width mx-auto">
+<div>
+<h3 class="text-headline-md font-headline-md font-black mb-4">KrishiSetu</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">© 2024 KrishiSetu. Digital Stewardship for Rural Growth.</p>
+</div>
+<div class="flex flex-col gap-2">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary underline transition-all text-ui-label-bold font-ui-label-bold uppercase" href="#">About Us</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary underline transition-all text-ui-label-bold font-ui-label-bold uppercase" href="#">How it Works</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary underline transition-all text-ui-label-bold font-ui-label-bold uppercase" href="#">Privacy Policy</a>
+</div>
+<div class="flex flex-col gap-2">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary underline transition-all text-ui-label-bold font-ui-label-bold uppercase" href="#">Terms of Service</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary underline transition-all text-ui-label-bold font-ui-label-bold uppercase" href="#">Farmer Support</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary underline transition-all text-ui-label-bold font-ui-label-bold uppercase" href="#">Contact</a>
+</div>
+</div>
+</footer>
+</body></html>
