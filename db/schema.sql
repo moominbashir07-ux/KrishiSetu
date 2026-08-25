@@ -308,5 +308,19 @@ CREATE TABLE IF NOT EXISTS user_activity (
 CREATE INDEX IF NOT EXISTS idx_user_activity_last_seen ON user_activity(last_seen DESC);
 CREATE INDEX IF NOT EXISTS idx_user_activity_role ON user_activity(role);
 
+-- 21. PLATFORM EXPENSES TABLE (FINANCIAL PROFIT/LOSS GOVERNANCE)
+CREATE TABLE IF NOT EXISTS platform_expenses (
+    id VARCHAR(50) PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    amount NUMERIC(10,2) NOT NULL CHECK (amount > 0),
+    description TEXT,
+    admin_id VARCHAR(50) NOT NULL REFERENCES users(id),
+    expense_date DATE DEFAULT CURRENT_DATE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_platform_expenses_date ON platform_expenses(expense_date DESC);
+
 
 

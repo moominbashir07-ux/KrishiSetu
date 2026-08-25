@@ -132,9 +132,9 @@ router.post('/', authenticateUser, requireRole('customer'), async (req, res, nex
         const sellerTotal = Math.round((sellerSubtotal + platformFee) * 100) / 100;
 
         await client.query(
-          `INSERT INTO orders (id, order_number, customer_id, seller_id, status, total_amount, buyer_contact, step, payment_method, payment_status)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-          [orderId, orderNumber, customerId, sellerId, 'Order Placed', sellerTotal, buyerContact, 1, payment_method, validPayStatus]
+          `INSERT INTO orders (id, order_number, customer_id, seller_id, status, total_amount, platform_fee, buyer_contact, step, payment_method, payment_status)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+          [orderId, orderNumber, customerId, sellerId, 'Order Placed', sellerTotal, platformFee, buyerContact, 1, payment_method, validPayStatus]
         );
 
         // Record initial status history log

@@ -100,7 +100,7 @@ router.get('/sellers', async (req, res, next) => {
       db.query("SELECT id, name, contact, account_status, created_at FROM users WHERE role = 'seller'"),
       db.query("SELECT user_id, business_name, verification_status FROM seller_profiles"),
       db.query("SELECT id, seller_id, status FROM products"),
-      db.query("SELECT id, seller_id, total_amount, status FROM orders"),
+      db.query("SELECT id, seller_id, total_amount, platform_fee, status FROM orders"),
       db.query("SELECT product_id, rating FROM reviews")
     ]);
 
@@ -114,9 +114,10 @@ router.get('/sellers', async (req, res, next) => {
       const sp = profiles.find(p => p.user_id === u.id) || {};
       const sellerProds = products.filter(p => p.seller_id === u.id);
       const sellerOrders = orders.filter(o => o.seller_id === u.id);
-      const totalSales = sellerOrders.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
+      const totalGmv = sellerOrders.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
+      const platformFees = sellerOrders.reduce((sum, o) => sum + Number(o.platform_fee || 0), 0);
+      const sellerNetSales = totalGmv - platformFees;
 
-      // Calc average rating
       const sellerProdIds = new Set(sellerProds.map(p => p.id));
       const sellerRevs = reviews.filter(r => sellerProdIds.has(r.product_id));
       const avgRating = sellerRevs.length ? (sellerRevs.reduce((a, b) => a + Number(b.rating || 5), 0) / sellerRevs.length).toFixed(1) : '5.0';
@@ -130,7 +131,9 @@ router.get('/sellers', async (req, res, next) => {
         accountStatus: u.account_status || 'active',
         productsCount: sellerProds.length,
         ordersCount: sellerOrders.length,
-        totalSales,
+        totalSales: totalGmv,
+        platformFees,
+        sellerNetSales,
         rating: Number(avgRating),
         registeredAt: u.created_at
       };
@@ -207,7 +210,7 @@ router.delete('/products/:id', async (req, res, next) => {
   }
 });
 
-// GET ALL ORDERS (ADMIN)
+// GET ALL ORDERS (ADMIN MONITORING)
 router.get('/orders', async (req, res, next) => {
   try {
     const result = await db.query(
@@ -218,6 +221,53 @@ router.get('/orders', async (req, res, next) => {
        ORDER BY o.created_at DESC`
     );
     res.json({ orders: result.rows });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// EMERGENCY ADMIN OVERRIDE ENDPOINT (FOR DISPUTES / STUCK ORDERS ONLY)
+router.post('/orders/:id/override', async (req, res, next) => {
+  const { action, reason, targetStatus } = req.body;
+  const orderId = req.params.id;
+
+  if (!reason || reason.trim().length < 5) {
+    return res.status(400).json({ error: 'A mandatory audit reason (min 5 chars) is required for Emergency Admin Override.' });
+  }
+
+  try {
+    const orderRes = await db.query('SELECT * FROM orders WHERE id = $1 OR order_number = $1', [orderId]);
+    if (!orderRes.rows.length) {
+      return res.status(404).json({ error: 'Order record not found.' });
+    }
+    const order = orderRes.rows[0];
+
+    let newStatus = order.status;
+    let details = `Emergency Admin Override on Order #${order.order_number || order.id}: Action='${action}'`;
+
+    if (action === 'cancel') {
+      newStatus = 'Cancelled';
+      details = `Admin emergency cancelled Order #${order.order_number || order.id}`;
+    } else if (action === 'flag_payment') {
+      await db.query("UPDATE orders SET payment_status = 'rejected', updated_at = CURRENT_TIMESTAMP WHERE id = $1", [order.id]);
+      details = `Admin flagged payment issue for Order #${order.order_number || order.id}`;
+    } else if (action === 'update_status' && targetStatus) {
+      newStatus = targetStatus;
+      details = `Admin override updated Order #${order.order_number || order.id} status to '${targetStatus}'`;
+    }
+
+    if (newStatus !== order.status) {
+      await db.query('UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [newStatus, order.id]);
+    }
+
+    await logAdminAction(req.user.id, 'EMERGENCY_ADMIN_OVERRIDE', order.id, details, reason);
+
+    res.json({
+      message: `Emergency Admin Override executed successfully on Order #${order.order_number || order.id}.`,
+      orderId: order.id,
+      status: newStatus,
+      reason
+    });
   } catch (err) {
     next(err);
   }
@@ -254,7 +304,7 @@ router.delete('/reviews/:id', async (req, res, next) => {
 router.get('/payments', async (req, res, next) => {
   try {
     const result = await db.query(
-      `SELECT o.id, o.order_number, o.customer_id, o.seller_id, o.total_amount as total, o.payment_method, o.payment_status, o.created_at,
+      `SELECT o.id, o.order_number, o.customer_id, o.seller_id, o.total_amount as total, o.platform_fee, o.payment_method, o.payment_status, o.created_at,
               u_cust.name as "customerName", u_cust.contact as "customerContact", u_sell.name as "sellerName"
        FROM orders o
        JOIN users u_cust ON o.customer_id = u_cust.id
@@ -286,7 +336,6 @@ router.put('/payments/:id/status', async (req, res, next) => {
     await db.query('UPDATE orders SET payment_status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [status, order.id]);
     await logAdminAction(req.user.id, 'UPDATE_PAYMENT_STATUS', order.id, `Updated payment status for order '${order.order_number}' to '${status}'`, reason);
 
-    // Dispatch notifications
     const notifCustomer = 'NOTIF_' + Date.now() + Math.random().toString(36).substring(2, 5);
     await db.query(
       `INSERT INTO notifications (id, user_id, type, title, message, read, order_id)
@@ -300,17 +349,50 @@ router.put('/payments/:id/status', async (req, res, next) => {
   }
 });
 
-// ONLINE USERS / PRESENCE ENDPOINT
+// PLATFORM EXPENSE MANAGEMENT ENDPOINTS (FINANCIAL GOVERNANCE)
+router.get('/expenses', async (req, res, next) => {
+  try {
+    const result = await db.query("SELECT e.*, u.name as \"adminName\" FROM platform_expenses e LEFT JOIN users u ON e.admin_id = u.id ORDER BY e.expense_date DESC, e.created_at DESC");
+    res.json({ expenses: result.rows || [] });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/expenses', async (req, res, next) => {
+  const { title, category, amount, description, expenseDate } = req.body;
+  if (!title || !category || !amount || Number(amount) <= 0) {
+    return res.status(400).json({ error: 'Title, valid category, and positive amount are required.' });
+  }
+
+  try {
+    const id = 'EXP_' + Date.now() + Math.random().toString(36).substring(2, 5);
+    const dateVal = expenseDate || new Date().toISOString().substring(0, 10);
+    await db.query(
+      `INSERT INTO platform_expenses (id, title, category, amount, description, admin_id, expense_date)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [id, title.trim(), category.trim(), Number(amount), description || '', req.user.id, dateVal]
+    );
+
+    await logAdminAction(req.user.id, 'RECORD_PLATFORM_EXPENSE', id, `Recorded platform expense '${title}' of ₹${amount} (${category})`);
+
+    res.json({ message: 'Platform expense recorded successfully.', expenseId: id });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ONLINE USERS / PRESENCE ENDPOINT (60-SECOND HEARTBEAT WINDOW)
 router.get('/online-users', async (req, res, next) => {
   try {
     const result = await db.query("SELECT * FROM user_activity ORDER BY last_seen DESC LIMIT 100");
     const rows = result.rows || [];
     const now = Date.now();
-    const fiveMins = 5 * 60 * 1000;
+    const sixtySecs = 60 * 1000;
 
     const onlineUsers = rows.map(r => {
       const lastSeenMs = new Date(r.last_seen || Date.now()).getTime();
-      const isOnline = (now - lastSeenMs) <= fiveMins;
+      const isOnline = (now - lastSeenMs) <= sixtySecs;
       return {
         userId: r.user_id,
         contact: r.contact,
@@ -378,36 +460,41 @@ router.get('/login-history', async (req, res, next) => {
   }
 });
 
-// SALES & REVENUE ANALYTICS ENDPOINT
+// SALES & REVENUE FINANCIAL ANALYTICS ENDPOINT (V3)
 router.get('/analytics', async (req, res, next) => {
   try {
-    const [oRes, pRes, uRes] = await Promise.all([
+    const [oRes, pRes, expRes] = await Promise.all([
       db.query("SELECT * FROM orders ORDER BY created_at DESC"),
       db.query("SELECT id, name, category, price, quantity FROM products"),
-      db.query("SELECT id, name, contact, role FROM users")
+      db.query("SELECT amount FROM platform_expenses")
     ]);
 
     const orders = oRes.rows || [];
     const products = pRes.rows || [];
-    const users = uRes.rows || [];
+    const expenses = expRes.rows || [];
 
-    const totalRevenue = orders.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
+    const validOrders = orders.filter(o => o.status !== 'Cancelled');
+    const gmv = validOrders.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
+    const platformRevenue = validOrders.reduce((sum, o) => sum + Number(o.platform_fee || 0), 0);
+    const sellerEarnings = gmv - platformRevenue;
+    const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+    
+    const expensesConfigured = expenses.length > 0;
+    const netProfit = expensesConfigured ? (platformRevenue - totalExpenses) : null;
+
     const totalOrdersCount = orders.length;
-    const avgOrderValue = totalOrdersCount > 0 ? (totalRevenue / totalOrdersCount).toFixed(2) : 0;
+    const avgOrderValue = validOrders.length > 0 ? (gmv / validOrders.length).toFixed(2) : 0;
 
-    // Payment method breakdown
     const upiOrders = orders.filter(o => (o.payment_method || '').toLowerCase().includes('upi')).length;
     const codOrders = orders.filter(o => (o.payment_method || '').toLowerCase().includes('cod')).length;
 
-    // Order status breakdown
     const statusMap = {};
     orders.forEach(o => {
       statusMap[o.status] = (statusMap[o.status] || 0) + 1;
     });
 
-    // Top selling products calculation
     const prodSales = {};
-    orders.forEach(o => {
+    validOrders.forEach(o => {
       if (o.items && Array.isArray(o.items)) {
         o.items.forEach(item => {
           const key = item.name || 'Produce';
@@ -425,12 +512,14 @@ router.get('/analytics', async (req, res, next) => {
 
     const topProducts = Object.values(prodSales).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
 
-    // Sales timeline (last 7 days grouped)
     const timeMap = {};
     orders.forEach(o => {
       const date = (o.created_at || '').substring(0, 10) || new Date().toISOString().substring(0, 10);
-      if (!timeMap[date]) timeMap[date] = { date, revenue: 0, count: 0 };
-      timeMap[date].revenue += Number(o.total_amount || 0);
+      if (!timeMap[date]) timeMap[date] = { date, gmv: 0, revenue: 0, count: 0 };
+      if (o.status !== 'Cancelled') {
+        timeMap[date].gmv += Number(o.total_amount || 0);
+        timeMap[date].revenue += Number(o.platform_fee || 0);
+      }
       timeMap[date].count += 1;
     });
 
@@ -438,7 +527,13 @@ router.get('/analytics', async (req, res, next) => {
 
     res.json({
       analytics: {
-        totalRevenue,
+        gmv,
+        platformRevenue,
+        totalRevenue: platformRevenue,
+        sellerEarnings,
+        totalExpenses,
+        netProfit,
+        expensesConfigured,
         totalOrdersCount,
         avgOrderValue: Number(avgOrderValue),
         upiOrders,
@@ -457,12 +552,11 @@ router.get('/analytics', async (req, res, next) => {
 router.get('/system-health', async (req, res, next) => {
   try {
     const isDbConnected = db.isPgConnected();
-    const metricsRes = await db.query("SELECT COUNT(*) FROM users");
     const dbLatencyMs = Math.round(Math.random() * 15 + 5);
 
     res.json({
       systemHealth: {
-        backend: { status: 'Operational', code: 200, message: 'Server runtime responsive' },
+        backend: { status: 'Operational', code: 200, message: 'Express runtime operational' },
         database: { status: isDbConnected ? 'Connected (PostgreSQL)' : 'Connected (Local Fallback)', latencyMs: dbLatencyMs },
         authService: { status: 'Operational', jwt: 'Valid' },
         mandiApi: { status: 'Operational', proxy: 'Active' },
@@ -524,7 +618,7 @@ router.get('/export/:resource', async (req, res, next) => {
         created_at: u.created_at
       }));
     } else if (resource === 'orders') {
-      const result = await db.query("SELECT id, order_number, customer_id, seller_id, total_amount, payment_method, payment_status, status, created_at FROM orders");
+      const result = await db.query("SELECT id, order_number, customer_id, seller_id, total_amount, platform_fee, payment_method, payment_status, status, created_at FROM orders");
       rows = result.rows || [];
     } else if (resource === 'products') {
       const result = await db.query("SELECT id, name, category, price, quantity, status, created_at FROM products");
@@ -534,6 +628,9 @@ router.get('/export/:resource', async (req, res, next) => {
       rows = result.rows || [];
     } else if (resource === 'audit-logs') {
       const result = await db.query("SELECT id, admin_id, action, target_id, details, created_at FROM admin_audit_logs");
+      rows = result.rows || [];
+    } else if (resource === 'expenses') {
+      const result = await db.query("SELECT id, title, category, amount, description, expense_date, created_at FROM platform_expenses");
       rows = result.rows || [];
     } else {
       return res.status(400).json({ error: `Resource '${resource}' not supported for CSV export.` });
@@ -560,7 +657,7 @@ const WHITELISTED_TABLES = [
   'users', 'seller_profiles', 'customer_profiles', 'products', 'orders', 
   'order_items', 'cart_items', 'reviews', 'feedback', 'notifications', 
   'seller_verifications', 'admin_audit_logs', 'market_price_snapshots',
-  'login_history', 'user_activity'
+  'login_history', 'user_activity', 'platform_expenses'
 ];
 
 router.get('/database/tables', async (req, res) => {
@@ -580,7 +677,6 @@ router.get('/database/tables/:tableName', async (req, res, next) => {
   try {
     const result = await db.query(`SELECT * FROM ${tableName} ORDER BY 1 DESC LIMIT $1 OFFSET $2`, [limit, offset]);
     
-    // Mask sensitive fields in returned database rows
     const maskedRows = result.rows.map(row => {
       const clone = { ...row };
       if (clone.password_hash) clone.password_hash = '[MASKED_HASH]';
@@ -631,16 +727,18 @@ router.get('/audit-logs', async (req, res, next) => {
   }
 });
 
-// GET ADMIN METRICS SUMMARY
+// GET EXECUTIVE METRICS SUMMARY (V3)
 router.get('/metrics', async (req, res, next) => {
   try {
-    const [uRes, pRes, oRes, fRes, rRes, actRes] = await Promise.all([
-      db.query("SELECT role, account_status FROM users"),
-      db.query("SELECT status FROM products"),
-      db.query("SELECT status, payment_status FROM orders"),
+    const [uRes, pRes, oRes, fRes, rRes, actRes, expRes, spRes] = await Promise.all([
+      db.query("SELECT role, account_status, created_at FROM users"),
+      db.query("SELECT status, quantity FROM products"),
+      db.query("SELECT status, payment_status, payment_method, total_amount, platform_fee FROM orders"),
       db.query("SELECT id FROM feedback"),
       db.query("SELECT id FROM reviews"),
-      db.query("SELECT last_seen FROM user_activity")
+      db.query("SELECT last_seen FROM user_activity"),
+      db.query("SELECT amount FROM platform_expenses"),
+      db.query("SELECT verification_status FROM seller_profiles")
     ]);
 
     const users = uRes.rows || [];
@@ -649,33 +747,70 @@ router.get('/metrics', async (req, res, next) => {
     const feedback = fRes.rows || [];
     const reviews = rRes.rows || [];
     const activities = actRes.rows || [];
+    const expenses = expRes.rows || [];
+    const sellerProfiles = spRes.rows || [];
 
     const now = Date.now();
-    const fiveMins = 5 * 60 * 1000;
-    const onlineCount = activities.filter(a => (now - new Date(a.last_seen || Date.now()).getTime()) <= fiveMins).length;
+    const sixtySecs = 60 * 1000;
+    const onlineCount = activities.filter(a => (now - new Date(a.last_seen || Date.now()).getTime()) <= sixtySecs).length;
+
+    // Financial calculations
+    const validOrders = orders.filter(o => o.status !== 'Cancelled');
+    const gmv = validOrders.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
+    const platformRevenue = validOrders.reduce((sum, o) => sum + Number(o.platform_fee || 0), 0);
+    const sellerSales = gmv - platformRevenue;
+    const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+    const expensesConfigured = expenses.length > 0;
+    const netProfit = expensesConfigured ? (platformRevenue - totalExpenses) : null;
+    const avgOrderValue = validOrders.length ? (gmv / validOrders.length).toFixed(2) : 0;
 
     const metrics = {
+      // Business Financials
+      gmv,
+      platformRevenue,
+      sellerSales,
+      totalExpenses,
+      netProfit,
+      expensesConfigured,
+      totalOrders: orders.length,
+      avgOrderValue: Number(avgOrderValue),
+
+      // Users
       totalUsers: users.length,
       activeUsers: onlineCount || Math.min(users.length, 1),
+      onlineNow: onlineCount,
       sellers: users.filter(u => u.role === 'seller').length,
       customers: users.filter(u => u.role === 'customer').length,
       admins: users.filter(u => u.role === 'admin').length,
-      frozenAccounts: users.filter(u => u.account_status === 'frozen' || u.account_status === 'suspended').length,
+      frozenAccounts: users.filter(u => u.account_status === 'frozen').length,
+      suspendedAccounts: users.filter(u => u.account_status === 'suspended').length,
 
+      // Marketplace
       totalProducts: products.length,
-      activeProducts: products.filter(p => p.status !== 'inactive').length,
+      activeProducts: products.filter(p => p.status === 'active').length,
       inactiveProducts: products.filter(p => p.status === 'inactive').length,
+      outOfStockProducts: products.filter(p => p.status === 'out_of_stock' || Number(p.quantity) <= 0).length,
+      pendingSellerVerifications: sellerProfiles.filter(sp => sp.verification_status === 'pending').length,
+      verifiedSellers: sellerProfiles.filter(sp => sp.verification_status === 'verified').length,
+      totalReviews: reviews.length,
 
-      totalOrders: orders.length,
-      pendingOrders: orders.filter(o => o.status === 'Order Placed' || o.status === 'Farmer Confirmed' || o.status === 'Preparing').length,
-      completedOrders: orders.filter(o => o.status === 'Completed' || o.status === 'Delivered' || o.status === 'Ready').length,
-      cancelledOrders: orders.filter(o => o.status === 'Cancelled').length,
+      // Orders Breakdown
+      ordersPending: orders.filter(o => o.status === 'Order Placed').length,
+      ordersFarmerConfirmed: orders.filter(o => o.status === 'Farmer Confirmed').length,
+      ordersPreparing: orders.filter(o => o.status === 'Preparing').length,
+      ordersReady: orders.filter(o => o.status === 'Ready').length,
+      ordersDelivered: orders.filter(o => o.status === 'Delivered').length,
+      ordersCompleted: orders.filter(o => o.status === 'Completed').length,
+      ordersCancelled: orders.filter(o => o.status === 'Cancelled').length,
 
-      pendingPayments: orders.filter(o => o.payment_status === 'pending' || o.payment_status === 'submitted').length,
-      verifiedPayments: orders.filter(o => o.payment_status === 'verified').length,
+      // Payments Breakdown
+      codPending: orders.filter(o => (o.payment_method || '').toLowerCase().includes('cod') && o.payment_status === 'pending').length,
+      codCompleted: orders.filter(o => (o.payment_method || '').toLowerCase().includes('cod') && o.payment_status === 'verified').length,
+      upiPending: orders.filter(o => (o.payment_method || '').toLowerCase().includes('upi') && (o.payment_status === 'pending' || o.payment_status === 'submitted')).length,
+      upiVerified: orders.filter(o => (o.payment_method || '').toLowerCase().includes('upi') && o.payment_status === 'verified').length,
+      upiRejected: orders.filter(o => (o.payment_method || '').toLowerCase().includes('upi') && o.payment_status === 'rejected').length,
 
-      totalFeedback: feedback.length,
-      totalReviews: reviews.length
+      totalFeedback: feedback.length
     };
 
     res.json({ metrics });

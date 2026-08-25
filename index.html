@@ -578,18 +578,18 @@
     </div>
   </section>
 
-  <!-- 9. ADMIN DASHBOARD CONTROL SCREEN V2 (MASTER CONTROL CENTER) -->
+  <!-- 9. ADMIN DASHBOARD CONTROL SCREEN V3 (MASTER COMMAND CENTER) -->
   <section class="screen max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-6" id="adminView">
-    <!-- Admin Master Top Navigation Bar -->
+    <!-- Admin Master Top Navigation Bar V3 -->
     <div class="bg-white p-5 rounded-2xl border border-border-subtle shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary font-bold text-xl">🛡</div>
         <div>
           <h2 class="text-headline-md font-bold text-primary flex items-center gap-2">
-            Master Control Center V2
-            <span class="text-[10px] bg-success-emerald/10 text-success-emerald px-2 py-0.5 rounded-full border border-success-emerald/20 font-extrabold uppercase">● Live Operational</span>
+            Master Command Center V3
+            <span class="text-[10px] bg-success-emerald/10 text-success-emerald px-2 py-0.5 rounded-full border border-success-emerald/20 font-extrabold uppercase">● Live Command Control</span>
           </h2>
-          <p class="text-xs text-soil-brown">Complete platform management, sales analytics, live user presence, orders & database control.</p>
+          <p class="text-xs text-soil-brown">Executive GMV/revenue analytics, seller/customer governance, live presence, financial expenses & database inspector.</p>
         </div>
       </div>
 
@@ -606,6 +606,7 @@
           <option value="users">Export Users CSV</option>
           <option value="orders">Export Orders CSV</option>
           <option value="products">Export Products CSV</option>
+          <option value="expenses">Export Expenses CSV</option>
           <option value="login-history">Export Login History CSV</option>
           <option value="audit-logs">Export Audit Logs CSV</option>
         </select>
@@ -614,48 +615,49 @@
       </div>
     </div>
 
-    <!-- Live KPI Overview Cards -->
+    <!-- Executive V3 Business KPI Overview Cards -->
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-6" id="adminStatsGrid">
       <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
-        <span class="text-[10px] font-bold text-soil-brown uppercase block">Total Users</span>
-        <h3 class="text-xl font-bold text-primary mt-0.5" id="admTotalUsers">0</h3>
+        <span class="text-[10px] font-bold text-soil-brown uppercase block">Gross Sales (GMV)</span>
+        <h3 class="text-xl font-bold text-primary mt-0.5" id="admGmv">₹0</h3>
       </div>
       <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
-        <span class="text-[10px] font-bold text-soil-brown uppercase block">Online Now</span>
-        <h3 class="text-xl font-bold text-success-emerald mt-0.5" id="admOnlineUsers">0</h3>
+        <span class="text-[10px] font-bold text-soil-brown uppercase block">Platform Revenue</span>
+        <h3 class="text-xl font-bold text-success-emerald mt-0.5" id="admPlatformRevenue">₹0</h3>
       </div>
       <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
-        <span class="text-[10px] font-bold text-soil-brown uppercase block">Active Products</span>
-        <h3 class="text-xl font-bold text-primary mt-0.5" id="admTotalProducts">0</h3>
+        <span class="text-[10px] font-bold text-soil-brown uppercase block">Seller Earnings</span>
+        <h3 class="text-xl font-bold text-primary mt-0.5" id="admSellerEarnings">₹0</h3>
+      </div>
+      <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
+        <span class="text-[10px] font-bold text-soil-brown uppercase block">Net Profit</span>
+        <h3 class="text-base font-bold text-primary mt-0.5 leading-tight" id="admNetProfit">₹0</h3>
       </div>
       <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
         <span class="text-[10px] font-bold text-soil-brown uppercase block">Total Orders</span>
         <h3 class="text-xl font-bold text-success-emerald mt-0.5" id="admTotalOrders">0</h3>
       </div>
       <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
-        <span class="text-[10px] font-bold text-soil-brown uppercase block">Total Revenue</span>
-        <h3 class="text-xl font-bold text-primary mt-0.5" id="admTotalRevenue">₹0</h3>
-      </div>
-      <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
-        <span class="text-[10px] font-bold text-soil-brown uppercase block">Frozen Accounts</span>
-        <h3 class="text-xl font-bold text-error mt-0.5" id="admFrozenUsers">0</h3>
+        <span class="text-[10px] font-bold text-soil-brown uppercase block">Online Now (60s)</span>
+        <h3 class="text-xl font-bold text-success-emerald mt-0.5" id="admOnlineUsers">0</h3>
       </div>
     </div>
 
-    <!-- Master Navigation Tabs -->
+    <!-- Master Command Navigation Tabs -->
     <div class="flex gap-2 border-b border-border-subtle mb-6 overflow-x-auto pb-1 whitespace-nowrap">
       <button id="admTabAnalytics" class="px-3.5 py-2 text-xs font-bold text-primary border-b-2 border-primary" onclick="switchAdminTab('analytics')" type="button">📈 Sales Analytics</button>
       <button id="admTabUsers" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('users')" type="button">👥 Users & Freeze</button>
       <button id="admTabSellers" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('sellers')" type="button">👨‍🌾 Sellers</button>
       <button id="admTabCustomers" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('customers')" type="button">🛒 Customers</button>
       <button id="admTabProducts" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('products')" type="button">🌾 Products</button>
-      <button id="admTabOrders" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('orders')" type="button">📦 Orders Control</button>
+      <button id="admTabOrders" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('orders')" type="button">📦 Orders Monitoring</button>
       <button id="admTabPayments" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('payments')" type="button">💳 Payments</button>
-      <button id="admTabLive" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('live')" type="button">🟢 Live & Online</button>
-      <button id="admTabLoginHistory" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('loginHistory')" type="button">🔑 Login History</button>
+      <button id="admTabLive" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('live')" type="button">🟢 Live Activity</button>
+      <button id="admTabLoginHistory" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('loginHistory')" type="button">🔑 Security & Logins</button>
       <button id="admTabFeedback" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('feedback')" type="button">💬 Feedback</button>
       <button id="admTabReviews" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('reviews')" type="button">⭐ Reviews</button>
       <button id="admTabAudit" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('audit')" type="button">📜 Audit Logs</button>
+      <button id="admTabFinance" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('finance')" type="button">💸 Finance & Expenses</button>
       <button id="admTabDatabase" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('database')" type="button">🗄 Database</button>
       <button id="admTabHealth" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('health')" type="button">🩺 System Health</button>
     </div>
@@ -665,7 +667,7 @@
       <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
           <div>
-            <h4 class="font-bold text-primary text-base">Sales Revenue Over Time</h4>
+            <h4 class="font-bold text-primary text-base">Platform Gross Merchandise Value (GMV) vs Revenue</h4>
             <p class="text-xs text-soil-brown">Real order volume and revenue generation across platform orders.</p>
           </div>
           <select id="analyticsDateRange" class="p-2 border border-border-subtle rounded-xl text-xs bg-input-bg font-bold text-primary" onchange="loadAdminAnalytics(this.value)">
@@ -727,7 +729,7 @@
 
     <!-- TAB 3: DETAILED SELLERS LIST -->
     <div id="adminTabContentSellers" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
-      <h4 class="font-bold text-primary mb-4">Platform Sellers & Performance</h4>
+      <h4 class="font-bold text-primary mb-4">Platform Sellers & Performance Governance</h4>
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs">
           <thead>
@@ -736,14 +738,15 @@
               <th class="py-2">Contact</th>
               <th class="py-2">Verification</th>
               <th class="py-2">Products</th>
-              <th class="py-2">Total Sales</th>
+              <th class="py-2">GMV Generated</th>
+              <th class="py-2">Platform Fees</th>
               <th class="py-2">Rating</th>
               <th class="py-2">Status</th>
               <th class="py-2">Action</th>
             </tr>
           </thead>
           <tbody id="adminSellersRows">
-            <tr><td colspan="8" class="py-4 text-center text-soil-brown">Loading sellers...</td></tr>
+            <tr><td colspan="9" class="py-4 text-center text-soil-brown">Loading sellers...</td></tr>
           </tbody>
         </table>
       </div>
@@ -794,23 +797,30 @@
       </div>
     </div>
 
-    <!-- TAB 6: ORDERS CONTROL -->
+    <!-- TAB 6: ORDERS MONITORING (NO NORMAL SELLER ACCEPT BUTTON) -->
     <div id="adminTabContentOrders" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
-      <h4 class="font-bold text-primary mb-4">All System Orders Control</h4>
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h4 class="font-bold text-primary text-base">Real-Time Order Fulfillment Monitoring</h4>
+          <p class="text-xs text-soil-brown">Admin monitors order progress. Normal fulfillment acceptance belongs strictly to sellers.</p>
+        </div>
+      </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs">
           <thead>
             <tr class="border-b border-border-subtle text-soil-brown uppercase">
               <th class="py-2">Order #</th>
               <th class="py-2">Customer</th>
-              <th class="py-2">Seller</th>
-              <th class="py-2">Total</th>
-              <th class="py-2">Payment</th>
-              <th class="py-2">Status</th>
+              <th class="py-2">Fulfilling Seller</th>
+              <th class="py-2">GMV Total</th>
+              <th class="py-2">Platform Fee</th>
+              <th class="py-2">Payment Status</th>
+              <th class="py-2">Fulfillment Status</th>
+              <th class="py-2">Action</th>
             </tr>
           </thead>
           <tbody id="adminOrdersRows">
-            <tr><td colspan="6" class="py-4 text-center text-soil-brown">Loading orders...</td></tr>
+            <tr><td colspan="8" class="py-4 text-center text-soil-brown">Loading orders...</td></tr>
           </tbody>
         </table>
       </div>
@@ -904,7 +914,82 @@
       </div>
     </div>
 
-    <!-- TAB 13: DATABASE INSPECTOR -->
+    <!-- TAB 13: FINANCE & PLATFORM EXPENSES -->
+    <div id="adminTabContentFinance" class="space-y-6 hidden">
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
+        <h4 class="font-bold text-primary mb-2 text-base">Financial Governance & Profit Breakdown</h4>
+        <p class="text-xs text-soil-brown mb-4">Track GMV, KrishiSetu Platform Fees, Seller Payouts, Platform Expenses, and Net Profit.</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <div class="p-3 bg-surface rounded-xl border border-primary/20">
+            <span class="text-[10px] font-bold text-soil-brown uppercase">Gross Sales (GMV)</span>
+            <h4 class="text-lg font-bold text-primary" id="finGmv">₹0</h4>
+          </div>
+          <div class="p-3 bg-surface rounded-xl border border-primary/20">
+            <span class="text-[10px] font-bold text-soil-brown uppercase">Platform Revenue (Fees)</span>
+            <h4 class="text-lg font-bold text-success-emerald" id="finRevenue">₹0</h4>
+          </div>
+          <div class="p-3 bg-surface rounded-xl border border-primary/20">
+            <span class="text-[10px] font-bold text-soil-brown uppercase">Recorded Expenses</span>
+            <h4 class="text-lg font-bold text-error" id="finExpenses">₹0</h4>
+          </div>
+          <div class="p-3 bg-surface rounded-xl border border-primary/20">
+            <span class="text-[10px] font-bold text-soil-brown uppercase">Calculated Net Profit</span>
+            <h4 class="text-sm font-bold text-primary leading-tight" id="finNetProfit">₹0</h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Expense Form -->
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
+        <h4 class="font-bold text-primary mb-3 text-sm">Record Platform Expense</h4>
+        <form id="adminExpenseForm" onsubmit="event.preventDefault(); recordAdminExpense();" class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+          <div>
+            <label class="font-bold text-soil-brown block mb-1">Expense Title</label>
+            <input type="text" id="expTitle" required placeholder="e.g. AWS Server Hosting" class="w-full p-2.5 border border-border-subtle rounded-xl bg-input-bg focus:bg-white">
+          </div>
+          <div>
+            <label class="font-bold text-soil-brown block mb-1">Category</label>
+            <select id="expCategory" class="w-full p-2.5 border border-border-subtle rounded-xl bg-input-bg font-bold text-primary">
+              <option value="Cloud Hosting">Cloud Hosting & Infra</option>
+              <option value="SMS OTP Service">SMS / OTP Gateway</option>
+              <option value="Payment Gateway">Payment Gateway Fees</option>
+              <option value="Marketing">Marketing & Promotion</option>
+              <option value="Operations">Platform Operations</option>
+            </select>
+          </div>
+          <div>
+            <label class="font-bold text-soil-brown block mb-1">Amount (₹)</label>
+            <input type="number" id="expAmount" required min="1" step="0.01" placeholder="1500.00" class="w-full p-2.5 border border-border-subtle rounded-xl bg-input-bg focus:bg-white">
+          </div>
+          <div class="flex items-end">
+            <button type="submit" class="w-full bg-primary text-white p-2.5 rounded-xl font-bold hover:bg-primary-container">➕ Add Expense</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Expenses List Table -->
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
+        <h4 class="font-bold text-primary mb-4 text-sm">Platform Expense Log</h4>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-border-subtle text-soil-brown uppercase">
+                <th class="py-2">Title</th>
+                <th class="py-2">Category</th>
+                <th class="py-2">Amount</th>
+                <th class="py-2">Logged By</th>
+                <th class="py-2">Date</th>
+              </tr>
+            </thead>
+            <tbody id="adminExpensesRows">
+              <tr><td colspan="5" class="py-4 text-center text-soil-brown">Loading expenses...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 14: DATABASE INSPECTOR -->
     <div id="adminTabContentDatabase" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
       <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
         <div>
@@ -928,6 +1013,7 @@
             <option value="market_price_snapshots">market_price_snapshots</option>
             <option value="login_history">login_history</option>
             <option value="user_activity">user_activity</option>
+            <option value="platform_expenses">platform_expenses</option>
           </select>
           <button class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary-container" onclick="inspectSelectedAdminTable()" type="button">Inspect Table</button>
         </div>
@@ -937,7 +1023,7 @@
       </div>
     </div>
 
-    <!-- TAB 14: SYSTEM HEALTH -->
+    <!-- TAB 15: SYSTEM HEALTH -->
     <div id="adminTabContentHealth" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
       <h4 class="font-bold text-primary mb-4 text-base">System Operational Health Monitor</h4>
       <div id="adminSystemHealthContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -962,6 +1048,32 @@
       <div class="flex justify-end gap-2">
         <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold text-soil-brown border border-border-subtle hover:bg-input-bg" onclick="$('adminReasonModal').classList.add('hidden')">Cancel</button>
         <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-primary text-white hover:bg-primary-container" onclick="submitAccountActionWithReason()">Confirm Status Update</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMERGENCY ADMIN OVERRIDE MODAL -->
+  <div id="adminEmergencyOverrideModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative">
+      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" onclick="$('adminEmergencyOverrideModal').classList.add('hidden')" type="button">✕</button>
+      <h3 class="text-lg font-bold text-error mb-1" id="overrideModalTitle">🚨 Emergency Admin Override</h3>
+      <p class="text-xs text-soil-brown mb-4">Emergency administrative override on order fulfillment. Normal fulfillment acceptance belongs strictly to sellers.</p>
+      
+      <input type="hidden" id="overrideOrderId" value="">
+
+      <label class="text-xs font-bold text-soil-brown block mb-1">Override Action</label>
+      <select id="overrideActionSelect" class="w-full p-2.5 border border-border-subtle rounded-xl text-xs bg-input-bg font-bold text-primary mb-3">
+        <option value="cancel">Cancel Order (Dispute / Fraud)</option>
+        <option value="flag_payment">Flag Payment Issue (Reject Payment)</option>
+        <option value="escalate">Escalate & Notify Seller</option>
+      </select>
+
+      <label class="text-xs font-bold text-soil-brown block mb-1">Mandatory Audit Reason (min 5 chars)</label>
+      <textarea id="overrideReasonTextarea" rows="3" placeholder="Enter explicit audit reason for emergency override..." class="w-full p-3 border border-border-subtle rounded-xl text-xs bg-input-bg mb-4 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
+
+      <div class="flex justify-end gap-2">
+        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold text-soil-brown border border-border-subtle hover:bg-input-bg" onclick="$('adminEmergencyOverrideModal').classList.add('hidden')">Cancel</button>
+        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-error text-white hover:bg-error/90" onclick="submitEmergencyAdminOverride()">Execute Override</button>
       </div>
     </div>
   </div>
@@ -2798,7 +2910,7 @@ function handleUrlHashRouting() {
 
 window.addEventListener('hashchange', handleUrlHashRouting);
 
-// ADMIN DASHBOARD & CONTROL CENTER ENGINE V2
+// ADMIN DASHBOARD & CONTROL CENTER ENGINE V3
 let currentAdminTab = 'analytics';
 
 function switchAdminTab(tab) {
@@ -2806,7 +2918,7 @@ function switchAdminTab(tab) {
   const tabs = [
     'analytics', 'users', 'sellers', 'customers', 'products', 
     'orders', 'payments', 'live', 'loginHistory', 'feedback', 
-    'reviews', 'audit', 'database', 'health'
+    'reviews', 'audit', 'finance', 'database', 'health'
   ];
   
   tabs.forEach(t => {
@@ -2839,6 +2951,7 @@ function switchAdminTab(tab) {
   if (tab === 'feedback') loadAdminFeedback();
   if (tab === 'reviews') loadAdminReviews();
   if (tab === 'audit') loadAdminAuditLogs();
+  if (tab === 'finance') loadAdminExpenses();
   if (tab === 'database') loadAdminDatabaseTables();
   if (tab === 'health') loadAdminSystemHealth();
 }
@@ -2854,11 +2967,23 @@ async function loadAdminDashboard() {
   try {
     const res = await fetch('/api/admin/metrics', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
     const m = res.metrics || {};
-    if ($('admTotalUsers')) $('admTotalUsers').textContent = m.totalUsers || 0;
-    if ($('admOnlineUsers')) $('admOnlineUsers').textContent = m.activeUsers || 0;
-    if ($('admFrozenUsers')) $('admFrozenUsers').textContent = m.frozenAccounts || 0;
-    if ($('admTotalProducts')) $('admTotalProducts').textContent = m.totalProducts || 0;
+
+    if ($('admGmv')) $('admGmv').textContent = `₹${(m.gmv || 0).toLocaleString()}`;
+    if ($('admPlatformRevenue')) $('admPlatformRevenue').textContent = `₹${(m.platformRevenue || 0).toLocaleString()}`;
+    if ($('admSellerEarnings')) $('admSellerEarnings').textContent = `₹${(m.sellerSales || 0).toLocaleString()}`;
     if ($('admTotalOrders')) $('admTotalOrders').textContent = m.totalOrders || 0;
+    if ($('admOnlineUsers')) $('admOnlineUsers').textContent = m.onlineNow || 0;
+
+    const npEl = $('admNetProfit');
+    if (npEl) {
+      if (m.expensesConfigured && m.netProfit !== null) {
+        npEl.textContent = `₹${m.netProfit.toLocaleString()}`;
+        npEl.className = m.netProfit >= 0 ? 'text-xl font-bold text-success-emerald mt-0.5' : 'text-xl font-bold text-error mt-0.5';
+      } else {
+        npEl.textContent = 'Profit data unavailable — expense tracking not configured';
+        npEl.className = 'text-[10px] font-bold text-soil-brown leading-snug mt-0.5';
+      }
+    }
 
     switchAdminTab(currentAdminTab);
   } catch (err) {
@@ -2873,8 +2998,6 @@ async function loadAdminAnalytics(range = '30d') {
   try {
     const res = await fetch(`/api/admin/analytics?range=${range}`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
     const a = res.analytics || {};
-
-    if ($('admTotalRevenue')) $('admTotalRevenue').textContent = `₹${(a.totalRevenue || 0).toLocaleString()}`;
 
     drawAdminSalesChart(a.salesTimeline || []);
 
@@ -2932,14 +3055,14 @@ function drawAdminSalesChart(timeline) {
     return;
   }
 
-  const maxRev = Math.max(...timeline.map(t => t.revenue)) * 1.2 || 1000;
+  const maxGmv = Math.max(...timeline.map(t => t.gmv || 0)) * 1.2 || 1000;
   const padding = 40;
   const graphW = cssW - padding * 2;
   const graphH = cssH - padding * 2;
 
   const points = timeline.map((pt, i) => {
     const x = padding + (i / Math.max(1, timeline.length - 1)) * graphW;
-    const y = cssH - padding - (pt.revenue / maxRev) * graphH;
+    const y = cssH - padding - ((pt.gmv || 0) / maxGmv) * graphH;
     return { x, y, pt };
   });
 
@@ -3070,15 +3193,16 @@ async function loadAdminSellers() {
         <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${s.verificationStatus === 'verified' ? 'bg-surface text-success-emerald border border-success-emerald/20' : 'bg-harvest-gold/20 text-harvest-gold'}">${s.verificationStatus}</span></td>
         <td class="py-2.5 font-semibold text-soil-brown">${s.productsCount}</td>
         <td class="py-2.5 font-bold text-primary">₹${s.totalSales.toLocaleString()}</td>
+        <td class="py-2.5 font-semibold text-success-emerald">₹${(s.platformFees || 0).toLocaleString()}</td>
         <td class="py-2.5 font-bold text-harvest-gold">⭐ ${s.rating}</td>
         <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${s.accountStatus === 'active' ? 'bg-surface text-success-emerald' : 'bg-error-container text-error'}">${s.accountStatus}</span></td>
         <td class="py-2.5">
           <button class="bg-surface text-primary border border-primary/20 px-2 py-1 rounded text-[10px] font-bold hover:bg-primary hover:text-white" onclick="promptAccountAction('${s.id}', '${s.accountStatus === 'active' ? 'suspended' : 'active'}')">${s.accountStatus === 'active' ? 'Suspend' : 'Reactivate'}</button>
         </td>
       </tr>
-    `).join('') : '<tr><td colspan="8" class="py-4 text-center text-soil-brown">No registered sellers.</td></tr>';
+    `).join('') : '<tr><td colspan="9" class="py-4 text-center text-soil-brown">No registered sellers.</td></tr>';
   } catch (err) {
-    rowsEl.innerHTML = `<tr><td colspan="8" class="py-4 text-center text-error">${err.message}</td></tr>`;
+    rowsEl.innerHTML = `<tr><td colspan="9" class="py-4 text-center text-error">${err.message}</td></tr>`;
   }
 }
 
@@ -3308,15 +3432,130 @@ async function loadAdminOrders() {
     rowsEl.innerHTML = orders.length ? orders.map(o => `
       <tr class="border-b border-border-subtle hover:bg-surface">
         <td class="py-2.5 font-bold text-primary">#${o.order_number || o.id}</td>
-        <td class="py-2.5 text-soil-brown">${o.customer_id}</td>
-        <td class="py-2.5 text-soil-brown">${o.seller_id}</td>
-        <td class="py-2.5 font-bold text-on-surface">₹${o.total_amount || 0}</td>
-        <td class="py-2.5 font-semibold text-soil-brown uppercase text-[10px]">${o.payment_method || 'cod'} (${o.payment_status || 'cod'})</td>
-        <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-surface text-success-emerald border border-success-emerald/20">${o.status}</span></td>
+        <td class="py-2.5 text-soil-brown">${o.customerName || o.customer_id}</td>
+        <td class="py-2.5 text-soil-brown font-semibold">${o.sellerName || o.seller_id}</td>
+        <td class="py-2.5 font-bold text-primary">₹${(o.total_amount || 0).toLocaleString()}</td>
+        <td class="py-2.5 font-semibold text-success-emerald">₹${(o.platform_fee || 0).toLocaleString()}</td>
+        <td class="py-2.5 font-semibold text-soil-brown uppercase text-[10px]">${o.payment_method || 'cod'} (${o.payment_status || 'pending'})</td>
+        <td class="py-2.5">
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-surface text-success-emerald border border-success-emerald/20">${o.status}</span>
+        </td>
+        <td class="py-2.5">
+          <button class="bg-error-container text-error px-2 py-1 rounded text-[10px] font-bold hover:bg-error/20" onclick="openEmergencyAdminOverrideModal('${o.id}')" type="button">🚨 Emergency Override</button>
+        </td>
       </tr>
-    `).join('') : '<tr><td colspan="6" class="py-4 text-center text-soil-brown">No orders found.</td></tr>';
+    `).join('') : '<tr><td colspan="8" class="py-4 text-center text-soil-brown">No orders found.</td></tr>';
   } catch (err) {
-    rowsEl.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-error">${err.message}</td></tr>`;
+    rowsEl.innerHTML = `<tr><td colspan="8" class="py-4 text-center text-error">${err.message}</td></tr>`;
+  }
+}
+
+function openEmergencyAdminOverrideModal(orderId) {
+  $('overrideOrderId').value = orderId;
+  $('overrideReasonTextarea').value = '';
+  $('adminEmergencyOverrideModal').classList.remove('hidden');
+}
+
+async function submitEmergencyAdminOverride() {
+  const orderId = $('overrideOrderId').value;
+  const action = $('overrideActionSelect').value;
+  const reason = $('overrideReasonTextarea').value.trim();
+  const token = AuthService.getToken();
+
+  if (!reason || reason.length < 5) {
+    notify('A mandatory audit reason (min 5 chars) is required for Emergency Admin Override.', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/admin/orders/${orderId}/override`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ action, reason })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to execute override.');
+
+    $('adminEmergencyOverrideModal').classList.add('hidden');
+    notify(data.message || 'Emergency Override executed.', 'success');
+    loadAdminOrders();
+    loadAdminDashboard();
+  } catch (err) {
+    notify('Override error: ' + err.message, 'error');
+  }
+}
+
+async function loadAdminExpenses() {
+  const token = AuthService.getToken();
+  if (!token) return;
+  const rowsEl = $('adminExpensesRows');
+  if (!rowsEl) return;
+
+  try {
+    const [expRes, metricsRes] = await Promise.all([
+      fetch('/api/admin/expenses', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json()),
+      fetch('/api/admin/metrics', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json())
+    ]);
+
+    const expenses = expRes.expenses || [];
+    const m = metricsRes.metrics || {};
+
+    if ($('finGmv')) $('finGmv').textContent = `₹${(m.gmv || 0).toLocaleString()}`;
+    if ($('finRevenue')) $('finRevenue').textContent = `₹${(m.platformRevenue || 0).toLocaleString()}`;
+    if ($('finExpenses')) $('finExpenses').textContent = `₹${(m.totalExpenses || 0).toLocaleString()}`;
+    
+    const finNpEl = $('finNetProfit');
+    if (finNpEl) {
+      if (m.expensesConfigured && m.netProfit !== null) {
+        finNpEl.textContent = `₹${m.netProfit.toLocaleString()}`;
+        finNpEl.className = m.netProfit >= 0 ? 'text-lg font-bold text-success-emerald' : 'text-lg font-bold text-error';
+      } else {
+        finNpEl.textContent = 'Profit data unavailable — expense tracking not configured';
+        finNpEl.className = 'text-[11px] font-bold text-soil-brown leading-snug';
+      }
+    }
+
+    rowsEl.innerHTML = expenses.length ? expenses.map(e => `
+      <tr class="border-b border-border-subtle hover:bg-surface">
+        <td class="py-2.5 font-bold text-primary">${e.title}</td>
+        <td class="py-2.5 text-soil-brown">${e.category}</td>
+        <td class="py-2.5 font-bold text-error">₹${Number(e.amount).toLocaleString()}</td>
+        <td class="py-2.5 text-soil-brown">${e.adminName || e.admin_id}</td>
+        <td class="py-2.5 text-soil-brown">${e.expense_date}</td>
+      </tr>
+    `).join('') : '<tr><td colspan="5" class="py-4 text-center text-soil-brown">No platform expenses recorded yet.</td></tr>';
+  } catch (err) {
+    rowsEl.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-error">${err.message}</td></tr>`;
+  }
+}
+
+async function recordAdminExpense() {
+  const title = $('expTitle').value.trim();
+  const category = $('expCategory').value;
+  const amount = $('expAmount').value;
+  const token = AuthService.getToken();
+
+  if (!title || !amount || Number(amount) <= 0) {
+    notify('Please fill out expense title and a valid positive amount.', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/admin/expenses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ title, category, amount })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to record expense.');
+
+    notify('Platform expense recorded.', 'success');
+    $('expTitle').value = '';
+    $('expAmount').value = '';
+    loadAdminExpenses();
+    loadAdminDashboard();
+  } catch (err) {
+    notify('Expense error: ' + err.message, 'error');
   }
 }
 

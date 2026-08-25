@@ -29,7 +29,8 @@ class LocalFallbackDB {
       notifications: [],
       admin_audit_logs: [],
       login_history: [],
-      user_activity: []
+      user_activity: [],
+      platform_expenses: []
     };
   }
 
@@ -444,18 +445,25 @@ class LocalFallbackDB {
     // 8. ORDERS
     if (q.startsWith('INSERT INTO orders')) {
       let order = {};
-      if (params.length >= 10) {
+      if (q.includes('platform_fee')) {
         order = {
           id: params[0], order_number: params[1], customer_id: params[2], seller_id: params[3],
-          status: params[4] || 'Order Placed', total_amount: Number(params[5]), buyer_contact: params[6] || '',
-          step: Number(params[7] || 1), payment_method: params[8] || 'cod', payment_status: params[9] || 'cod',
+          status: params[4] || 'Order Placed', total_amount: Number(params[5]), platform_fee: Number(params[6] || 0),
+          buyer_contact: params[7] || '', step: Number(params[8] || 1), payment_method: params[9] || 'cod',
+          payment_status: params[10] || 'cod', created_at: new Date().toISOString(), updated_at: new Date().toISOString()
+        };
+      } else if (params.length >= 10) {
+        order = {
+          id: params[0], order_number: params[1], customer_id: params[2], seller_id: params[3],
+          status: params[4] || 'Order Placed', total_amount: Number(params[5]), platform_fee: Math.round(Number(params[5]) * 0.02 * 100) / 100,
+          buyer_contact: params[6] || '', step: Number(params[7] || 1), payment_method: params[8] || 'cod', payment_status: params[9] || 'cod',
           created_at: new Date().toISOString(), updated_at: new Date().toISOString()
         };
       } else {
         order = {
           id: params[0], order_number: params[1], customer_id: params[2], seller_id: params[3],
-          status: params[4] || 'Order Placed', total_amount: Number(params[5]), buyer_contact: '',
-          step: 1, payment_method: params[6] || 'cod', payment_status: params[7] || 'cod',
+          status: params[4] || 'Order Placed', total_amount: Number(params[5]), platform_fee: Math.round(Number(params[5]) * 0.02 * 100) / 100,
+          buyer_contact: '', step: 1, payment_method: params[6] || 'cod', payment_status: params[7] || 'cod',
           created_at: new Date().toISOString(), updated_at: new Date().toISOString()
         };
       }
@@ -582,6 +590,26 @@ class LocalFallbackDB {
 
     if (q.includes('FROM user_activity')) {
       return { rows: [...this.tables.user_activity] };
+    }
+
+    // 8C. PLATFORM EXPENSES
+    if (q.startsWith('INSERT INTO platform_expenses')) {
+      const exp = {
+        id: params[0],
+        title: params[1],
+        category: params[2],
+        amount: Number(params[3]),
+        description: params[4] || '',
+        admin_id: params[5],
+        expense_date: params[6] || new Date().toISOString().substring(0, 10),
+        created_at: new Date().toISOString()
+      };
+      this.tables.platform_expenses.unshift(exp);
+      return { rows: [{ ...exp }] };
+    }
+
+    if (q.includes('FROM platform_expenses')) {
+      return { rows: [...this.tables.platform_expenses] };
     }
 
     // 9. ORDER ITEMS
