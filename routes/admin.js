@@ -202,7 +202,7 @@ router.put('/payments/:id/status', async (req, res, next) => {
 const WHITELISTED_TABLES = [
   'users', 'seller_profiles', 'customer_profiles', 'products', 'orders', 
   'order_items', 'cart_items', 'reviews', 'feedback', 'notifications', 
-  'seller_verifications', 'admin_audit_logs'
+  'seller_verifications', 'admin_audit_logs', 'market_price_snapshots'
 ];
 
 router.get('/database/tables', async (req, res) => {
@@ -243,6 +243,21 @@ router.get('/database/tables/:tableName', async (req, res, next) => {
   }
 });
 
+// GET PLATFORM NOTIFICATIONS (ADMIN INSPECTION)
+router.get('/notifications', async (req, res, next) => {
+  try {
+    const result = await db.query(
+      `SELECT n.*, u.name as "userName", u.contact as "userContact"
+       FROM notifications n
+       JOIN users u ON n.user_id = u.id
+       ORDER BY n.created_at DESC LIMIT 100`
+    );
+    res.json({ notifications: result.rows });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET ADMIN AUDIT LOGS
 router.get('/audit-logs', async (req, res, next) => {
   try {
@@ -261,24 +276,44 @@ router.get('/audit-logs', async (req, res, next) => {
 // GET ADMIN METRICS SUMMARY
 router.get('/metrics', async (req, res, next) => {
   try {
-    const metricsRes = await db.query('SELECT COUNT(*) as count FROM users');
-    const metrics = metricsRes.rows[0] || {};
+    const [uRes, pRes, oRes, fRes, rRes] = await Promise.all([
+      db.query("SELECT role, account_status FROM users"),
+      db.query("SELECT status FROM products"),
+      db.query("SELECT status, payment_status FROM orders"),
+      db.query("SELECT id FROM feedback"),
+      db.query("SELECT id FROM reviews")
+    ]);
 
-    res.json({
-      metrics: {
-        totalUsers: Number(metrics.totalUsers || 0),
-        totalSellers: Number(metrics.totalSellers || metrics.count || 0),
-        totalCustomers: Number(metrics.totalCustomers || 0),
-        frozenUsers: Number(metrics.frozenUsers || 0),
-        pendingVerifications: Number(metrics.pendingVerifications || 0),
-        verifiedSellers: Number(metrics.verifiedSellers || 0),
-        rejectedVerifications: Number(metrics.rejectedVerifications || 0),
-        totalProducts: Number(metrics.totalProducts || 0),
-        totalOrders: Number(metrics.totalOrders || 0),
-        totalReviews: Number(metrics.totalReviews || 0),
-        totalFeedback: Number(metrics.totalFeedback || 0)
-      }
-    });
+    const users = uRes.rows || [];
+    const products = pRes.rows || [];
+    const orders = oRes.rows || [];
+    const feedback = fRes.rows || [];
+    const reviews = rRes.rows || [];
+
+    const metrics = {
+      totalUsers: users.length,
+      sellers: users.filter(u => u.role === 'seller').length,
+      customers: users.filter(u => u.role === 'customer').length,
+      admins: users.filter(u => u.role === 'admin').length,
+      frozenAccounts: users.filter(u => u.account_status === 'frozen' || u.account_status === 'suspended').length,
+
+      totalProducts: products.length,
+      activeProducts: products.filter(p => p.status !== 'inactive').length,
+      inactiveProducts: products.filter(p => p.status === 'inactive').length,
+
+      totalOrders: orders.length,
+      pendingOrders: orders.filter(o => o.status === 'Order Placed' || o.status === 'Farmer Confirmed' || o.status === 'Preparing').length,
+      completedOrders: orders.filter(o => o.status === 'Completed' || o.status === 'Delivered' || o.status === 'Ready').length,
+      cancelledOrders: orders.filter(o => o.status === 'Cancelled').length,
+
+      pendingPayments: orders.filter(o => o.payment_status === 'pending' || o.payment_status === 'submitted').length,
+      verifiedPayments: orders.filter(o => o.payment_status === 'verified').length,
+
+      totalFeedback: feedback.length,
+      totalReviews: reviews.length
+    };
+
+    res.json({ metrics });
   } catch (err) {
     next(err);
   }

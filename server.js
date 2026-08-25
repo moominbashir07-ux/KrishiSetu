@@ -442,6 +442,19 @@ app.get('/api/market-prices/compare', async (req, res) => {
   }
 });
 
+// EXPLICIT PRODUCTION ROUTE FOR /admin frontend dashboard
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// WILDCARD SPA FALLBACK FOR NON-API ROUTES
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    return next();
+  }
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // Centralized safe error handler
 app.use(errorHandler);
 

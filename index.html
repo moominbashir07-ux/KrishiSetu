@@ -2967,6 +2967,50 @@ async function inspectSelectedAdminTable() {
   }
 }
 
+async function handleUrlHashRouting() {
+  const isPathAdmin = window.location.pathname === '/admin' || window.location.pathname.endsWith('/admin');
+  const isHashAdmin = window.location.hash === '#admin';
+
+  if (isPathAdmin || isHashAdmin) {
+    const token = AuthService.getToken();
+
+    if (!token) {
+      notify('Authentication required. Please Sign In with an Admin account.', 'warning');
+      openAuthModal();
+      showScreen('landing');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!res.ok) throw new Error('Authentication session expired.');
+      const data = await res.json();
+      const user = data.user || {};
+
+      if (user.role !== 'admin') {
+        notify('Forbidden: Admin privileges required to access Admin Control Center.', 'error');
+        showScreen('landing');
+        if (window.history && window.history.pushState) {
+          window.history.pushState({}, '', '/');
+        }
+        return;
+      }
+
+      // Valid server-side authenticated admin
+      currentRole = 'admin';
+      currentUserId = user.id;
+      showScreen('adminView');
+      loadAdminDashboard();
+    } catch (err) {
+      notify('Admin access denied: ' + err.message, 'error');
+      showScreen('landing');
+    }
+  }
+}
+
 (function init() {
   const userStr = localStorage.getItem('krishisetu_current_user');
   if (userStr) {
