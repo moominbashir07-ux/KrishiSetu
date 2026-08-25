@@ -386,7 +386,7 @@
             <select id="prodGrade" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-sm outline-none focus:border-primary">
               <option value="Grade A">Grade A (Premium)</option>
               <option value="Grade B">Grade B (Standard)</option>
-              <option value="Standard">Standard FAQ</option>
+              <option value="Standard Quality">Standard Quality</option>
             </select>
           </div>
         </div>
@@ -449,29 +449,40 @@
     <!-- Controls & Selectors -->
     <div class="bg-white p-6 rounded-2xl border border-border-subtle mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4 shadow-sm">
       <div>
-        <label class="block text-xs font-bold text-soil-brown uppercase mb-1">COMMODITY</label>
-        <select id="mandiCommodity" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg font-semibold text-sm outline-none" onchange="loadMarketPrices()">
+        <label class="block text-xs font-bold text-soil-brown uppercase mb-1" for="mandiCommodity">COMMODITY</label>
+        <select id="mandiCommodity" class="w-full p-3 border border-border-subtle rounded-xl bg-input-bg font-semibold text-sm outline-none focus:ring-2 focus:ring-primary min-h-[44px]" onchange="loadMarketPrices()">
           <option value="Onion">Onion</option>
           <option value="Tomato">Tomato</option>
           <option value="Potato">Potato</option>
           <option value="Wheat">Wheat</option>
           <option value="Rice">Rice</option>
           <option value="Soybean">Soybean</option>
+          <option value="Cotton">Cotton</option>
+          <option value="Apple">Apple</option>
+          <option value="Chilli">Chilli</option>
         </select>
       </div>
       <div>
-        <label class="block text-xs font-bold text-soil-brown uppercase mb-1">STATE</label>
-        <select id="mandiState" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg font-semibold text-sm outline-none" onchange="loadMarketPrices()">
+        <label class="block text-xs font-bold text-soil-brown uppercase mb-1" for="mandiState">STATE</label>
+        <select id="mandiState" class="w-full p-3 border border-border-subtle rounded-xl bg-input-bg font-semibold text-sm outline-none focus:ring-2 focus:ring-primary min-h-[44px]" onchange="onMandiStateChange()">
           <option value="Maharashtra">Maharashtra</option>
           <option value="Delhi">Delhi</option>
           <option value="Uttar Pradesh">Uttar Pradesh</option>
           <option value="Madhya Pradesh">Madhya Pradesh</option>
           <option value="Gujarat">Gujarat</option>
+          <option value="Punjab">Punjab</option>
+          <option value="Haryana">Haryana</option>
+          <option value="Rajasthan">Rajasthan</option>
+          <option value="Jammu & Kashmir">Jammu & Kashmir</option>
+          <option value="Karnataka">Karnataka</option>
+          <option value="Tamil Nadu">Tamil Nadu</option>
+          <option value="Andhra Pradesh">Andhra Pradesh</option>
+          <option value="West Bengal">West Bengal</option>
         </select>
       </div>
       <div>
-        <label class="block text-xs font-bold text-soil-brown uppercase mb-1">DISTRICT FILTER</label>
-        <select id="mandiDistrict" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg font-semibold text-sm outline-none" onchange="loadMarketPrices()">
+        <label class="block text-xs font-bold text-soil-brown uppercase mb-1" for="mandiDistrict">DISTRICT FILTER</label>
+        <select id="mandiDistrict" class="w-full p-3 border border-border-subtle rounded-xl bg-input-bg font-semibold text-sm outline-none focus:ring-2 focus:ring-primary min-h-[44px]" onchange="loadMarketPrices()">
           <option value="">All Districts</option>
         </select>
       </div>
@@ -2180,19 +2191,70 @@ function detectMyLocation() {
 }
 
 // MARKET INTELLIGENCE TERMINAL ENGINE
-let currentChartMetric = 'modal_price';
+const STATE_DISTRICT_MAP = {
+  'Maharashtra': ['Nashik', 'Pune', 'Ahmednagar', 'Mumbai', 'Solapur', 'Nagpur'],
+  'Delhi': ['Azadpur', 'Ghazipur', 'Okhla', 'Najafgarh'],
+  'Uttar Pradesh': ['Agra', 'Kanpur', 'Lucknow', 'Varanasi'],
+  'Madhya Pradesh': ['Indore', 'Bhopal', 'Ujjain', 'Neemuch'],
+  'Gujarat': ['Ahmedabad', 'Surat', 'Rajkot', 'Vadodara'],
+  'Punjab': ['Ludhiana', 'Amritsar', 'Jalandhar'],
+  'Haryana': ['Karnal', 'Ambala', 'Gurugram'],
+  'Rajasthan': ['Jaipur', 'Jodhpur', 'Kota'],
+  'Jammu & Kashmir': ['Srinagar', 'Anantnag', 'Baramulla'],
+  'Karnataka': ['Bengaluru', 'Mysuru', 'Hubballi'],
+  'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai'],
+  'Andhra Pradesh': ['Guntur', 'Vijayawada'],
+  'West Bengal': ['Kolkata', 'Hooghly']
+};
 
-async function loadMarketPrices() {
+let currentMandiRequestId = 0;
+let mandiChartPoints = [];
+
+function onMandiStateChange() {
+  const state = $('mandiState')?.value || 'Maharashtra';
+  const distSelect = $('mandiDistrict');
+  if (distSelect) {
+    const districts = STATE_DISTRICT_MAP[state] || [];
+    distSelect.innerHTML = `<option value="">All Districts</option>` + districts.map(d => `<option value="${d}">${d}</option>`).join('');
+    distSelect.value = "";
+    distSelect.disabled = false;
+  }
+  loadMarketPrices();
+}
+
+async function loadMarketPrices(force = false) {
+  const requestId = ++currentMandiRequestId;
+
   const commodity = $('mandiCommodity')?.value || 'Onion';
   const state = $('mandiState')?.value || 'Maharashtra';
   const district = $('mandiDistrict')?.value || '';
 
+  const heroTitle = $('mandiHeroTitle');
+  if (heroTitle) heroTitle.textContent = `${commodity} — Loading ${district ? district + ' District, ' : ''}${state}...`;
+  if ($('mandiModalVal')) $('mandiModalVal').textContent = 'Loading...';
+  if ($('mandiModalKgVal')) $('mandiModalKgVal').textContent = '—';
+  if ($('mandiMinVal')) $('mandiMinVal').textContent = '—';
+  if ($('mandiMaxVal')) $('mandiMaxVal').textContent = '—';
+  if ($('mandiChangeVal')) {
+    $('mandiChangeVal').textContent = 'Fetching market arrival observations...';
+    $('mandiChangeVal').className = 'text-xs font-bold px-3 py-1 rounded-full bg-input-bg text-soil-brown';
+  }
+
   try {
-    const res = await MarketIntelligenceService.getMarketPrices({ commodity, state, district });
+    const res = await MarketIntelligenceService.getMarketPrices({ commodity, state, district, force });
+    
+    // Discard stale response if another request was initiated in the meantime
+    if (requestId !== currentMandiRequestId) {
+      console.log(`[MANDI UI] Discarded stale response for request #${requestId}`);
+      return;
+    }
+
     const records = res.records || [];
-    renderMandiUI(records, commodity, state);
+    renderMandiUI(records, commodity, state, district, res.message);
   } catch (err) {
+    if (requestId !== currentMandiRequestId) return;
     notify('Mandi data load failed: ' + err.message, 'error');
+    renderMandiUI([], commodity, state, district, 'Unable to load mandi prices. Please try again.');
   }
 }
 
@@ -2210,27 +2272,24 @@ function parseMandiPrice(val) {
   return null;
 }
 
-function normalizePriceToKg(priceInQuintal, unit = 'quintal') {
-  const price = parseMandiPrice(priceInQuintal);
-  if (price === null) return null;
-  const u = String(unit || 'quintal').toLowerCase();
-  if (u.includes('kg') || u.includes('kilogram')) return price;
-  if (u.includes('quintal') || u.includes('100 kg') || u.includes('qtl')) return price / 100;
-  if (u.includes('ton') || u.includes('tonne')) return price / 1000;
-  return price / 100;
-}
+function renderMandiUI(rawRecords, commodity, state, district = '', customMessage = null) {
+  const stateDistHeader = `${commodity} — ${state}${district ? ' (' + district + ' District)' : ''} Mandis`;
+  $('mandiHeroTitle').textContent = stateDistHeader;
 
-function renderMandiUI(rawRecords, commodity, state) {
-  $('mandiHeroTitle').textContent = `${commodity} — ${state} Mandis`;
+  const emptyMsg = customMessage || (district 
+    ? `No mandi price data available for ${district} district.` 
+    : `No mandi price data available for ${state}.`);
 
   if (!rawRecords || !rawRecords.length) {
-    $('mandiModalVal').textContent = 'Unavailable';
+    $('mandiModalVal').textContent = '—';
     $('mandiModalKgVal').textContent = '—';
     $('mandiMinVal').textContent = '—';
     $('mandiMaxVal').textContent = '—';
-    $('mandiChangeVal').textContent = 'Live mandi data temporarily unavailable';
+    $('mandiChangeVal').textContent = emptyMsg;
     $('mandiChangeVal').className = 'text-xs font-bold px-3 py-1 rounded-full bg-input-bg text-soil-brown';
-    $('mandiSummaryRows').innerHTML = `<tr><td colspan="5" class="py-4 text-center text-soil-brown font-semibold">No valid market price observations available.</td></tr>`;
+    $('mandiSummaryRows').innerHTML = `<tr><td colspan="5" class="py-4 text-center text-soil-brown font-semibold">${emptyMsg}</td></tr>`;
+    drawMandiChart([]);
+    drawCompareChart([]);
     return;
   }
 
@@ -2248,13 +2307,15 @@ function renderMandiUI(rawRecords, commodity, state) {
   }).filter(r => r.modal_price !== null);
 
   if (!validRecords.length) {
-    $('mandiModalVal').textContent = 'Unavailable';
+    $('mandiModalVal').textContent = '—';
     $('mandiModalKgVal').textContent = '—';
     $('mandiMinVal').textContent = '—';
     $('mandiMaxVal').textContent = '—';
-    $('mandiChangeVal').textContent = 'Live mandi data temporarily unavailable';
+    $('mandiChangeVal').textContent = emptyMsg;
     $('mandiChangeVal').className = 'text-xs font-bold px-3 py-1 rounded-full bg-input-bg text-soil-brown';
-    $('mandiSummaryRows').innerHTML = `<tr><td colspan="5" class="py-4 text-center text-soil-brown font-semibold">No valid market price observations available.</td></tr>`;
+    $('mandiSummaryRows').innerHTML = `<tr><td colspan="5" class="py-4 text-center text-soil-brown font-semibold">${emptyMsg}</td></tr>`;
+    drawMandiChart([]);
+    drawCompareChart([]);
     return;
   }
 
@@ -2266,24 +2327,21 @@ function renderMandiUI(rawRecords, commodity, state) {
   const avgModalKg = avgModalQuintal / 100;
 
   const minQuintal = validMins.length ? Math.min(...validMins) : Math.min(...validModals);
-  const maxQuintal = validMaxs.length ? Math.max(...validMaxs) : Math.max(...validModals);
+  const minKg = minQuintal / 100;
 
+  const maxQuintal = validMaxs.length ? Math.max(...validMaxs) : Math.max(...validModals);
+  const maxKg = maxQuintal / 100;
+
+  // Set Summary Cards (Same dataset used as graph)
   $('mandiModalVal').textContent = '₹' + Math.round(avgModalQuintal).toLocaleString();
   $('mandiModalKgVal').textContent = '₹' + avgModalKg.toFixed(2) + '/kg';
-  $('mandiMinVal').textContent = '₹' + Math.round(minQuintal) + ' (₹' + (minQuintal / 100).toFixed(1) + '/kg)';
-  $('mandiMaxVal').textContent = '₹' + Math.round(maxQuintal) + ' (₹' + (maxQuintal / 100).toFixed(1) + '/kg)';
+  $('mandiMinVal').textContent = '₹' + Math.round(minQuintal) + ' (₹' + minKg.toFixed(1) + '/kg)';
+  $('mandiMaxVal').textContent = '₹' + Math.round(maxQuintal) + ' (₹' + maxKg.toFixed(1) + '/kg)';
 
-  if (validModals.length >= 2 && validModals[1] > 0) {
-    const current = validModals[0];
-    const prev = validModals[1];
-    const pct = (((current - prev) / prev) * 100).toFixed(1);
-    const isUp = pct >= 0;
-    $('mandiChangeVal').textContent = `${isUp ? '↑' : '↓'} ${Math.abs(pct)}% vs previous record (Based on ${validRecords.length} mandis)`;
-    $('mandiChangeVal').className = `text-xs font-bold px-3 py-1 rounded-full ${isUp ? 'bg-surface text-success-emerald' : 'bg-error-container text-error'}`;
-  } else {
-    $('mandiChangeVal').textContent = `Based on ${validRecords.length} mandi observations`;
-    $('mandiChangeVal').className = 'text-xs font-bold px-3 py-1 rounded-full bg-input-bg text-soil-brown';
-  }
+  // Count of distinct mandis used
+  const distinctMandis = new Set(validRecords.map(r => r.market)).size;
+  $('mandiChangeVal').textContent = `Based on ${distinctMandis} mandi observation${distinctMandis > 1 ? 's' : ''} in ${district || state}`;
+  $('mandiChangeVal').className = 'text-xs font-bold px-3 py-1 rounded-full bg-surface text-primary border border-primary/20';
 
   $('mandiSummaryRows').innerHTML = validRecords.slice(0, 10).map(r => {
     const minStr = r.min_price !== null ? '₹' + Math.round(r.min_price) : '—';
@@ -2292,11 +2350,11 @@ function renderMandiUI(rawRecords, commodity, state) {
     const kgStr = '₹' + (r.modal_price / 100).toFixed(1);
     return `
       <tr class="border-b border-border-subtle">
-        <td class="py-2 font-semibold text-on-surface">${r.market}</td>
-        <td class="py-2 text-soil-brown">${minStr}</td>
-        <td class="py-2 font-bold text-success-emerald">${modalStr}</td>
-        <td class="py-2 text-soil-brown">${maxStr}</td>
-        <td class="py-2 font-bold text-primary">${kgStr}/kg</td>
+        <td class="py-2.5 font-semibold text-on-surface">${r.market}</td>
+        <td class="py-2.5 text-soil-brown">${minStr}</td>
+        <td class="py-2.5 font-bold text-success-emerald">${modalStr}</td>
+        <td class="py-2.5 text-soil-brown">${maxStr}</td>
+        <td class="py-2.5 font-bold text-primary">${kgStr}/kg</td>
       </tr>
     `;
   }).join('');
@@ -2318,32 +2376,72 @@ function drawMandiChart(records) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, cssW, cssH);
 
-  if (!records || !records.length) return;
+  mandiChartPoints = [];
+
+  if (!records || !records.length) {
+    ctx.font = 'bold 14px Inter, sans-serif';
+    ctx.fillStyle = '#6D786F';
+    ctx.textAlign = 'center';
+    ctx.fillText('Insufficient historical data for trend graph.', cssW / 2, cssH / 2);
+    return;
+  }
 
   const validPts = records.map(r => {
-    const p = parseMandiPrice(r[currentChartMetric] || r.modal_price);
-    return p !== null ? { date: r.arrival_date, price: p, priceKg: p / 100, market: r.market } : null;
+    const minP = parseMandiPrice(r.min_price) || parseMandiPrice(r.modal_price);
+    const modalP = parseMandiPrice(r.modal_price);
+    const maxP = parseMandiPrice(r.max_price) || parseMandiPrice(r.modal_price);
+    if (modalP === null) return null;
+    return {
+      date: r.arrival_date || new Date().toISOString().split('T')[0],
+      market: r.market || 'APMC Market',
+      minKg: (minP / 100),
+      modalKg: (modalP / 100),
+      maxKg: (maxP / 100)
+    };
   }).filter(Boolean);
 
   if (validPts.length < 2) {
     ctx.font = 'bold 14px Inter, sans-serif';
     ctx.fillStyle = '#6D786F';
     ctx.textAlign = 'center';
-    ctx.fillText('Insufficient historical data for trend line', cssW / 2, cssH / 2);
+    ctx.fillText('Insufficient historical data for trend graph.', cssW / 2, cssH / 2);
     return;
   }
 
   validPts.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  const vals = validPts.map(p => p.priceKg);
-  const minV = Math.min(...vals) * 0.95;
-  const maxV = Math.max(...vals) * 1.05 || 10;
+  const allVals = validPts.flatMap(p => [p.minKg, p.modalKg, p.maxKg]);
+  const minV = Math.max(0, Math.floor(Math.min(...allVals) * 0.9));
+  const maxV = Math.ceil(Math.max(...allVals) * 1.1) || 10;
 
-  const pad = { l: 55, r: 25, t: 25, b: 35 };
+  const pad = { l: 60, r: 30, t: 45, b: 40 };
   const w = cssW - pad.l - pad.r;
   const h = cssH - pad.t - pad.b;
 
-  ctx.strokeStyle = '#e5e7eb';
+  // 1. Draw Legend
+  ctx.font = 'bold 11px Inter, sans-serif';
+  ctx.textAlign = 'left';
+  
+  // Min Legend (Amber)
+  ctx.fillStyle = '#D97706';
+  ctx.fillRect(pad.l, 15, 12, 12);
+  ctx.fillStyle = '#374151';
+  ctx.fillText('Min Price (₹/kg)', pad.l + 18, 25);
+
+  // Modal Legend (Green)
+  ctx.fillStyle = '#006033';
+  ctx.fillRect(pad.l + 140, 15, 12, 12);
+  ctx.fillStyle = '#374151';
+  ctx.fillText('Modal Price (₹/kg)', pad.l + 158, 25);
+
+  // Max Legend (Blue)
+  ctx.fillStyle = '#2563EB';
+  ctx.fillRect(pad.l + 290, 15, 12, 12);
+  ctx.fillStyle = '#374151';
+  ctx.fillText('Max Price (₹/kg)', pad.l + 308, 25);
+
+  // 2. Y-Axis Gridlines & Labels (₹/kg)
+  ctx.strokeStyle = '#E5E7EB';
   ctx.lineWidth = 1;
   ctx.font = '10px Inter, sans-serif';
   ctx.fillStyle = '#6D786F';
@@ -2356,39 +2454,79 @@ function drawMandiChart(records) {
     ctx.moveTo(pad.l, y);
     ctx.lineTo(cssW - pad.r, y);
     ctx.stroke();
-    ctx.fillText('₹' + yVal.toFixed(1) + '/kg', pad.l - 8, y + 3);
+    ctx.fillText('₹' + yVal.toFixed(1), pad.l - 8, y + 3);
   }
 
-  ctx.beginPath();
-  ctx.strokeStyle = '#006033';
-  ctx.lineWidth = 3;
-
+  // Screen coordinate points calculation
   const screenPts = validPts.map((p, i) => {
     const x = pad.l + (i / (validPts.length - 1)) * w;
-    const y = pad.t + h - ((p.priceKg - minV) / (maxV - minV || 1)) * h;
-    return { x, y, pt: p };
+    const yMin = pad.t + h - ((p.minKg - minV) / (maxV - minV || 1)) * h;
+    const yModal = pad.t + h - ((p.modalKg - minV) / (maxV - minV || 1)) * h;
+    const yMax = pad.t + h - ((p.maxKg - minV) / (maxV - minV || 1)) * h;
+    return { x, yMin, yModal, yMax, pt: p };
   });
 
+  mandiChartPoints = screenPts;
+
+  // 3. Draw Max Series (Blue)
+  ctx.beginPath();
+  ctx.strokeStyle = '#2563EB';
+  ctx.lineWidth = 2;
   screenPts.forEach((sp, i) => {
-    if (i === 0) ctx.moveTo(sp.x, sp.y);
-    else ctx.lineTo(sp.x, sp.y);
+    if (i === 0) ctx.moveTo(sp.x, sp.yMax);
+    else ctx.lineTo(sp.x, sp.yMax);
   });
   ctx.stroke();
 
-  ctx.textAlign = 'center';
+  // 4. Draw Min Series (Amber)
+  ctx.beginPath();
+  ctx.strokeStyle = '#D97706';
+  ctx.lineWidth = 2;
   screenPts.forEach((sp, i) => {
+    if (i === 0) ctx.moveTo(sp.x, sp.yMin);
+    else ctx.lineTo(sp.x, sp.yMin);
+  });
+  ctx.stroke();
+
+  // 5. Draw Modal Series (Primary Green)
+  ctx.beginPath();
+  ctx.strokeStyle = '#006033';
+  ctx.lineWidth = 3;
+  screenPts.forEach((sp, i) => {
+    if (i === 0) ctx.moveTo(sp.x, sp.yModal);
+    else ctx.lineTo(sp.x, sp.yModal);
+  });
+  ctx.stroke();
+
+  // 6. Draw Points & X-Axis Labels
+  screenPts.forEach((sp, i) => {
+    // Max dot
     ctx.beginPath();
-    ctx.arc(sp.x, sp.y, 5, 0, Math.PI * 2);
+    ctx.arc(sp.x, sp.yMax, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#2563EB';
+    ctx.fill();
+
+    // Min dot
+    ctx.beginPath();
+    ctx.arc(sp.x, sp.yMin, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#D97706';
+    ctx.fill();
+
+    // Modal dot
+    ctx.beginPath();
+    ctx.arc(sp.x, sp.yModal, 5, 0, Math.PI * 2);
     ctx.fillStyle = '#006033';
     ctx.fill();
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    if (i === 0 || i === screenPts.length - 1 || screenPts.length <= 6) {
+    // X-Axis Date label
+    if (i === 0 || i === screenPts.length - 1 || screenPts.length <= 7 || i % Math.ceil(screenPts.length / 6) === 0) {
       const dateLabel = sp.pt.date ? sp.pt.date.substring(5) : '';
       ctx.fillStyle = '#6D786F';
       ctx.font = '10px Inter, sans-serif';
+      ctx.textAlign = 'center';
       ctx.fillText(dateLabel, sp.x, cssH - 10);
     }
   });

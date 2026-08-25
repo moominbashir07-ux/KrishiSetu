@@ -693,24 +693,19 @@ class LocalFallbackDB {
     if (q.includes('FROM market_price_snapshots')) {
       let results = [...this.tables.market_price_snapshots];
 
-      if (params.length > 0) {
-        const commodity = params[0];
-        if (commodity) {
-          results = results.filter(x => x.commodity.toLowerCase() === String(commodity).toLowerCase());
-        }
+      if (q.includes('LOWER(commodity) = LOWER($1)') && params[0]) {
+        results = results.filter(x => x.commodity && x.commodity.toLowerCase() === String(params[0]).toLowerCase());
       }
-
-      if (q.includes('market =') && params.length > 1) {
-        const market = params[1];
-        if (market) {
-          results = results.filter(x => x.market.toLowerCase() === String(market).toLowerCase());
-        }
+      if (q.includes('LOWER(state) = LOWER($2)') && params[1]) {
+        results = results.filter(x => x.state && x.state.toLowerCase() === String(params[1]).toLowerCase());
       }
-
-      if (q.includes('state =') && params.length > 1) {
-        const state = params[params.length - 1];
-        if (state) {
-          results = results.filter(x => x.state.toLowerCase() === String(state).toLowerCase());
+      if (q.includes('LOWER(district) = LOWER($3)') && params[2]) {
+        results = results.filter(x => x.district && x.district.toLowerCase() === String(params[2]).toLowerCase());
+      }
+      if (q.includes('LOWER(market) = LOWER($')) {
+        const mParam = params[params.length - 1];
+        if (mParam) {
+          results = results.filter(x => x.market && x.market.toLowerCase() === String(mParam).toLowerCase());
         }
       }
 

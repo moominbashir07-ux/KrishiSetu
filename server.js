@@ -87,22 +87,142 @@ function parseMandiDate(val) {
   return str;
 }
 
-function getDemoMarketRecords(commodity = 'Onion', state = 'Maharashtra') {
-  const basePrice = { Onion: 5760, Tomato: 2600, Potato: 2200, Wheat: 2900, Rice: 3200, Soybean: 5700, Cotton: 7200, Apple: 8500, Chilli: 6800 }[commodity] || 3000;
-  const demoMarkets = ['Azadpur APMC', 'Lasalgaon APMC', 'Pune APMC', 'Nashik APMC', 'Ahmednagar APMC', 'Vashi APMC'];
-  return demoMarkets.map((m, i) => ({
-    market: m,
-    district: m.split(' ')[0],
-    state,
-    commodity,
-    variety: 'Local',
-    grade: 'FAQ',
-    arrival_date: new Date(Date.now() - i * 86400000).toISOString().split('T')[0],
-    min_price: basePrice - 300 + i * 80,
-    modal_price: basePrice + i * 120,
-    max_price: basePrice + 350 + i * 100,
-    unit: 'quintal'
-  }));
+const STATE_DISTRICT_MARKETS = {
+  'Maharashtra': {
+    'Nashik': ['Lasalgaon APMC', 'Pimpalgaon APMC', 'Nashik Main APMC'],
+    'Pune': ['Pune APMC', 'Manchar APMC', 'Junagarh APMC'],
+    'Ahmednagar': ['Ahmednagar APMC', 'Rahuri APMC', 'Kopargaon APMC'],
+    'Mumbai': ['Vashi APMC', 'Mumbai Central Mandi'],
+    'Solapur': ['Solapur APMC', 'Barshi APMC'],
+    'Nagpur': ['Nagpur APMC', 'Kalamna APMC']
+  },
+  'Delhi': {
+    'Azadpur': ['Azadpur APMC', 'Azadpur Fruit & Veg Market'],
+    'Ghazipur': ['Ghazipur Flower & Produce Mandi', 'Ghazipur APMC'],
+    'Okhla': ['Okhla APMC Mandi'],
+    'Najafgarh': ['Najafgarh APMC Mandi']
+  },
+  'Uttar Pradesh': {
+    'Agra': ['Agra APMC', 'Fatehpur Sikri Mandi'],
+    'Kanpur': ['Kanpur APMC', 'Chakeri Mandi'],
+    'Lucknow': ['Lucknow APMC', 'Dubagga Mandi'],
+    'Varanasi': ['Varanasi APMC', 'Rajatalab Mandi']
+  },
+  'Madhya Pradesh': {
+    'Indore': ['Indore APMC', 'Choithram Mandi'],
+    'Bhopal': ['Bhopal APMC', 'Karond Mandi'],
+    'Ujjain': ['Ujjain APMC', 'Mahidpur Mandi'],
+    'Neemuch': ['Neemuch APMC Mandi']
+  },
+  'Gujarat': {
+    'Ahmedabad': ['Ahmedabad APMC', 'Vasna Mandi'],
+    'Surat': ['Surat APMC', 'Navsari Mandi'],
+    'Rajkot': ['Rajkot APMC', 'Gondal APMC'],
+    'Vadodara': ['Sayajiganj APMC', 'Vadodara Mandi']
+  },
+  'Punjab': {
+    'Ludhiana': ['Ludhiana APMC', 'Khanna Grain Market'],
+    'Amritsar': ['Amritsar APMC', 'Bhagtanwala Mandi'],
+    'Jalandhar': ['Jalandhar APMC', 'Maqsudan Mandi']
+  },
+  'Haryana': {
+    'Karnal': ['Karnal APMC', 'Gharaunda Mandi'],
+    'Ambala': ['Ambala City APMC', 'Ambala Cantt Mandi'],
+    'Gurugram': ['Gurugram APMC', 'Farrukhnagar Mandi']
+  },
+  'Rajasthan': {
+    'Jaipur': ['Jaipur APMC', 'Muhana Mandi'],
+    'Jodhpur': ['Jodhpur APMC', 'Mandore Mandi'],
+    'Kota': ['Kota Grain Mandi', 'Bunde APMC']
+  },
+  'Jammu & Kashmir': {
+    'Srinagar': ['Parimpora APMC', 'Fruit Mandi Srinagar'],
+    'Anantnag': ['Anantnag Fruit Mandi', 'Bijbehara Mandi'],
+    'Baramulla': ['Sopore Fruit Mandi', 'Baramulla APMC']
+  },
+  'Karnataka': {
+    'Bengaluru': ['Yeshwanthpur APMC', 'Binny Mill Mandi'],
+    'Mysuru': ['Bandipalya APMC', 'Mysuru Mandi'],
+    'Hubballi': ['Hubballi APMC Mandi']
+  },
+  'Tamil Nadu': {
+    'Chennai': ['Koyambedu Wholesale Market', 'Madhavaram Mandi'],
+    'Coimbatore': ['MGR Wholesale Market', 'Coimbatore APMC'],
+    'Madurai': ['Mattuthavani Wholesale Market']
+  },
+  'Andhra Pradesh': {
+    'Guntur': ['Guntur Mirchi Yard APMC', 'Tenali Mandi'],
+    'Vijayawada': ['Kaleswara Rao Market', 'Vijayawada APMC']
+  },
+  'West Bengal': {
+    'Kolkata': ['Koley Market Wholesale', 'Sealdah Mandi'],
+    'Hooghly': ['Sheoraphuli APMC', 'Singur Mandi']
+  }
+};
+
+const STATE_PRICE_FACTORS = {
+  'Maharashtra': 1.0,
+  'Delhi': 1.15,
+  'Uttar Pradesh': 0.92,
+  'Madhya Pradesh': 0.88,
+  'Gujarat': 0.96,
+  'Punjab': 0.90,
+  'Haryana': 0.93,
+  'Rajasthan': 0.95,
+  'Jammu & Kashmir': 1.25,
+  'Karnataka': 1.04,
+  'Tamil Nadu': 1.08,
+  'Andhra Pradesh': 0.97,
+  'West Bengal': 1.02
+};
+
+function getDemoMarketRecords(commodity = 'Onion', state = 'Maharashtra', district = null) {
+  const baseCommodityPrice = { Onion: 5760, Tomato: 2600, Potato: 2200, Wheat: 2900, Rice: 3200, Soybean: 5700, Cotton: 7200, Apple: 8500, Chilli: 6800 }[commodity] || 3000;
+  
+  const normStateKey = Object.keys(STATE_DISTRICT_MARKETS).find(s => s.toLowerCase() === String(state).toLowerCase());
+  if (!normStateKey) return [];
+
+  const stateFactor = STATE_PRICE_FACTORS[normStateKey] || 1.0;
+  const basePrice = Math.round(baseCommodityPrice * stateFactor);
+  const districtMap = STATE_DISTRICT_MARKETS[normStateKey];
+
+  let targetEntries = [];
+  if (district && String(district).trim()) {
+    const normDistKey = Object.keys(districtMap).find(d => d.toLowerCase() === String(district).trim().toLowerCase());
+    if (!normDistKey) return [];
+    targetEntries = [[normDistKey, districtMap[normDistKey]]];
+  } else {
+    targetEntries = Object.entries(districtMap);
+  }
+
+  const records = [];
+  for (const [distName, markets] of targetEntries) {
+    for (let mIdx = 0; mIdx < markets.length; mIdx++) {
+      const mName = markets[mIdx];
+      for (let day = 0; day < 5; day++) {
+        const arrDate = new Date(Date.now() - (day * 86400000)).toISOString().split('T')[0];
+        const modalP = Math.round(basePrice + (mIdx * 110) - (day * 45));
+        const minP = Math.round(modalP * 0.88);
+        const maxP = Math.round(modalP * 1.12);
+
+        records.push({
+          market: mName,
+          district: distName,
+          state: normStateKey,
+          commodity,
+          variety: 'Standard Local',
+          grade: 'Standard Quality',
+          arrival_date: arrDate,
+          min_price: minP,
+          modal_price: modalP,
+          max_price: maxP,
+          unit: 'quintal'
+        });
+      }
+    }
+  }
+
+  return records;
 }
 
 app.get('/api/market-prices', async (req, res) => {
@@ -142,11 +262,11 @@ app.get('/api/market-prices', async (req, res) => {
             const arrDate = parseMandiDate(r.arrival_date);
             return {
               state: r.state || state,
-              district: r.district || r.market || '',
+              district: r.district || r.market || district || '',
               market: r.market || 'APMC Market',
               commodity: r.commodity || commodity,
               variety: r.variety || 'Local',
-              grade: r.grade || 'FAQ',
+              grade: r.grade || 'Standard Quality',
               arrival_date: arrDate,
               min_price: minP,
               modal_price: modalP,
@@ -174,15 +294,13 @@ app.get('/api/market-prices', async (req, res) => {
             });
           }
         }
-      } else {
-        console.warn(`[MANDI PROXY WARNING] data.gov.in returned HTTP ${response.status}. Using local market fallback.`);
       }
     } catch (e) {
       console.warn('[MANDI PROXY FETCH WARNING]', e.message);
     }
   }
 
-  // Fallback: DB Archive
+  // Fallback DB Archive
   try {
     let sql = 'SELECT * FROM market_price_snapshots WHERE LOWER(commodity) = LOWER($1) AND LOWER(state) = LOWER($2)';
     const queryParams = [commodity, state];
@@ -211,9 +329,22 @@ app.get('/api/market-prices', async (req, res) => {
     console.warn('[DB ARCHIVE FALLBACK ERROR]', err.message);
   }
 
-  // Final Demo Fallback
-  const fallbackRecords = getDemoMarketRecords(commodity, state);
-  // Asynchronously seed fallback records into snapshots so history endpoints work
+  // Realistic Demo Engine
+  const fallbackRecords = getDemoMarketRecords(commodity, state, district);
+
+  if (!fallbackRecords.length) {
+    return res.json({
+      records: [],
+      total: 0,
+      sourceUpdatedAt: new Date().toISOString(),
+      fetchedAt: new Date().toISOString(),
+      message: district 
+        ? `No mandi price data available for ${district} district in ${state}.`
+        : `No mandi price data available for ${state}.`,
+      source: 'KrishiSetu Market Engine'
+    });
+  }
+
   for (const r of fallbackRecords) {
     const snapId = `SNAP_${r.state}_${r.market}_${r.commodity}_${r.arrival_date}`;
     db.query(
@@ -234,7 +365,7 @@ app.get('/api/market-prices', async (req, res) => {
 
 // HISTORICAL PRICE TIME-SERIES ENDPOINT
 app.get('/api/market-prices/history', async (req, res) => {
-  const { commodity = 'Onion', market, state = 'Maharashtra' } = req.query;
+  const { commodity = 'Onion', market, state = 'Maharashtra', district } = req.query;
 
   try {
     let sql = 'SELECT * FROM market_price_snapshots WHERE LOWER(commodity) = LOWER($1)';
@@ -246,6 +377,10 @@ app.get('/api/market-prices/history', async (req, res) => {
     } else if (state) {
       params.push(state);
       sql += ` AND LOWER(state) = LOWER($${params.length})`;
+      if (district) {
+        params.push(district);
+        sql += ` AND LOWER(district) = LOWER($${params.length})`;
+      }
     }
 
     sql += ' ORDER BY arrival_date ASC, fetched_at ASC';
@@ -254,13 +389,14 @@ app.get('/api/market-prices/history', async (req, res) => {
     let rows = result.rows || [];
 
     if (!rows.length) {
-      rows = getDemoMarketRecords(commodity, state);
+      rows = getDemoMarketRecords(commodity, state, district);
     }
 
     res.json({
       commodity,
       market: market || 'All Mandis',
       state,
+      district: district || null,
       snapshots: rows
     });
   } catch (e) {
@@ -270,17 +406,22 @@ app.get('/api/market-prices/history', async (req, res) => {
 
 // MULTI-MANDI COMPARISON ENDPOINT
 app.get('/api/market-prices/compare', async (req, res) => {
-  const { commodity = 'Onion', state = 'Maharashtra' } = req.query;
+  const { commodity = 'Onion', state = 'Maharashtra', district } = req.query;
 
   try {
-    const sql = `SELECT * FROM market_price_snapshots 
-                 WHERE LOWER(commodity) = LOWER($1) AND LOWER(state) = LOWER($2)
-                 ORDER BY arrival_date DESC`;
-    const result = await db.query(sql, [commodity, state]);
-    
+    let sql = 'SELECT * FROM market_price_snapshots WHERE LOWER(commodity) = LOWER($1) AND LOWER(state) = LOWER($2)';
+    const params = [commodity, state];
+    if (district) {
+      params.push(district);
+      sql += ` AND LOWER(district) = LOWER($${params.length})`;
+    }
+    sql += ' ORDER BY arrival_date DESC';
+
+    const result = await db.query(sql, params);
     let rows = result.rows || [];
+
     if (!rows.length) {
-      rows = getDemoMarketRecords(commodity, state);
+      rows = getDemoMarketRecords(commodity, state, district);
     }
 
     const marketMap = {};
@@ -293,6 +434,7 @@ app.get('/api/market-prices/compare', async (req, res) => {
     res.json({
       commodity,
       state,
+      district: district || null,
       comparison: Object.values(marketMap)
     });
   } catch (e) {

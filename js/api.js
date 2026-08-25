@@ -244,15 +244,17 @@ const MarketIntelligenceService = {
     return ApiService.request(`/api/market-prices?${params.toString()}`);
   },
 
-  async getHistory({ commodity = 'Onion', market, state = 'Maharashtra' } = {}) {
+  async getHistory({ commodity = 'Onion', market, state = 'Maharashtra', district } = {}) {
     const params = new URLSearchParams({ commodity, state });
+    if (district) params.append('district', district);
     if (market) params.append('market', market);
 
     return ApiService.request(`/api/market-prices/history?${params.toString()}`);
   },
 
-  async getComparison({ commodity = 'Onion', state = 'Maharashtra' } = {}) {
+  async getComparison({ commodity = 'Onion', state = 'Maharashtra', district } = {}) {
     const params = new URLSearchParams({ commodity, state });
+    if (district) params.append('district', district);
     return ApiService.request(`/api/market-prices/compare?${params.toString()}`);
   }
 };
