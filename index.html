@@ -1027,7 +1027,8 @@ function selectAuthRole(role) {
 
 function isValidEmail(email) {
   if (typeof email !== 'string') return false;
-  const str = email.trim();
+  const str = email.trim().toLowerCase();
+  if (str === 'admin') return true;
   if (str.includes('..')) return false;
   const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   return regex.test(str);
@@ -1196,8 +1197,12 @@ function onUserSignedIn(user) {
   if (currentRole === 'seller') {
     showScreen('buyer-market');
   } else if (currentRole === 'admin') {
+    notify('Welcome Administrator! Accessing Master Control Center...', 'success');
     showScreen('adminView');
     loadAdminDashboard();
+    if (window.history && window.history.pushState && window.location.pathname !== '/admin') {
+      window.history.pushState({}, '', '/admin');
+    }
   } else {
     showScreen('buyer-market');
   }

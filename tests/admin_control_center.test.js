@@ -62,6 +62,18 @@ test('KrishiSetu — Master Admin Control Center & /admin Route Security Test Su
   await db.query('INSERT INTO users (id, name, contact, password_hash, role) VALUES ($1, $2, $3, $4, $5)', [customerId, 'Normal Customer', 'cust@krishisetu.com', 'secret_hash_cust', 'customer']);
   await db.query('INSERT INTO users (id, name, contact, password_hash, role) VALUES ($1, $2, $3, $4, $5)', [sellerId, 'Local Farmer', 'farmer@krishisetu.com', 'secret_hash_sell', 'seller']);
 
+  await t.test('0. Default Demo Admin Account ("admin" / "admin") authenticates via normal signin endpoint', async () => {
+    const res = await makeRequest('/api/auth/signin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: { contact: 'admin', password: 'admin' }
+    });
+
+    assert.equal(res.status, 200);
+    assert.ok(res.data.token, 'Must return JWT token for admin');
+    assert.equal(res.data.user.role, 'admin', 'Returned user role must be admin');
+  });
+
   await t.test('1 & 2. GET /admin route serves HTML frontend (HTTP 200 OK)', async () => {
     const res = await makeRequest('/admin');
     assert.equal(res.status, 200);

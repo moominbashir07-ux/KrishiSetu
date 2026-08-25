@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { Pool } = require('pg');
+const bcrypt = require('bcryptjs');
 
 let pool = null;
 let isPgConnected = false;
@@ -45,9 +46,9 @@ class LocalFallbackDB {
         ...u
       }));
 
-      if (q.includes('contact =')) {
-        const contact = params[0];
-        const found = users.find(u => u.contact === contact);
+      if (q.includes('contact =') || q.includes('LOWER(contact) =')) {
+        const contact = String(params[0] || '').toLowerCase();
+        const found = users.find(u => u.contact.toLowerCase() === contact || (contact === 'admin' && u.contact.toLowerCase() === 'admin@krishisetu.com'));
         return { rows: found ? [{ ...found }] : [] };
       }
       if (q.includes('id =')) {
@@ -757,16 +758,34 @@ async function initDb() {
       client.release();
       isPgConnected = true;
       console.log('Successfully connected to PostgreSQL production database.');
-      return;
     } catch (err) {
       console.warn('PostgreSQL connection attempt failed:', err.message);
       console.warn('Using embedded database fallback engine for local operation.');
+      isPgConnected = false;
     }
   } else {
     console.warn('No DATABASE_URL configured. Using embedded database fallback engine.');
+    isPgConnected = false;
   }
 
-  isPgConnected = false;
+  await seedAdminAccount();
+}
+
+async function seedAdminAccount() {
+  try {
+    const existing = await query("SELECT id FROM users WHERE LOWER(contact) = 'admin' OR LOWER(contact) = 'admin@krishisetu.com'");
+    if (!existing.rows.length) {
+      const adminId = 'U_ADMIN_DEFAULT';
+      const passwordHash = bcrypt.hashSync('admin', 10);
+      await query(
+        "INSERT INTO users (id, name, contact, password_hash, role, account_status) VALUES ($1, $2, $3, $4, $5, $6)",
+        [adminId, 'Administrator', 'admin', passwordHash, 'admin', 'active']
+      );
+      console.log("[DB SEED] Demo/Development Admin account ('admin' / 'admin') initialized successfully.");
+    }
+  } catch (err) {
+    console.warn('[DB SEED] Admin account seed skipped:', err.message);
+  }
 }
 
 async function query(text, params) {

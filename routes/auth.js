@@ -102,7 +102,7 @@ router.post('/signin', async (req, res, next) => {
 
   try {
     const result = await db.query(
-      'SELECT id, name, contact, password_hash, role FROM users WHERE contact = $1',
+      'SELECT id, name, contact, password_hash, role, account_status FROM users WHERE LOWER(contact) = LOWER($1) OR (LOWER($1) = \'admin\' AND LOWER(contact) = \'admin@krishisetu.com\')',
       [normalizedContact]
     );
 
