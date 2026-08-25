@@ -201,6 +201,24 @@
         <span class="material-symbols-outlined text-xl" data-icon="shopping_cart">shopping_cart</span>
         <span id="cartCountBadge" class="absolute -top-1 -right-1 bg-harvest-gold text-inverse-surface font-bold text-[10px] w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center">0</span>
       </button>
+      
+      <!-- NOTIFICATION BELL & DROPDOWN -->
+      <div class="relative">
+        <button id="notifBtn" class="hidden text-on-surface-variant hover:text-primary transition-colors relative p-1.5" onclick="toggleNotificationsDropdown()" type="button" title="Notifications">
+          <span class="material-symbols-outlined text-xl">notifications</span>
+          <span id="notifBadge" class="hidden absolute -top-1 -right-1 bg-error-crisp text-white font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
+        </button>
+        <div id="notificationsDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-2xl border border-border-subtle shadow-xl z-50 p-4 max-h-96 overflow-y-auto">
+          <div class="flex justify-between items-center pb-2 border-b border-border-subtle mb-2">
+            <h4 class="font-bold text-xs text-primary uppercase">Notifications</h4>
+            <button class="text-[10px] text-soil-brown hover:text-primary font-bold" onclick="markAllNotificationsRead()" type="button">Clear</button>
+          </div>
+          <div id="notificationsList" class="space-y-2 text-xs text-soil-brown">
+            <p class="text-center py-4">No notifications.</p>
+          </div>
+        </div>
+      </div>
+
       <span id="userRoleBadge" class="hidden text-xs font-extrabold px-2.5 py-1 rounded-full bg-surface text-primary border border-primary/20"></span>
       <button id="profileNavBtn" class="hidden text-xs sm:text-body-sm text-soil-brown hover:text-primary font-bold transition-colors" onclick="showScreen('profile')" type="button">Profile</button>
       <button id="authHeaderBtn" class="text-xs sm:text-body-sm bg-primary text-white rounded-lg px-3 py-2 sm:px-4 sm:py-2 hover:bg-primary-container transition-colors font-bold" onclick="openAuthModal()" type="button">Login</button>
@@ -269,6 +287,21 @@
 
   <!-- 2. AUTHENTICATED BUYER MARKETPLACE SCREEN -->
   <section class="screen max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-8" id="buyer-market">
+    
+    <!-- DEDICATED MY LISTINGS SECTION FOR SELLERS -->
+    <div id="myListingsSection" class="mb-10 hidden">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h2 class="text-headline-md font-bold text-primary">My Listings</h2>
+          <p class="text-body-sm text-soil-brown">Manage and update your published produce listings.</p>
+        </div>
+        <button class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors shadow-sm" onclick="showScreen('sell')" type="button">+ Add New Produce Listing</button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6" id="myListingsGrid">
+        <div class="p-8 text-center text-soil-brown bg-white rounded-xl border border-border-subtle col-span-full">Loading your produce listings...</div>
+      </div>
+    </div>
+
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
       <div>
         <h2 class="text-headline-md font-bold text-primary">Fresh Produce Near You</h2>
@@ -760,6 +793,53 @@
   </div>
 </div>
 
+<!-- REAL PAYMENT SELECTION MODAL (SCANNER & PAY ON DELIVERY) -->
+<div id="paymentCheckoutModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-white rounded-2xl max-w-lg w-[92vw] p-6 shadow-xl relative max-h-[90vh] overflow-y-auto" id="paymentModalContent">
+    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" onclick="closePaymentCheckoutModal()" type="button">✕</button>
+    <h3 class="text-xl font-bold text-primary mb-1">Payment & Order Confirmation</h3>
+    <p class="text-xs text-soil-brown mb-4">Choose your preferred payment method to place order.</p>
+
+    <!-- Order Summary Container -->
+    <div class="bg-input-bg p-4 rounded-xl border border-border-subtle mb-4" id="checkoutOrderSummary">
+      <h4 class="font-bold text-xs uppercase text-soil-brown mb-2">Order Items Summary</h4>
+      <div id="checkoutSummaryRows" class="space-y-1.5 text-xs mb-3"></div>
+      <div class="pt-2 border-t border-border-subtle flex justify-between font-bold text-sm text-primary">
+        <span>Total Payable:</span>
+        <span id="checkoutTotalPayable">₹0</span>
+      </div>
+    </div>
+
+    <!-- Payment Method Tabs -->
+    <div class="flex bg-input-bg p-1 rounded-xl mb-4">
+      <button id="payTabScanner" class="flex-1 py-2 text-xs font-bold rounded-lg bg-white text-primary shadow-sm" onclick="switchPaymentMethod('upi_qr')" type="button">📱 Pay on Scanner (UPI QR)</button>
+      <button id="payTabCod" class="flex-1 py-2 text-xs font-bold rounded-lg text-soil-brown" onclick="switchPaymentMethod('cod')" type="button">💵 Pay on Delivery</button>
+    </div>
+
+    <!-- Option 1: Pay on Scanner -->
+    <div id="payViewScanner" class="text-center space-y-3">
+      <p class="text-xs text-soil-brown font-medium">Scan this QR code using PhonePe, Google Pay, Paytm, or any UPI app:</p>
+      <div class="p-3 bg-white border border-border-subtle rounded-xl inline-block shadow-sm">
+        <img src="images/scanner.png" class="w-48 h-48 mx-auto object-contain" alt="UPI Payment Scanner" onerror="this.src='images/logo.png'">
+      </div>
+      <div class="text-xs font-bold text-success-emerald">Scan & Pay <span id="scannerPayAmount">₹0</span></div>
+      <p class="text-[10px] text-soil-brown">After completing payment on your UPI app, click below to submit order for verification.</p>
+      <button class="w-full bg-success-emerald text-white py-3 rounded-xl font-bold text-sm hover:bg-primary transition-colors shadow-md" onclick="confirmPaymentAndPlaceOrder('upi_qr')" type="button">I Have Paid (Submit Verification) ✓</button>
+    </div>
+
+    <!-- Option 2: Pay on Delivery -->
+    <div id="payViewCod" class="hidden text-center space-y-4 py-2">
+      <div class="p-4 bg-surface rounded-xl border border-primary/20 text-left">
+        <div class="flex items-center gap-2 text-primary font-bold text-sm mb-1">
+          <span>💵</span> <span>Pay on Delivery (Cash on Delivery)</span>
+        </div>
+        <p class="text-xs text-soil-brown">Pay the farmer directly in cash or UPI when your produce is delivered to your address.</p>
+      </div>
+      <button class="w-full bg-primary text-white py-3 rounded-xl font-bold text-sm hover:bg-primary-container transition-colors shadow-md" onclick="confirmPaymentAndPlaceOrder('cod')" type="button">Place Order with Pay on Delivery →</button>
+    </div>
+  </div>
+</div>
+
 <!-- FOOTER -->
 <footer class="w-full mt-auto bg-surface-container-highest dark:bg-inverse-surface border-t border-border-subtle">
   <div class="grid grid-cols-1 md:grid-cols-3 gap-lg px-margin-mobile md:px-margin-desktop py-xl max-w-max-width mx-auto">
@@ -941,6 +1021,9 @@ function toggleMobileMenu() {
   if (menu) menu.classList.toggle('hidden');
 }
 
+let cartUpdateQueues = {};
+let selectedPaymentMethod = 'upi_qr';
+
 function onUserSignedIn(user) {
   currentUserId = user.id;
   currentRole = user.role;
@@ -963,8 +1046,10 @@ function onUserSignedIn(user) {
   if ($('mobileSellBtn')) $('mobileSellBtn').classList.toggle('hidden', currentRole !== 'seller');
   if ($('mobileAdminBtn')) $('mobileAdminBtn').classList.toggle('hidden', currentRole !== 'admin');
 
+  fetchNotifications();
+
   if (currentRole === 'seller') {
-    showScreen('sell');
+    showScreen('buyer-market');
   } else if (currentRole === 'admin') {
     showScreen('adminView');
     loadAdminDashboard();
@@ -980,6 +1065,7 @@ function logoutUser() {
   const badge = $('userRoleBadge');
   if (badge) badge.classList.add('hidden');
   $('profileNavBtn').classList.add('hidden');
+  if ($('notifBtn')) $('notifBtn').classList.add('hidden');
   currentRole = 'customer';
   currentUserId = null;
   $('sellNavBtn').style.display = 'none';
@@ -1055,7 +1141,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return (R * c).toFixed(1);
 }
 
-function renderProductCard(p) {
+function renderProductCard(p, isMyListing = false) {
   let distStr = p.location || 'Maharashtra';
   if (userLocation.lat && p.latitude && p.longitude) {
     const dist = calculateDistance(userLocation.lat, userLocation.lng, p.latitude, p.longitude);
@@ -1092,7 +1178,7 @@ function renderProductCard(p) {
             ? `<button class="bg-error-container text-on-error-container px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-error/10" onclick="deleteProduct('${p.id}')" type="button">Delete</button>`
             : isSeller 
               ? `<span class="text-[10px] text-soil-brown font-semibold">View Only</span>`
-              : `<button class="bg-primary text-white px-3.5 py-1.5 rounded-lg text-xs font-bold hover:bg-primary-container shadow-sm" onclick="addToCart('${p.id}')" type="button">+ CART</button>`
+              : `<button class="bg-primary text-white px-3.5 py-1.5 rounded-lg text-xs font-bold hover:bg-primary-container shadow-sm transition-all" onclick="addToCart('${p.id}', this)" type="button">+ CART</button>`
           }
         </div>
       </div>
@@ -1102,20 +1188,50 @@ function renderProductCard(p) {
 
 async function renderProducts() {
   const cat = $('marketCategoryFilter')?.value || 'All';
+  const isSeller = currentRole === 'seller';
+
+  // Toggle My Listings section for sellers
+  const myListingsSec = $('myListingsSection');
+  if (myListingsSec) {
+    if (isSeller && currentUserId) {
+      myListingsSec.classList.remove('hidden');
+      renderMyListings();
+    } else {
+      myListingsSec.classList.add('hidden');
+    }
+  }
+
   let ps = [];
   try {
-    const res = await ProductService.getProducts(cat);
+    const query = isSeller && currentUserId ? `?excludeSellerId=${currentUserId}&category=${cat}` : `?category=${cat}`;
+    const res = await fetch(`/api/products${query}`).then(r => r.json());
     ps = res.products || [];
   } catch (err) {
     ps = [];
   }
 
   const gridHtml = ps.length 
-    ? ps.map(renderProductCard).join('') 
+    ? ps.map(p => renderProductCard(p, false)).join('') 
     : `<div class="p-8 text-center text-soil-brown bg-white rounded-2xl border border-border-subtle col-span-full">No produce listings found in this category.</div>`;
 
   if ($('marketplaceProductsGrid')) $('marketplaceProductsGrid').innerHTML = gridHtml;
   updateCartBadge();
+}
+
+async function renderMyListings() {
+  if (!currentUserId) return;
+  const grid = $('myListingsGrid');
+  if (!grid) return;
+
+  try {
+    const res = await fetch(`/api/products?sellerId=${currentUserId}`).then(r => r.json());
+    const products = res.products || [];
+    grid.innerHTML = products.length 
+      ? products.map(p => renderProductCard(p, true)).join('') 
+      : `<div class="p-8 text-center text-soil-brown bg-white rounded-2xl border border-border-subtle col-span-full">You have not published any produce listings yet. Click "+ Add New Produce Listing" above to publish!</div>`;
+  } catch (err) {
+    grid.innerHTML = `<div class="p-4 text-center text-error col-span-full">${err.message}</div>`;
+  }
 }
 
 function previewProductImage(event) {
@@ -1175,8 +1291,8 @@ async function deleteProduct(id) {
   }
 }
 
-// CART ARCHITECTURE FIX (ADD TO CART DOES NOT CREATE ORDER)
-async function addToCart(productId) {
+// OPTIMISTIC ADD TO CART
+async function addToCart(productId, btnElem) {
   const userStr = localStorage.getItem('krishisetu_current_user');
   if (!userStr) {
     notify('Please sign in as a Buyer to add items to your cart.', 'info');
@@ -1184,11 +1300,42 @@ async function addToCart(productId) {
     return;
   }
 
+  if (currentRole === 'seller') {
+    return notify('Sellers cannot add products to a shopping cart. Switch to your buyer account to purchase products.', 'error');
+  }
+
+  const originalText = btnElem ? btnElem.textContent : '+ CART';
+  if (btnElem) {
+    btnElem.disabled = true;
+    btnElem.textContent = 'Adding...';
+  }
+
+  // Optimistically increment badge
+  const badge = $('cartCountBadge');
+  if (badge) {
+    const cur = Number(badge.textContent || '0');
+    badge.textContent = cur + 1;
+  }
+
   try {
     await CartService.addItem(productId, 1);
+    if (btnElem) {
+      btnElem.textContent = 'Added ✓';
+      btnElem.classList.replace('bg-primary', 'bg-success-emerald');
+      setTimeout(() => {
+        btnElem.textContent = originalText;
+        btnElem.disabled = false;
+        btnElem.classList.replace('bg-success-emerald', 'bg-primary');
+      }, 1500);
+    }
     notify('Item added to your cart!', 'success');
     updateCartBadge();
   } catch (err) {
+    if (btnElem) {
+      btnElem.textContent = originalText;
+      btnElem.disabled = false;
+    }
+    updateCartBadge();
     notify('Cart error: ' + err.message, 'error');
   }
 }
@@ -1205,7 +1352,7 @@ async function updateCartBadge() {
   }
 }
 
-// DEDICATED CART PAGE RENDERING
+// DEDICATED CART PAGE RENDERING & OPTIMISTIC QUANTITY UPDATE
 async function renderCartScreen() {
   const listEl = $('cartItemsList');
   if (!listEl) return;
@@ -1250,14 +1397,14 @@ async function renderCartScreen() {
           <div>
             <h4 class="font-bold text-primary text-base">${i.product_name}</h4>
             <span class="text-xs text-soil-brown block">₹${i.unit_price} per kg</span>
-            <span class="text-[10px] font-bold text-success-emerald bg-surface px-2 py-0.5 rounded border border-success-emerald/20 mt-1 inline-block">Subtotal: ₹${i.subtotal}</span>
+            <span id="cartSubtotal_${i.id}" class="text-[10px] font-bold text-success-emerald bg-surface px-2 py-0.5 rounded border border-success-emerald/20 mt-1 inline-block">Subtotal: ₹${i.subtotal.toLocaleString()}</span>
           </div>
         </div>
         <div class="flex items-center gap-3">
           <div class="flex items-center border border-border-subtle rounded-lg bg-input-bg">
-            <button class="px-3 py-1 font-bold text-primary text-sm hover:bg-white" onclick="changeCartQty('${i.id}', ${Number(i.quantity) - 1})">-</button>
-            <span class="px-3 font-bold text-xs text-on-surface">${i.quantity} kg</span>
-            <button class="px-3 py-1 font-bold text-primary text-sm hover:bg-white" onclick="changeCartQty('${i.id}', ${Number(i.quantity) + 1})">+</button>
+            <button class="px-3 py-1 font-bold text-primary text-sm hover:bg-white active:bg-input-bg" onclick="changeCartQty('${i.id}', ${Number(i.quantity) - 1})">-</button>
+            <span id="cartQty_${i.id}" data-price="${i.unit_price}" class="px-3 font-bold text-xs text-on-surface">${i.quantity} kg</span>
+            <button class="px-3 py-1 font-bold text-primary text-sm hover:bg-white active:bg-input-bg" onclick="changeCartQty('${i.id}', ${Number(i.quantity) + 1})">+</button>
           </div>
           <button class="text-error font-bold text-sm px-2 py-1 hover:bg-error-container rounded-lg" onclick="removeCartItem('${i.id}')" title="Remove item">✕</button>
         </div>
@@ -1268,15 +1415,48 @@ async function renderCartScreen() {
   }
 }
 
+// OPTIMISTIC QUANTITY UPDATE WITH DEBOUNCED QUEUE
 async function changeCartQty(itemId, newQty) {
   if (newQty <= 0) return removeCartItem(itemId);
-  try {
-    await CartService.updateItem(itemId, newQty);
-    renderCartScreen();
-    updateCartBadge();
-  } catch (err) {
-    notify('Failed to update quantity: ' + err.message, 'error');
-  }
+
+  const qtyEl = $(`cartQty_${itemId}`);
+  const subtotalEl = $(`cartSubtotal_${itemId}`);
+  const priceUnit = Number(qtyEl?.dataset?.price || 0);
+
+  if (qtyEl) qtyEl.textContent = `${newQty} kg`;
+  if (subtotalEl && priceUnit) subtotalEl.textContent = `Subtotal: ₹${(newQty * priceUnit).toLocaleString()}`;
+
+  recalculateCartTotalsLocally();
+
+  if (cartUpdateQueues[itemId]) clearTimeout(cartUpdateQueues[itemId]);
+
+  cartUpdateQueues[itemId] = setTimeout(async () => {
+    try {
+      await CartService.updateItem(itemId, newQty);
+      updateCartBadge();
+    } catch (err) {
+      notify('Failed to update quantity: ' + err.message, 'error');
+      renderCartScreen();
+    }
+  }, 300);
+}
+
+function recalculateCartTotalsLocally() {
+  let sum = 0;
+  document.querySelectorAll('[id^="cartSubtotal_"]').forEach(el => {
+    const txt = el.textContent.replace(/[^0-9]/g, '');
+    sum += Number(txt || 0);
+  });
+
+  const isBulk = sum >= 5000;
+  const feeRate = isBulk ? 0.005 : 0.02;
+  const fee = Math.round(sum * feeRate);
+  const total = sum + fee;
+
+  if ($('cartSubtotal')) $('cartSubtotal').textContent = `₹${sum.toLocaleString()}`;
+  if ($('cartFeeLabel')) $('cartFeeLabel').textContent = `Platform Fee (${isBulk ? '0.5%' : '2%'})`;
+  if ($('cartFeeVal')) $('cartFeeVal').textContent = `₹${fee.toLocaleString()}`;
+  if ($('cartTotalVal')) $('cartTotalVal').textContent = `₹${total.toLocaleString()}`;
 }
 
 async function removeCartItem(itemId) {
@@ -1290,15 +1470,138 @@ async function removeCartItem(itemId) {
   }
 }
 
+// REAL PAYMENT SELECTION & CHECKOUT MODAL LOGIC
 async function checkoutCart() {
+  const userStr = localStorage.getItem('krishisetu_current_user');
+  if (!userStr) return openAuthModal();
+
   try {
-    await OrderService.createOrder({});
-    notify('Order placed successfully! Check tracking in Orders.', 'success');
-    updateCartBadge();
-    showScreen('orders');
+    const res = await CartService.getCart();
+    const items = res.items || [];
+    if (!items.length) return notify('Your cart is empty.', 'error');
+
+    openPaymentCheckoutModal(res);
   } catch (err) {
     notify('Checkout error: ' + err.message, 'error');
   }
+}
+
+function openPaymentCheckoutModal(cartData) {
+  const modal = $('paymentCheckoutModal');
+  if (!modal) return;
+
+  const items = cartData.items || [];
+  const total = cartData.totalAmount || 0;
+
+  $('checkoutSummaryRows').innerHTML = items.map(i => `
+    <div class="flex justify-between items-center text-soil-brown">
+      <span><b>${i.product_name}</b> (${i.quantity} kg)</span>
+      <span class="font-bold text-on-surface">₹${i.subtotal.toLocaleString()}</span>
+    </div>
+  `).join('');
+
+  if ($('checkoutTotalPayable')) $('checkoutTotalPayable').textContent = `₹${total.toLocaleString()}`;
+  if ($('scannerPayAmount')) $('scannerPayAmount').textContent = `₹${total.toLocaleString()}`;
+
+  switchPaymentMethod('upi_qr');
+  modal.classList.remove('hidden');
+}
+
+function closePaymentCheckoutModal() {
+  const modal = $('paymentCheckoutModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function switchPaymentMethod(method) {
+  selectedPaymentMethod = method;
+  const isQr = method === 'upi_qr';
+
+  $('payTabScanner').className = `flex-1 py-2 text-xs font-bold rounded-lg ${isQr ? 'bg-white text-primary shadow-sm' : 'text-soil-brown'}`;
+  $('payTabCod').className = `flex-1 py-2 text-xs font-bold rounded-lg ${!isQr ? 'bg-white text-primary shadow-sm' : 'text-soil-brown'}`;
+
+  $('payViewScanner').classList.toggle('hidden', !isQr);
+  $('payViewCod').classList.toggle('hidden', isQr);
+}
+
+async function confirmPaymentAndPlaceOrder(method) {
+  const token = AuthService.getToken();
+  if (!token) return openAuthModal();
+
+  const payStatus = method === 'upi_qr' ? 'submitted' : 'cod';
+
+  try {
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ payment_method: method, payment_status: payStatus })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to place order.');
+
+    closePaymentCheckoutModal();
+    notify('🎉 Order placed successfully! The farmer has been notified.', 'success');
+    updateCartBadge();
+    showScreen('orders');
+  } catch (err) {
+    notify('Order error: ' + err.message, 'error');
+  }
+}
+
+// NOTIFICATIONS DROPDOWN HANDLER
+async function fetchNotifications() {
+  const token = AuthService.getToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const notifs = res.notifications || [];
+    const unread = notifs.filter(n => !n.read).length;
+
+    const badge = $('notifBadge');
+    const btn = $('notifBtn');
+    if (btn) btn.classList.remove('hidden');
+
+    if (badge) {
+      badge.textContent = unread;
+      badge.classList.toggle('hidden', unread === 0);
+    }
+
+    const listEl = $('notificationsList');
+    if (listEl) {
+      listEl.innerHTML = notifs.length ? notifs.map(n => `
+        <div class="p-2.5 rounded-lg ${n.read ? 'bg-surface' : 'bg-primary/10 border border-primary/20'} transition-colors">
+          <div class="font-bold text-primary text-xs mb-0.5">${n.title}</div>
+          <p class="text-[11px] text-soil-brown">${n.message}</p>
+          <span class="text-[9px] text-soil-brown/70 mt-1 block">${new Date(n.created_at || Date.now()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+        </div>
+      `).join('') : '<p class="text-center py-4 text-soil-brown">No notifications.</p>';
+    }
+  } catch (err) {
+    console.warn('Notifications fetch error:', err.message);
+  }
+}
+
+function toggleNotificationsDropdown() {
+  const dd = $('notificationsDropdown');
+  if (dd) {
+    dd.classList.toggle('hidden');
+    if (!dd.classList.contains('hidden')) fetchNotifications();
+  }
+}
+
+async function markAllNotificationsRead() {
+  const token = AuthService.getToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const notifs = res.notifications || [];
+    for (const n of notifs.filter(x => !x.read)) {
+      await fetch(`/api/notifications/${n.id}/read`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } });
+    }
+    fetchNotifications();
+  } catch (e) {}
 }
 
 // PROFILE SCREEN

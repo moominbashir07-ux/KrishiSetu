@@ -24,7 +24,8 @@ class LocalFallbackDB {
       order_status_history: [],
       market_price_snapshots: [],
       reviews: [],
-      feedback: []
+      feedback: [],
+      notifications: []
     };
   }
 
@@ -182,6 +183,30 @@ class LocalFallbackDB {
       return { rows: fb ? [{ ...fb }] : [] };
     }
 
+    // 17. NOTIFICATIONS
+    if (q.startsWith('INSERT INTO notifications')) {
+      const n = {
+        id: params[0], user_id: params[1], type: params[2], title: params[3],
+        message: params[4], read: params[5] === true || params[5] === 'true',
+        order_id: params[6] || null, created_at: new Date().toISOString()
+      };
+      this.tables.notifications.unshift(n);
+      return { rows: [{ ...n }] };
+    }
+
+    if (q.includes('FROM notifications')) {
+      const uid = params[0];
+      let list = this.tables.notifications.filter(n => n.user_id === uid);
+      return { rows: list };
+    }
+
+    if (q.startsWith('UPDATE notifications')) {
+      const id = params[0];
+      const n = this.tables.notifications.find(x => x.id === id);
+      if (n) n.read = true;
+      return { rows: n ? [{ ...n }] : [] };
+    }
+
     // 13. ADMIN METRICS
     if (q.includes('COUNT(')) {
       const totalUsers = this.tables.users.length;
@@ -266,7 +291,10 @@ class LocalFallbackDB {
         const p = result.find(x => x.id === id);
         return { rows: p ? [{ ...p }] : [] };
       }
-      if (q.includes('p.seller_id = $') || q.includes('seller_id = $')) {
+      if (q.includes('p.seller_id != $') || q.includes('seller_id != $') || q.includes('seller_id <> $')) {
+        const exclId = params[0];
+        result = result.filter(p => p.seller_id !== exclId);
+      } else if (q.includes('p.seller_id = $') || q.includes('seller_id = $')) {
         const sellerId = params[0];
         result = result.filter(p => p.seller_id === sellerId);
       }
@@ -392,11 +420,22 @@ class LocalFallbackDB {
 
     // 8. ORDERS
     if (q.startsWith('INSERT INTO orders')) {
-      const order = {
-        id: params[0], order_number: params[1], customer_id: params[2], seller_id: params[3],
-        status: params[4] || 'Order Placed', total_amount: Number(params[5]), buyer_contact: params[6] || '',
-        step: Number(params[7] || 1), created_at: new Date().toISOString(), updated_at: new Date().toISOString()
-      };
+      let order = {};
+      if (params.length >= 10) {
+        order = {
+          id: params[0], order_number: params[1], customer_id: params[2], seller_id: params[3],
+          status: params[4] || 'Order Placed', total_amount: Number(params[5]), buyer_contact: params[6] || '',
+          step: Number(params[7] || 1), payment_method: params[8] || 'cod', payment_status: params[9] || 'cod',
+          created_at: new Date().toISOString(), updated_at: new Date().toISOString()
+        };
+      } else {
+        order = {
+          id: params[0], order_number: params[1], customer_id: params[2], seller_id: params[3],
+          status: params[4] || 'Order Placed', total_amount: Number(params[5]), buyer_contact: '',
+          step: 1, payment_method: params[6] || 'cod', payment_status: params[7] || 'cod',
+          created_at: new Date().toISOString(), updated_at: new Date().toISOString()
+        };
+      }
       this.tables.orders.unshift(order);
       return { rows: [{ ...order }] };
     }

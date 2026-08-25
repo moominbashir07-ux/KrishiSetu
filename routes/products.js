@@ -5,9 +5,9 @@ const { validateProductInput } = require('../middleware/validate');
 
 const router = express.Router();
 
-// GET ALL ACTIVE PRODUCTS (Optional filtering by category or seller)
+// GET ALL ACTIVE PRODUCTS (Optional filtering by category, sellerId, or excludeSellerId)
 router.get('/', async (req, res, next) => {
-  const { sellerId, category } = req.query;
+  const { sellerId, excludeSellerId, category } = req.query;
   try {
     let sql = `SELECT p.*, u.name as "sellerName", u.contact as "sellerContact", COALESCE(sp.verification_status, 'pending') as "sellerVerificationStatus" 
                FROM products p 
@@ -16,10 +16,14 @@ router.get('/', async (req, res, next) => {
                WHERE p.status != 'inactive'`;
     const params = [];
 
-    if (sellerId) {
+    if (excludeSellerId) {
+      params.push(excludeSellerId);
+      sql += ` AND p.seller_id != $${params.length}`;
+    } else if (sellerId) {
       params.push(sellerId);
       sql += ` AND p.seller_id = $${params.length}`;
     }
+
     if (category && category !== 'All' && category !== 'All produce') {
       params.push(category);
       sql += ` AND LOWER(p.category) = LOWER($${params.length})`;

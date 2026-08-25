@@ -34,9 +34,11 @@ const STATUS_TO_STEP = {
 
 // CREATE ORDER (DIRECT OR CART CHECKOUT)
 router.post('/', authenticateUser, requireRole('customer'), async (req, res, next) => {
-  const { productId, quantity } = req.body;
+  const { productId, quantity, payment_method = 'cod', payment_status } = req.body;
   const customerId = req.user.id;
   const buyerContact = req.user.contact;
+
+  const validPayStatus = payment_status || (payment_method === 'upi_qr' ? 'submitted' : 'cod');
 
   try {
     let orderItemsToProcess = [];
@@ -124,9 +126,9 @@ router.post('/', authenticateUser, requireRole('customer'), async (req, res, nex
         const sellerTotal = Math.round((sellerSubtotal + platformFee) * 100) / 100;
 
         await client.query(
-          `INSERT INTO orders (id, order_number, customer_id, seller_id, status, total_amount, buyer_contact, step)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-          [orderId, orderNumber, customerId, sellerId, 'Order Placed', sellerTotal, buyerContact, 1]
+          `INSERT INTO orders (id, order_number, customer_id, seller_id, status, total_amount, buyer_contact, step, payment_method, payment_status)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+          [orderId, orderNumber, customerId, sellerId, 'Order Placed', sellerTotal, buyerContact, 1, payment_method, validPayStatus]
         );
 
         // Record initial status history log
@@ -135,6 +137,19 @@ router.post('/', authenticateUser, requireRole('customer'), async (req, res, nex
           `INSERT INTO order_status_history (id, order_id, previous_status, new_status, changed_by)
            VALUES ($1, $2, $3, $4, $5)`,
           [historyId, orderId, null, 'Order Placed', customerId]
+        );
+
+        // Send notification to Seller
+        const notifId = 'NOTIF_' + Date.now() + Math.random().toString(36).substring(2, 6);
+        await client.query(
+          `INSERT INTO notifications (id, user_id, type, title, message, read, order_id)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [
+            notifId, sellerId, 'new_order',
+            `🔔 New Order Received #${orderNumber}`,
+            `You received a new order for ${items[0].product.name} (${items[0].requestedQty} kg). Total: ₹${sellerTotal}`,
+            false, orderId
+          ]
         );
 
         for (const item of items) {
@@ -370,6 +385,19 @@ router.put('/:id/status', authenticateUser, requireAnyRole('seller', 'admin'), a
         `INSERT INTO order_status_history (id, order_id, previous_status, new_status, changed_by)
          VALUES ($1, $2, $3, $4, $5)`,
         [historyId, order.id, currentStatus, targetStatus, req.user.id]
+      );
+
+      // Send notification to Customer
+      const notifId = 'NOTIF_' + Date.now() + Math.random().toString(36).substring(2, 6);
+      await client.query(
+        `INSERT INTO notifications (id, user_id, type, title, message, read, order_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [
+          notifId, order.customer_id, 'order_status',
+          `📦 Order Update #${order.order_number || order.id}`,
+          `Your order status has been updated to "${targetStatus}".`,
+          false, order.id
+        ]
       );
     });
 
