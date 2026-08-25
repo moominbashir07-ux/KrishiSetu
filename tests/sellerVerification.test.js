@@ -43,6 +43,7 @@ test('Phase 5B — Document Storage Service Validation', async (t) => {
 });
 
 test('Phase 5B — OTP Service & Password Reset Abstraction', async (t) => {
+  process.env.NODE_ENV = 'test';
   let generatedOtp = null;
 
   await t.test('generates, hashes, and records OTP without exposing plain text', async () => {

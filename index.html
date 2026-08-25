@@ -498,10 +498,10 @@
   <!-- 8. ABOUT US SCREEN -->
   <section class="screen max-w-3xl mx-auto px-margin-mobile md:px-margin-desktop py-12 text-center" id="about">
     <div class="bg-white p-10 rounded-2xl border border-border-subtle shadow-sm">
-      <span class="text-4xl">🌾</span>
+      <img src="images/logo.png" class="h-20 w-auto object-contain mx-auto mb-4" alt="KrishiSetu Brand Logo" onerror="this.style.display='none';">
       <h2 class="text-headline-lg font-bold text-primary mt-2 mb-4">About KrishiSetu</h2>
       <p class="text-body-default text-soil-brown mb-6 max-w-2xl mx-auto">
-        KrishiSetu is an agricultural price intelligence and farm-to-customer marketplace designed to empower local farmers with direct consumer access, transparent platform fees, and live AGMARKNET mandi rates.
+        KrishiSetu is an agricultural price intelligence and direct farm-to-customer marketplace designed to empower local farmers with direct consumer access, transparent platform fees, and live AGMARKNET mandi rates.
       </p>
       <div class="inline-block bg-surface px-6 py-3 rounded-xl border border-primary/20 text-primary font-bold text-sm">
         🚀 Made by Team Red
@@ -701,9 +701,8 @@ async function submitAuthModal() {
       pendingContact = contact;
       
       try {
-        const otpRes = await OtpService.sendOtp(contact, 'email_verification');
+        await OtpService.sendOtp(contact, 'email_verification');
         notify('OTP sent! Please check your email inbox.', 'success');
-        if (otpRes && otpRes.otp) $('modalOtpInput').value = otpRes.otp;
       } catch (e) {
         notify('OTP Dispatch: ' + e.message, 'warning');
       }
@@ -748,9 +747,8 @@ async function verifyRegistrationOtp() {
 async function resendRegistrationOtp() {
   if (!pendingContact) return notify('No pending contact found.', 'error');
   try {
-    const res = await OtpService.sendOtp(pendingContact, 'email_verification');
+    await OtpService.sendOtp(pendingContact, 'email_verification');
     notify('New Email OTP sent successfully!', 'success');
-    if (res && res.otp) $('modalOtpInput').value = res.otp;
   } catch (err) {
     notify('Resend error: ' + err.message, 'error');
   }
@@ -1233,6 +1231,7 @@ async function renderOrders() {
 }
 
 function detectMyLocation() {
+  if ($('topLocationText')) $('topLocationText').textContent = '📍 Detecting location...';
   notify('Detecting GPS location...', 'info');
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -1246,16 +1245,17 @@ function detectMyLocation() {
         const locality = addr.suburb || addr.neighbourhood || addr.village || addr.town || addr.city || addr.county || 'Detected Area';
         const state = addr.state || '';
         userLocation.area = state ? `${locality}, ${state}` : locality;
-        $('topLocationText').textContent = userLocation.area;
+        if ($('topLocationText')) $('topLocationText').textContent = `📍 ${userLocation.area}`;
         notify(`Location updated to ${userLocation.area}`, 'success');
       } catch {
         userLocation.area = `${lat.toFixed(2)}°, ${lng.toFixed(2)}°`;
-        $('topLocationText').textContent = userLocation.area;
+        if ($('topLocationText')) $('topLocationText').textContent = `📍 ${userLocation.area}`;
         notify('GPS coordinates detected', 'info');
       }
       renderProducts();
     }, (err) => {
-      notify('Geolocation permission denied or unavailable.', 'warning');
+      if ($('topLocationText')) $('topLocationText').textContent = 'Detect Location';
+      notify('Location permission is required to detect nearby produce.', 'warning');
     }, { enableHighAccuracy: true, timeout: 10000 });
   } else {
     notify('Geolocation is not supported by your browser.', 'error');
@@ -1301,6 +1301,18 @@ function renderMandiUI(records, commodity, state) {
   $('mandiModalKgVal').textContent = '₹' + (avgModal / 100).toFixed(1) + '/kg';
   $('mandiMinVal').textContent = '₹' + lowest;
   $('mandiMaxVal').textContent = '₹' + highest;
+
+  if (modals.length >= 2 && modals[1] > 0) {
+    const current = modals[0];
+    const prev = modals[1];
+    const pct = (((current - prev) / prev) * 100).toFixed(1);
+    const isUp = pct >= 0;
+    $('mandiChangeVal').textContent = `${isUp ? '↑' : '↓'} ${Math.abs(pct)}% vs previous record`;
+    $('mandiChangeVal').className = `text-xs font-bold px-3 py-1 rounded-full ${isUp ? 'bg-surface text-success-emerald' : 'bg-error-container text-error'}`;
+  } else {
+    $('mandiChangeVal').textContent = 'Insufficient historical data';
+    $('mandiChangeVal').className = 'text-xs font-bold px-3 py-1 rounded-full bg-input-bg text-soil-brown';
+  }
 
   $('mandiSummaryRows').innerHTML = records.slice(0, 10).map(r => `
     <tr class="border-b border-border-subtle">

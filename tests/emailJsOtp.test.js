@@ -7,6 +7,7 @@ const OtpService = require('../services/otpService');
 test('EmailJS OTP Integration & Password Reset Flow', async (t) => {
   await db.initDb();
 
+  process.env.NODE_ENV = 'test';
   process.env.EMAIL_OTP_PROVIDER = 'emailjs';
   process.env.EMAILJS_PUBLIC_KEY = 'czyv3jAfR0Ie75oKe';
   process.env.EMAILJS_SERVICE_ID = 'service_9kbwben';

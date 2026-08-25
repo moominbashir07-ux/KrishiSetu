@@ -65,9 +65,13 @@ CREATE TABLE IF NOT EXISTS products (
     location TEXT,
     latitude NUMERIC(9,6),
     longitude NUMERIC(9,6),
+    image_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Ensure image_url column exists for existing tables
+ALTER TABLE products ADD COLUMN IF NOT EXISTS image_url TEXT;
 
 -- 6. PRODUCT IMAGES TABLE
 CREATE TABLE IF NOT EXISTS product_images (

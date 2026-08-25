@@ -64,7 +64,7 @@ class OtpService {
     return {
       message: 'Verification OTP sent successfully.',
       expiresInSeconds: 600,
-      otp: (process.env.NODE_ENV === 'development' || provider === 'dev') ? otpCode : undefined
+      otp: process.env.NODE_ENV === 'test' ? otpCode : undefined
     };
   }
 

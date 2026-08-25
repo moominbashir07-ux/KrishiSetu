@@ -22,8 +22,8 @@ const API_BASE = `https://api.data.gov.in/resource/${RESOURCE_ID}`;
 // Apply security middleware & parsers
 app.use(securityHeaders);
 app.use(corsOptions);
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Apply rate limiter to API routes
 app.use('/api', apiLimiter);
