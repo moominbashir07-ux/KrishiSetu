@@ -47,6 +47,14 @@ const ApiService = {
 };
 
 const AuthService = {
+  getToken() {
+    return ApiService.getToken();
+  },
+
+  setToken(token) {
+    return ApiService.setToken(token);
+  },
+
   async signup(payload) {
     const res = await ApiService.request('/api/auth/signup', {
       method: 'POST',
