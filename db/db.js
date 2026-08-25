@@ -27,7 +27,9 @@ class LocalFallbackDB {
       reviews: [],
       feedback: [],
       notifications: [],
-      admin_audit_logs: []
+      admin_audit_logs: [],
+      login_history: [],
+      user_activity: []
     };
   }
 
@@ -533,6 +535,53 @@ class LocalFallbackDB {
 
     if (q.includes('FROM admin_audit_logs')) {
       return { rows: [...this.tables.admin_audit_logs] };
+    }
+
+    // 8B. LOGIN HISTORY & USER ACTIVITY
+    if (q.startsWith('INSERT INTO login_history')) {
+      const entry = {
+        id: params[0],
+        user_id: params[1] || null,
+        contact: params[2],
+        role: params[3] || 'customer',
+        status: params[4],
+        failure_reason: params[5] || null,
+        ip_address: params[6] || '127.0.0.1',
+        user_agent: params[7] || 'Unknown Browser',
+        created_at: new Date().toISOString()
+      };
+      this.tables.login_history.unshift(entry);
+      return { rows: [{ ...entry }] };
+    }
+
+    if (q.includes('FROM login_history')) {
+      return { rows: [...this.tables.login_history] };
+    }
+
+    if (q.startsWith('INSERT INTO user_activity') || q.includes('ON CONFLICT (user_id)') || q.includes('user_activity')) {
+      const userId = params[0];
+      if (userId) {
+        const existingIdx = this.tables.user_activity.findIndex(x => x.user_id === userId);
+        const act = {
+          id: 'ACT_' + userId,
+          user_id: userId,
+          contact: params[1] || '',
+          role: params[2] || 'customer',
+          last_seen: new Date().toISOString(),
+          last_action: params[3] || 'Active',
+          current_page: params[4] || '/'
+        };
+        if (existingIdx !== -1) {
+          this.tables.user_activity[existingIdx] = act;
+        } else {
+          this.tables.user_activity.unshift(act);
+        }
+        return { rows: [{ ...act }] };
+      }
+    }
+
+    if (q.includes('FROM user_activity')) {
+      return { rows: [...this.tables.user_activity] };
     }
 
     // 9. ORDER ITEMS

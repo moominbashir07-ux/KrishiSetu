@@ -91,6 +91,36 @@ router.get('/me', authenticateUser, async (req, res, next) => {
   }
 });
 
+// HELPER FOR LOGIN HISTORY & PRESENCE RECORDING
+async function recordLoginHistory(userId, contact, role, status, failureReason, req) {
+  try {
+    const id = 'LH_' + Date.now() + Math.random().toString(36).substring(2, 6);
+    const ip = req.ip || req.headers['x-forwarded-for'] || '127.0.0.1';
+    const ua = req.headers['user-agent'] || 'Unknown Browser';
+    await db.query(
+      `INSERT INTO login_history (id, user_id, contact, role, status, failure_reason, ip_address, user_agent)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [id, userId || null, contact, role || 'customer', status, failureReason || null, String(ip), String(ua)]
+    );
+  } catch (e) {
+    console.warn('[AUTH] Failed to record login history:', e.message);
+  }
+}
+
+async function recordUserActivity(userId, contact, role, action, page) {
+  try {
+    await db.query(
+      `INSERT INTO user_activity (id, user_id, contact, role, last_seen, last_action, current_page)
+       VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, $5, $6)
+       ON CONFLICT (user_id) DO UPDATE
+       SET last_seen = CURRENT_TIMESTAMP, last_action = EXCLUDED.last_action, current_page = EXCLUDED.current_page`,
+      ['ACT_' + userId, userId, contact, role, action || 'Active', page || '/']
+    );
+  } catch (e) {
+    console.warn('[AUTH] Failed to record user activity:', e.message);
+  }
+}
+
 // SIGN IN ROUTE
 router.post('/signin', async (req, res, next) => {
   const { contact, password } = req.body;
@@ -107,26 +137,47 @@ router.post('/signin', async (req, res, next) => {
     );
 
     if (result.rows.length === 0) {
+      await recordLoginHistory(null, normalizedContact, 'unknown', 'failed', 'Account not found', req);
       return res.status(401).json({ 
         error: 'No account found with these details. Please click Create Account to register.' 
       });
     }
 
     const user = result.rows[0];
+    if (user.account_status === 'frozen' || user.account_status === 'suspended') {
+      await recordLoginHistory(user.id, user.contact, user.role, 'failed', `Account ${user.account_status}`, req);
+      return res.status(403).json({ error: `Account is ${user.account_status}. Please contact KrishiSetu Administrator.` });
+    }
+
     const passwordValid = await bcrypt.compare(password, user.password_hash);
 
     if (!passwordValid) {
+      await recordLoginHistory(user.id, user.contact, user.role, 'failed', 'Incorrect password', req);
       return res.status(401).json({ error: 'Incorrect password. Please try again.' });
     }
 
     const userPayload = { id: user.id, name: user.name, contact: user.contact, role: user.role };
     const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '7d' });
 
+    await recordLoginHistory(user.id, user.contact, user.role, 'success', null, req);
+    await recordUserActivity(user.id, user.contact, user.role, 'Logged in', '/');
+
     res.json({
       message: 'Signed in successfully.',
       token,
       user: userPayload
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// USER PRESENCE HEARTBEAT ROUTE
+router.post('/heartbeat', authenticateUser, async (req, res, next) => {
+  const { action = 'Active', currentPage = '/' } = req.body;
+  try {
+    await recordUserActivity(req.user.id, req.user.contact || 'User', req.user.role || 'customer', action, currentPage);
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
   } catch (err) {
     next(err);
   }

@@ -277,5 +277,36 @@ CREATE TABLE IF NOT EXISTS admin_audit_logs (
 
 CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_admin ON admin_audit_logs(admin_id);
 
+-- 19. LOGIN HISTORY TABLE
+CREATE TABLE IF NOT EXISTS login_history (
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) REFERENCES users(id) ON DELETE SET NULL,
+    contact VARCHAR(255) NOT NULL,
+    role VARCHAR(50) DEFAULT 'customer',
+    status VARCHAR(50) NOT NULL CHECK (status IN ('success', 'failed')),
+    failure_reason TEXT,
+    ip_address VARCHAR(100),
+    user_agent TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_login_history_contact ON login_history(contact);
+CREATE INDEX IF NOT EXISTS idx_login_history_status ON login_history(status);
+CREATE INDEX IF NOT EXISTS idx_login_history_created ON login_history(created_at DESC);
+
+-- 20. USER ACTIVITY TABLE (ONLINE / PRESENCE TRACKING)
+CREATE TABLE IF NOT EXISTS user_activity (
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    contact VARCHAR(255) NOT NULL,
+    role VARCHAR(50) DEFAULT 'customer',
+    last_seen TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    last_action TEXT,
+    current_page VARCHAR(255)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_activity_last_seen ON user_activity(last_seen DESC);
+CREATE INDEX IF NOT EXISTS idx_user_activity_role ON user_activity(role);
+
 
 

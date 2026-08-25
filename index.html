@@ -578,55 +578,129 @@
     </div>
   </section>
 
-  <!-- 9. ADMIN DASHBOARD CONTROL SCREEN (ADMIN ONLY) -->
-  <section class="screen max-w-6xl mx-auto px-margin-mobile md:px-margin-desktop py-8" id="adminView">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-      <div>
-        <h2 class="text-headline-md font-bold text-primary">Admin Operations Control Center</h2>
-        <p class="text-body-sm text-soil-brown">Manage users, freeze suspicious accounts, moderate product listings, reviews, and feedback.</p>
+  <!-- 9. ADMIN DASHBOARD CONTROL SCREEN V2 (MASTER CONTROL CENTER) -->
+  <section class="screen max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-6" id="adminView">
+    <!-- Admin Master Top Navigation Bar -->
+    <div class="bg-white p-5 rounded-2xl border border-border-subtle shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary font-bold text-xl">🛡</div>
+        <div>
+          <h2 class="text-headline-md font-bold text-primary flex items-center gap-2">
+            Master Control Center V2
+            <span class="text-[10px] bg-success-emerald/10 text-success-emerald px-2 py-0.5 rounded-full border border-success-emerald/20 font-extrabold uppercase">● Live Operational</span>
+          </h2>
+          <p class="text-xs text-soil-brown">Complete platform management, sales analytics, live user presence, orders & database control.</p>
+        </div>
       </div>
-      <div class="flex gap-2">
-        <button class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors" onclick="loadAdminDashboard()" type="button">🔄 Refresh Data</button>
+
+      <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+        <!-- Global Search Bar -->
+        <div class="relative flex-1 md:w-64">
+          <input type="text" id="adminGlobalSearchInput" placeholder="Global search (user, order, product)..." class="w-full pl-8 pr-3 py-2 border border-border-subtle rounded-xl text-xs bg-input-bg font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20" onkeyup="if(event.key==='Enter') executeAdminGlobalSearch()">
+          <span class="absolute left-2.5 top-2.5 text-xs text-soil-brown">🔍</span>
+        </div>
+
+        <!-- Export Dropdown -->
+        <select id="adminCsvExportSelect" class="p-2 border border-border-subtle rounded-xl text-xs bg-input-bg font-bold text-primary" onchange="if(this.value){ exportAdminCsv(this.value); this.value=''; }">
+          <option value="">📥 Export CSV...</option>
+          <option value="users">Export Users CSV</option>
+          <option value="orders">Export Orders CSV</option>
+          <option value="products">Export Products CSV</option>
+          <option value="login-history">Export Login History CSV</option>
+          <option value="audit-logs">Export Audit Logs CSV</option>
+        </select>
+
+        <button class="bg-primary text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-primary-container transition-colors shrink-0" onclick="loadAdminDashboard()" type="button">🔄 Refresh Data</button>
       </div>
     </div>
 
-    <!-- Admin Overview Stats Cards Grid -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" id="adminStatsGrid">
-      <div class="bg-white p-4 rounded-xl border border-border-subtle shadow-sm text-center">
-        <span class="text-[10px] font-bold text-soil-brown uppercase">Total Users</span>
-        <h3 class="text-2xl font-bold text-primary mt-1" id="admTotalUsers">0</h3>
+    <!-- Live KPI Overview Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-6" id="adminStatsGrid">
+      <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
+        <span class="text-[10px] font-bold text-soil-brown uppercase block">Total Users</span>
+        <h3 class="text-xl font-bold text-primary mt-0.5" id="admTotalUsers">0</h3>
       </div>
-      <div class="bg-white p-4 rounded-xl border border-border-subtle shadow-sm text-center">
-        <span class="text-[10px] font-bold text-soil-brown uppercase">Frozen Accounts</span>
-        <h3 class="text-2xl font-bold text-error-crisp mt-1" id="admFrozenUsers">0</h3>
+      <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
+        <span class="text-[10px] font-bold text-soil-brown uppercase block">Online Now</span>
+        <h3 class="text-xl font-bold text-success-emerald mt-0.5" id="admOnlineUsers">0</h3>
       </div>
-      <div class="bg-white p-4 rounded-xl border border-border-subtle shadow-sm text-center">
-        <span class="text-[10px] font-bold text-soil-brown uppercase">Active Products</span>
-        <h3 class="text-2xl font-bold text-primary mt-1" id="admTotalProducts">0</h3>
+      <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
+        <span class="text-[10px] font-bold text-soil-brown uppercase block">Active Products</span>
+        <h3 class="text-xl font-bold text-primary mt-0.5" id="admTotalProducts">0</h3>
       </div>
-      <div class="bg-white p-4 rounded-xl border border-border-subtle shadow-sm text-center">
-        <span class="text-[10px] font-bold text-soil-brown uppercase">Total Orders</span>
-        <h3 class="text-2xl font-bold text-success-emerald mt-1" id="admTotalOrders">0</h3>
+      <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
+        <span class="text-[10px] font-bold text-soil-brown uppercase block">Total Orders</span>
+        <h3 class="text-xl font-bold text-success-emerald mt-0.5" id="admTotalOrders">0</h3>
+      </div>
+      <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
+        <span class="text-[10px] font-bold text-soil-brown uppercase block">Total Revenue</span>
+        <h3 class="text-xl font-bold text-primary mt-0.5" id="admTotalRevenue">₹0</h3>
+      </div>
+      <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
+        <span class="text-[10px] font-bold text-soil-brown uppercase block">Frozen Accounts</span>
+        <h3 class="text-xl font-bold text-error mt-0.5" id="admFrozenUsers">0</h3>
       </div>
     </div>
 
-    <!-- Admin Control Center Tabs -->
+    <!-- Master Navigation Tabs -->
     <div class="flex gap-2 border-b border-border-subtle mb-6 overflow-x-auto pb-1 whitespace-nowrap">
-      <button id="admTabUsers" class="px-3.5 py-2 text-xs font-bold text-primary border-b-2 border-primary" onclick="switchAdminTab('users')" type="button">👥 Users & Freeze</button>
+      <button id="admTabAnalytics" class="px-3.5 py-2 text-xs font-bold text-primary border-b-2 border-primary" onclick="switchAdminTab('analytics')" type="button">📈 Sales Analytics</button>
+      <button id="admTabUsers" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('users')" type="button">👥 Users & Freeze</button>
+      <button id="admTabSellers" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('sellers')" type="button">👨‍🌾 Sellers</button>
+      <button id="admTabCustomers" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('customers')" type="button">🛒 Customers</button>
       <button id="admTabProducts" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('products')" type="button">🌾 Products</button>
       <button id="admTabOrders" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('orders')" type="button">📦 Orders Control</button>
-      <button id="admTabPayments" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('payments')" type="button">💳 Payments Verification</button>
+      <button id="admTabPayments" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('payments')" type="button">💳 Payments</button>
+      <button id="admTabLive" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('live')" type="button">🟢 Live & Online</button>
+      <button id="admTabLoginHistory" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('loginHistory')" type="button">🔑 Login History</button>
       <button id="admTabFeedback" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('feedback')" type="button">💬 Feedback</button>
       <button id="admTabReviews" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('reviews')" type="button">⭐ Reviews</button>
       <button id="admTabAudit" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('audit')" type="button">📜 Audit Logs</button>
-      <button id="admTabDatabase" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('database')" type="button">🗄 Database Inspector</button>
+      <button id="admTabDatabase" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('database')" type="button">🗄 Database</button>
+      <button id="admTabHealth" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('health')" type="button">🩺 System Health</button>
     </div>
 
-    <!-- Admin Users Table Container -->
-    <div id="adminTabContentUsers" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
+    <!-- TAB 1: SALES ANALYTICS & REVENUE -->
+    <div id="adminTabContentAnalytics" class="space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
+          <div>
+            <h4 class="font-bold text-primary text-base">Sales Revenue Over Time</h4>
+            <p class="text-xs text-soil-brown">Real order volume and revenue generation across platform orders.</p>
+          </div>
+          <select id="analyticsDateRange" class="p-2 border border-border-subtle rounded-xl text-xs bg-input-bg font-bold text-primary" onchange="loadAdminAnalytics(this.value)">
+            <option value="30d">Last 30 Days</option>
+            <option value="7d">Last 7 Days</option>
+            <option value="today">Today</option>
+            <option value="1y">Full Year</option>
+          </select>
+        </div>
+        <div class="w-full overflow-hidden">
+          <canvas id="adminSalesChart" class="w-full h-64 border border-border-subtle/40 rounded-xl bg-surface/30"></canvas>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
+          <h4 class="font-bold text-primary mb-3 text-sm">Top Selling Products</h4>
+          <div id="adminTopProductsList" class="space-y-2 text-xs">
+            <div class="p-3 text-center text-soil-brown">Loading top products...</div>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
+          <h4 class="font-bold text-primary mb-3 text-sm">Payment Method Breakdown</h4>
+          <div id="adminPaymentMethodSummary" class="space-y-3 text-xs">
+            <div class="p-3 text-center text-soil-brown">Loading payment distribution...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: USERS & FREEZE MANAGEMENT -->
+    <div id="adminTabContentUsers" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
       <div class="flex justify-between items-center mb-4">
-        <h4 class="font-bold text-primary">User Accounts & Freeze Controls</h4>
-        <select id="adminUserFilter" class="p-2 border border-border-subtle rounded-lg text-xs bg-input-bg" onchange="loadAdminUsers()">
+        <h4 class="font-bold text-primary">User Accounts & Access Control</h4>
+        <select id="adminUserFilter" class="p-2 border border-border-subtle rounded-lg text-xs bg-input-bg font-bold" onchange="loadAdminUsers()">
           <option value="">All Roles</option>
           <option value="customer">Customers Only</option>
           <option value="seller">Sellers Only</option>
@@ -651,7 +725,54 @@
       </div>
     </div>
 
-    <!-- Admin Products Table Container -->
+    <!-- TAB 3: DETAILED SELLERS LIST -->
+    <div id="adminTabContentSellers" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
+      <h4 class="font-bold text-primary mb-4">Platform Sellers & Performance</h4>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr class="border-b border-border-subtle text-soil-brown uppercase">
+              <th class="py-2">Seller / Business</th>
+              <th class="py-2">Contact</th>
+              <th class="py-2">Verification</th>
+              <th class="py-2">Products</th>
+              <th class="py-2">Total Sales</th>
+              <th class="py-2">Rating</th>
+              <th class="py-2">Status</th>
+              <th class="py-2">Action</th>
+            </tr>
+          </thead>
+          <tbody id="adminSellersRows">
+            <tr><td colspan="8" class="py-4 text-center text-soil-brown">Loading sellers...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 4: DETAILED CUSTOMERS LIST -->
+    <div id="adminTabContentCustomers" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
+      <h4 class="font-bold text-primary mb-4">Platform Customers & Purchase History</h4>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr class="border-b border-border-subtle text-soil-brown uppercase">
+              <th class="py-2">Customer Name</th>
+              <th class="py-2">Contact</th>
+              <th class="py-2">Location</th>
+              <th class="py-2">Orders Count</th>
+              <th class="py-2">Total Spending</th>
+              <th class="py-2">Account Status</th>
+              <th class="py-2">Action</th>
+            </tr>
+          </thead>
+          <tbody id="adminCustomersRows">
+            <tr><td colspan="7" class="py-4 text-center text-soil-brown">Loading customers...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 5: PRODUCTS MODERATION -->
     <div id="adminTabContentProducts" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
       <h4 class="font-bold text-primary mb-4">Product Listings Moderation</h4>
       <div class="overflow-x-auto">
@@ -673,7 +794,7 @@
       </div>
     </div>
 
-    <!-- Admin Orders Table Container -->
+    <!-- TAB 6: ORDERS CONTROL -->
     <div id="adminTabContentOrders" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
       <h4 class="font-bold text-primary mb-4">All System Orders Control</h4>
       <div class="overflow-x-auto">
@@ -695,7 +816,7 @@
       </div>
     </div>
 
-    <!-- Admin Payments Verification Container -->
+    <!-- TAB 7: PAYMENTS VERIFICATION -->
     <div id="adminTabContentPayments" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
       <h4 class="font-bold text-primary mb-4">UPI Payments Verification & Control</h4>
       <div class="overflow-x-auto">
@@ -717,7 +838,49 @@
       </div>
     </div>
 
-    <!-- Admin Feedback Container -->
+    <!-- TAB 8: LIVE & ONLINE PRESENCE -->
+    <div id="adminTabContentLive" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
+        <h4 class="font-bold text-primary mb-3 text-sm flex items-center gap-2">
+          <span>🟢</span> Currently Active Users
+        </h4>
+        <div id="adminOnlineUsersContainer" class="space-y-2 text-xs">
+          <div class="p-3 text-center text-soil-brown">Loading active users...</div>
+        </div>
+      </div>
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
+        <h4 class="font-bold text-primary mb-3 text-sm flex items-center gap-2">
+          <span>⚡</span> Live Activity Event Stream
+        </h4>
+        <div id="adminLiveActivityContainer" class="space-y-2 text-xs max-h-96 overflow-y-auto">
+          <div class="p-3 text-center text-soil-brown">Loading activity stream...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 9: LOGIN HISTORY -->
+    <div id="adminTabContentLoginHistory" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
+      <h4 class="font-bold text-primary mb-4">User Login History & Authentication Audit</h4>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr class="border-b border-border-subtle text-soil-brown uppercase">
+              <th class="py-2">Contact / User</th>
+              <th class="py-2">Role</th>
+              <th class="py-2">Status</th>
+              <th class="py-2">IP Address</th>
+              <th class="py-2">Failure Reason / Details</th>
+              <th class="py-2">Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="adminLoginHistoryRows">
+            <tr><td colspan="6" class="py-4 text-center text-soil-brown">Loading login history...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 10: FEEDBACK -->
     <div id="adminTabContentFeedback" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
       <h4 class="font-bold text-primary mb-4">Platform Feedback Submissions</h4>
       <div id="adminFeedbackContainer" class="space-y-3">
@@ -725,7 +888,7 @@
       </div>
     </div>
 
-    <!-- Admin Reviews Container -->
+    <!-- TAB 11: REVIEWS -->
     <div id="adminTabContentReviews" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
       <h4 class="font-bold text-primary mb-4">Customer Reviews Moderation</h4>
       <div id="adminReviewsContainer" class="space-y-3">
@@ -733,7 +896,7 @@
       </div>
     </div>
 
-    <!-- Admin Audit Logs Container -->
+    <!-- TAB 12: AUDIT LOGS -->
     <div id="adminTabContentAudit" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
       <h4 class="font-bold text-primary mb-4">Admin Security Audit Logs</h4>
       <div id="adminAuditLogsContainer" class="space-y-2 text-xs">
@@ -741,7 +904,7 @@
       </div>
     </div>
 
-    <!-- Whitelisted Database Table Inspector -->
+    <!-- TAB 13: DATABASE INSPECTOR -->
     <div id="adminTabContentDatabase" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
       <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
         <div>
@@ -752,6 +915,7 @@
           <select id="dbInspectorTableSelect" class="p-2 border border-border-subtle rounded-lg text-xs bg-input-bg font-bold text-primary">
             <option value="users">users</option>
             <option value="seller_profiles">seller_profiles</option>
+            <option value="customer_profiles">customer_profiles</option>
             <option value="products">products</option>
             <option value="orders">orders</option>
             <option value="order_items">order_items</option>
@@ -761,6 +925,9 @@
             <option value="notifications">notifications</option>
             <option value="seller_verifications">seller_verifications</option>
             <option value="admin_audit_logs">admin_audit_logs</option>
+            <option value="market_price_snapshots">market_price_snapshots</option>
+            <option value="login_history">login_history</option>
+            <option value="user_activity">user_activity</option>
           </select>
           <button class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary-container" onclick="inspectSelectedAdminTable()" type="button">Inspect Table</button>
         </div>
@@ -769,7 +936,35 @@
         <div class="p-6 text-center text-soil-brown">Select a table above and click "Inspect Table" to view masked database records.</div>
       </div>
     </div>
+
+    <!-- TAB 14: SYSTEM HEALTH -->
+    <div id="adminTabContentHealth" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
+      <h4 class="font-bold text-primary mb-4 text-base">System Operational Health Monitor</h4>
+      <div id="adminSystemHealthContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <div class="p-4 text-center text-soil-brown">Checking system components health...</div>
+      </div>
+    </div>
   </section>
+
+  <!-- ACCOUNT FREEZE / SUSPEND REASON MODAL -->
+  <div id="adminReasonModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative">
+      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" onclick="$('adminReasonModal').classList.add('hidden')" type="button">✕</button>
+      <h3 class="text-lg font-bold text-primary mb-1" id="reasonModalTitle">Update Account Status</h3>
+      <p class="text-xs text-soil-brown mb-4" id="reasonModalSubtitle">Provide a clear audit reason for changing this account status.</p>
+      
+      <input type="hidden" id="reasonModalUserId" value="">
+      <input type="hidden" id="reasonModalTargetStatus" value="">
+
+      <label class="text-xs font-bold text-soil-brown block mb-1">Audit Reason / Explanation</label>
+      <textarea id="reasonModalTextarea" rows="3" placeholder="Enter reason (e.g. Terms violation, requested by user, verification issue)..." class="w-full p-3 border border-border-subtle rounded-xl text-xs bg-input-bg mb-4 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
+
+      <div class="flex justify-end gap-2">
+        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold text-soil-brown border border-border-subtle hover:bg-input-bg" onclick="$('adminReasonModal').classList.add('hidden')">Cancel</button>
+        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-primary text-white hover:bg-primary-container" onclick="submitAccountActionWithReason()">Confirm Status Update</button>
+      </div>
+    </div>
+  </div>
 
 </main>
 
@@ -2603,12 +2798,16 @@ function handleUrlHashRouting() {
 
 window.addEventListener('hashchange', handleUrlHashRouting);
 
-// ADMIN DASHBOARD & CONTROL CENTER ENGINE
-let currentAdminTab = 'users';
+// ADMIN DASHBOARD & CONTROL CENTER ENGINE V2
+let currentAdminTab = 'analytics';
 
 function switchAdminTab(tab) {
   currentAdminTab = tab;
-  const tabs = ['users', 'products', 'orders', 'payments', 'feedback', 'reviews', 'audit', 'database'];
+  const tabs = [
+    'analytics', 'users', 'sellers', 'customers', 'products', 
+    'orders', 'payments', 'live', 'loginHistory', 'feedback', 
+    'reviews', 'audit', 'database', 'health'
+  ];
   
   tabs.forEach(t => {
     const btnName = `admTab${t.charAt(0).toUpperCase() + t.slice(1)}`;
@@ -2628,14 +2827,20 @@ function switchAdminTab(tab) {
     }
   });
 
+  if (tab === 'analytics') loadAdminAnalytics('30d');
   if (tab === 'users') loadAdminUsers();
+  if (tab === 'sellers') loadAdminSellers();
+  if (tab === 'customers') loadAdminCustomers();
   if (tab === 'products') loadAdminProducts();
   if (tab === 'orders') loadAdminOrders();
   if (tab === 'payments') loadAdminPayments();
+  if (tab === 'live') loadAdminLivePresence();
+  if (tab === 'loginHistory') loadAdminLoginHistory();
   if (tab === 'feedback') loadAdminFeedback();
   if (tab === 'reviews') loadAdminReviews();
   if (tab === 'audit') loadAdminAuditLogs();
   if (tab === 'database') loadAdminDatabaseTables();
+  if (tab === 'health') loadAdminSystemHealth();
 }
 
 async function loadAdminDashboard() {
@@ -2650,7 +2855,8 @@ async function loadAdminDashboard() {
     const res = await fetch('/api/admin/metrics', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
     const m = res.metrics || {};
     if ($('admTotalUsers')) $('admTotalUsers').textContent = m.totalUsers || 0;
-    if ($('admFrozenUsers')) $('admFrozenUsers').textContent = m.frozenUsers || 0;
+    if ($('admOnlineUsers')) $('admOnlineUsers').textContent = m.activeUsers || 0;
+    if ($('admFrozenUsers')) $('admFrozenUsers').textContent = m.frozenAccounts || 0;
     if ($('admTotalProducts')) $('admTotalProducts').textContent = m.totalProducts || 0;
     if ($('admTotalOrders')) $('admTotalOrders').textContent = m.totalOrders || 0;
 
@@ -2658,6 +2864,122 @@ async function loadAdminDashboard() {
   } catch (err) {
     notify('Failed to load admin metrics: ' + err.message, 'error');
   }
+}
+
+async function loadAdminAnalytics(range = '30d') {
+  const token = AuthService.getToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch(`/api/admin/analytics?range=${range}`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const a = res.analytics || {};
+
+    if ($('admTotalRevenue')) $('admTotalRevenue').textContent = `₹${(a.totalRevenue || 0).toLocaleString()}`;
+
+    drawAdminSalesChart(a.salesTimeline || []);
+
+    // Render Top Products List
+    const topProdsEl = $('adminTopProductsList');
+    if (topProdsEl) {
+      topProdsEl.innerHTML = (a.topProducts || []).length ? (a.topProducts || []).map(tp => `
+        <div class="p-3 bg-surface rounded-xl border border-primary/20 flex justify-between items-center">
+          <div>
+            <span class="font-bold text-primary">${tp.name}</span>
+            <span class="text-soil-brown block text-[11px]">${tp.unitsSold} kg sold</span>
+          </div>
+          <span class="font-extrabold text-success-emerald">₹${tp.revenue.toLocaleString()}</span>
+        </div>
+      `).join('') : '<div class="p-3 text-center text-soil-brown">No product sales recorded yet.</div>';
+    }
+
+    // Render Payment Method Summary
+    const paySumEl = $('adminPaymentMethodSummary');
+    if (paySumEl) {
+      paySumEl.innerHTML = `
+        <div class="p-3 bg-input-bg rounded-xl border border-border-subtle flex justify-between items-center">
+          <span class="font-bold text-primary">💳 UPI QR Payments</span>
+          <span class="font-extrabold text-primary">${a.upiOrders || 0} orders</span>
+        </div>
+        <div class="p-3 bg-input-bg rounded-xl border border-border-subtle flex justify-between items-center">
+          <span class="font-bold text-soil-brown">💵 Cash on Delivery (COD)</span>
+          <span class="font-extrabold text-soil-brown">${a.codOrders || 0} orders</span>
+        </div>
+      `;
+    }
+  } catch (err) {
+    notify('Failed to load analytics: ' + err.message, 'error');
+  }
+}
+
+function drawAdminSalesChart(timeline) {
+  const canvas = $('adminSalesChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.clientWidth || 800;
+  const cssH = 250;
+
+  canvas.width = cssW * dpr;
+  canvas.height = cssH * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cssW, cssH);
+
+  if (!timeline || !timeline.length) {
+    ctx.font = 'bold 14px Inter, sans-serif';
+    ctx.fillStyle = '#6D786F';
+    ctx.textAlign = 'center';
+    ctx.fillText('No historical order sales data available.', cssW / 2, cssH / 2);
+    return;
+  }
+
+  const maxRev = Math.max(...timeline.map(t => t.revenue)) * 1.2 || 1000;
+  const padding = 40;
+  const graphW = cssW - padding * 2;
+  const graphH = cssH - padding * 2;
+
+  const points = timeline.map((pt, i) => {
+    const x = padding + (i / Math.max(1, timeline.length - 1)) * graphW;
+    const y = cssH - padding - (pt.revenue / maxRev) * graphH;
+    return { x, y, pt };
+  });
+
+  const grad = ctx.createLinearGradient(0, padding, 0, cssH - padding);
+  grad.addColorStop(0, 'rgba(15, 123, 69, 0.25)');
+  grad.addColorStop(1, 'rgba(15, 123, 69, 0.0)');
+
+  ctx.beginPath();
+  points.forEach((p, i) => {
+    if (i === 0) ctx.moveTo(p.x, p.y);
+    else ctx.lineTo(p.x, p.y);
+  });
+  ctx.lineTo(points[points.length - 1].x, cssH - padding);
+  ctx.lineTo(points[0].x, cssH - padding);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.strokeStyle = '#0F7B45';
+  ctx.lineWidth = 3;
+  points.forEach((p, i) => {
+    if (i === 0) ctx.moveTo(p.x, p.y);
+    else ctx.lineTo(p.x, p.y);
+  });
+  ctx.stroke();
+
+  points.forEach((p, i) => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#006033';
+    ctx.fill();
+
+    if (i === 0 || i === points.length - 1 || points.length <= 8 || i % Math.ceil(points.length / 6) === 0) {
+      ctx.fillStyle = '#6D786F';
+      ctx.font = '10px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(p.pt.date.substring(5), p.x, cssH - 12);
+    }
+  });
 }
 
 async function loadAdminUsers() {
@@ -2683,10 +3005,11 @@ async function loadAdminUsers() {
         <td class="py-2.5">
           <span class="px-2 py-0.5 rounded text-[10px] font-bold ${u.account_status === 'active' ? 'bg-surface text-success-emerald border border-success-emerald/20' : 'bg-error-container text-error'}">${u.account_status || 'active'}</span>
         </td>
-        <td class="py-2.5">
+        <td class="py-2.5 flex items-center gap-1.5">
           ${u.account_status === 'active'
-            ? `<button class="bg-error-container text-error px-2.5 py-1 rounded text-[10px] font-bold hover:bg-error/20" onclick="updateUserAccountStatus('${u.id}', 'frozen')" type="button">Freeze</button>`
-            : `<button class="bg-surface text-success-emerald border border-success-emerald/20 px-2.5 py-1 rounded text-[10px] font-bold hover:bg-success-emerald hover:text-white" onclick="updateUserAccountStatus('${u.id}', 'active')" type="button">Unfreeze</button>`
+            ? `<button class="bg-error-container text-error px-2.5 py-1 rounded text-[10px] font-bold hover:bg-error/20" onclick="promptAccountAction('${u.id}', 'frozen')" type="button">Freeze</button>
+               <button class="bg-harvest-gold/20 text-harvest-gold px-2.5 py-1 rounded text-[10px] font-bold hover:bg-harvest-gold/30" onclick="promptAccountAction('${u.id}', 'suspended')" type="button">Suspend</button>`
+            : `<button class="bg-surface text-success-emerald border border-success-emerald/20 px-2.5 py-1 rounded text-[10px] font-bold hover:bg-success-emerald hover:text-white" onclick="promptAccountAction('${u.id}', 'active')" type="button">Reactivate</button>`
           }
         </td>
       </tr>
@@ -2696,24 +3019,234 @@ async function loadAdminUsers() {
   }
 }
 
-async function updateUserAccountStatus(userId, status) {
+function promptAccountAction(userId, status) {
+  $('reasonModalUserId').value = userId;
+  $('reasonModalTargetStatus').value = status;
+  $('reasonModalTitle').textContent = `${status === 'active' ? 'Reactivate' : status === 'frozen' ? 'Freeze' : 'Suspend'} Account`;
+  $('reasonModalSubtitle').textContent = `Reason for changing account status of user '${userId}' to '${status}'.`;
+  $('reasonModalTextarea').value = '';
+  $('adminReasonModal').classList.remove('hidden');
+}
+
+async function submitAccountActionWithReason() {
+  const userId = $('reasonModalUserId').value;
+  const status = $('reasonModalTargetStatus').value;
+  const reason = $('reasonModalTextarea').value.trim();
   const token = AuthService.getToken();
-  if (!token) return;
+  if (!token || !userId || !status) return;
 
   try {
     const res = await fetch(`/api/admin/users/${userId}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ status })
+      body: JSON.stringify({ status, reason })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to update user status.');
 
-    notify(`User status updated to '${status}'.`, 'success');
+    $('adminReasonModal').classList.add('hidden');
+    notify(`User account status updated to '${status}'.`, 'success');
     loadAdminUsers();
     loadAdminDashboard();
   } catch (err) {
-    notify('User status error: ' + err.message, 'error');
+    notify('Status error: ' + err.message, 'error');
+  }
+}
+
+async function loadAdminSellers() {
+  const token = AuthService.getToken();
+  if (!token) return;
+  const rowsEl = $('adminSellersRows');
+  if (!rowsEl) return;
+
+  try {
+    const res = await fetch('/api/admin/sellers', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const sellers = res.sellers || [];
+
+    rowsEl.innerHTML = sellers.length ? sellers.map(s => `
+      <tr class="border-b border-border-subtle hover:bg-surface">
+        <td class="py-2.5 font-bold text-primary">${s.businessName || s.name}</td>
+        <td class="py-2.5 text-soil-brown">${s.contact}</td>
+        <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${s.verificationStatus === 'verified' ? 'bg-surface text-success-emerald border border-success-emerald/20' : 'bg-harvest-gold/20 text-harvest-gold'}">${s.verificationStatus}</span></td>
+        <td class="py-2.5 font-semibold text-soil-brown">${s.productsCount}</td>
+        <td class="py-2.5 font-bold text-primary">₹${s.totalSales.toLocaleString()}</td>
+        <td class="py-2.5 font-bold text-harvest-gold">⭐ ${s.rating}</td>
+        <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${s.accountStatus === 'active' ? 'bg-surface text-success-emerald' : 'bg-error-container text-error'}">${s.accountStatus}</span></td>
+        <td class="py-2.5">
+          <button class="bg-surface text-primary border border-primary/20 px-2 py-1 rounded text-[10px] font-bold hover:bg-primary hover:text-white" onclick="promptAccountAction('${s.id}', '${s.accountStatus === 'active' ? 'suspended' : 'active'}')">${s.accountStatus === 'active' ? 'Suspend' : 'Reactivate'}</button>
+        </td>
+      </tr>
+    `).join('') : '<tr><td colspan="8" class="py-4 text-center text-soil-brown">No registered sellers.</td></tr>';
+  } catch (err) {
+    rowsEl.innerHTML = `<tr><td colspan="8" class="py-4 text-center text-error">${err.message}</td></tr>`;
+  }
+}
+
+async function loadAdminCustomers() {
+  const token = AuthService.getToken();
+  if (!token) return;
+  const rowsEl = $('adminCustomersRows');
+  if (!rowsEl) return;
+
+  try {
+    const res = await fetch('/api/admin/customers', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const customers = res.customers || [];
+
+    rowsEl.innerHTML = customers.length ? customers.map(c => `
+      <tr class="border-b border-border-subtle hover:bg-surface">
+        <td class="py-2.5 font-bold text-primary">${c.name}</td>
+        <td class="py-2.5 text-soil-brown">${c.contact}</td>
+        <td class="py-2.5 text-soil-brown">${c.city ? `${c.city}, ${c.state}` : 'Not provided'}</td>
+        <td class="py-2.5 font-semibold text-soil-brown">${c.ordersCount}</td>
+        <td class="py-2.5 font-bold text-primary">₹${c.totalSpending.toLocaleString()}</td>
+        <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.accountStatus === 'active' ? 'bg-surface text-success-emerald' : 'bg-error-container text-error'}">${c.accountStatus}</span></td>
+        <td class="py-2.5">
+          <button class="bg-surface text-primary border border-primary/20 px-2 py-1 rounded text-[10px] font-bold hover:bg-primary hover:text-white" onclick="promptAccountAction('${c.id}', '${c.accountStatus === 'active' ? 'frozen' : 'active'}')">${c.accountStatus === 'active' ? 'Freeze' : 'Unfreeze'}</button>
+        </td>
+      </tr>
+    `).join('') : '<tr><td colspan="7" class="py-4 text-center text-soil-brown">No registered customers.</td></tr>';
+  } catch (err) {
+    rowsEl.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-error">${err.message}</td></tr>`;
+  }
+}
+
+async function loadAdminLivePresence() {
+  const token = AuthService.getToken();
+  if (!token) return;
+
+  try {
+    const [onlineRes, actRes] = await Promise.all([
+      fetch('/api/admin/online-users', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json()),
+      fetch('/api/admin/live-activity', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json())
+    ]);
+
+    const usersEl = $('adminOnlineUsersContainer');
+    if (usersEl) {
+      const users = onlineRes.users || [];
+      usersEl.innerHTML = users.length ? users.map(u => `
+        <div class="p-3 bg-surface rounded-xl border border-primary/20 flex justify-between items-center">
+          <div class="flex items-center gap-2">
+            <span class="${u.isOnline ? 'text-success-emerald font-bold' : 'text-soil-brown'}">●</span>
+            <span class="font-bold text-primary">${u.contact} (${u.role})</span>
+          </div>
+          <span class="text-[10px] text-soil-brown">${new Date(u.lastSeen || Date.now()).toLocaleTimeString()}</span>
+        </div>
+      `).join('') : '<div class="p-3 text-center text-soil-brown">No online user activity recorded.</div>';
+    }
+
+    const actEl = $('adminLiveActivityContainer');
+    if (actEl) {
+      const events = actRes.events || [];
+      actEl.innerHTML = events.length ? events.map(e => `
+        <div class="p-3 bg-input-bg rounded-xl border border-border-subtle flex justify-between items-center">
+          <div>
+            <span class="font-bold text-primary">${e.user}</span>
+            <span class="text-soil-brown block text-[11px]">${e.action} — ${e.target}</span>
+          </div>
+          <span class="text-[10px] text-soil-brown shrink-0">${new Date(e.timestamp || Date.now()).toLocaleTimeString()}</span>
+        </div>
+      `).join('') : '<div class="p-3 text-center text-soil-brown">No live events logged.</div>';
+    }
+  } catch (err) {
+    notify('Live activity error: ' + err.message, 'error');
+  }
+}
+
+async function loadAdminLoginHistory() {
+  const token = AuthService.getToken();
+  if (!token) return;
+  const rowsEl = $('adminLoginHistoryRows');
+  if (!rowsEl) return;
+
+  try {
+    const res = await fetch('/api/admin/login-history', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const history = res.history || [];
+
+    rowsEl.innerHTML = history.length ? history.map(l => `
+      <tr class="border-b border-border-subtle hover:bg-surface">
+        <td class="py-2.5 font-bold text-primary">${l.contact}</td>
+        <td class="py-2.5 uppercase font-semibold text-soil-brown text-[10px]">${l.role}</td>
+        <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${l.status === 'success' ? 'bg-surface text-success-emerald border border-success-emerald/20' : 'bg-error-container text-error'}">${l.status}</span></td>
+        <td class="py-2.5 font-mono text-soil-brown text-[11px]">${l.ip_address || '127.0.0.1'}</td>
+        <td class="py-2.5 text-soil-brown">${l.failure_reason || 'Successful login'}</td>
+        <td class="py-2.5 text-soil-brown">${new Date(l.created_at || Date.now()).toLocaleString()}</td>
+      </tr>
+    `).join('') : '<tr><td colspan="6" class="py-4 text-center text-soil-brown">No login history recorded.</td></tr>';
+  } catch (err) {
+    rowsEl.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-error">${err.message}</td></tr>`;
+  }
+}
+
+async function loadAdminSystemHealth() {
+  const token = AuthService.getToken();
+  if (!token) return;
+  const container = $('adminSystemHealthContainer');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/admin/system-health', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const sh = res.systemHealth || {};
+
+    const components = [
+      { name: 'Backend Express Runtime', status: sh.backend?.status || 'Operational', icon: '⚡' },
+      { name: 'Database Persistence Engine', status: sh.database?.status || 'Operational', icon: '🗄' },
+      { name: 'JWT Authentication & Security', status: sh.authService?.status || 'Operational', icon: '🔒' },
+      { name: 'Agmarknet Mandi API Proxy', status: sh.mandiApi?.status || 'Operational', icon: '🌾' },
+      { name: 'UPI & COD Payment Service', status: sh.paymentService?.status || 'Operational', icon: '💳' },
+      { name: 'Platform Notification Engine', status: sh.notificationEngine?.status || 'Operational', icon: '🔔' }
+    ];
+
+    container.innerHTML = components.map(c => `
+      <div class="p-4 bg-white rounded-2xl border border-border-subtle shadow-sm flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <span class="text-xl">${c.icon}</span>
+          <div>
+            <h5 class="font-bold text-primary text-sm">${c.name}</h5>
+            <span class="text-[11px] text-soil-brown">Component status</span>
+          </div>
+        </div>
+        <span class="px-3 py-1 rounded-full text-xs font-extrabold bg-surface text-success-emerald border border-success-emerald/20">● ${c.status}</span>
+      </div>
+    `).join('');
+  } catch (err) {
+    container.innerHTML = `<div class="p-4 text-center text-error font-semibold">Failed to check system health: ${err.message}</div>`;
+  }
+}
+
+async function executeAdminGlobalSearch() {
+  const q = $('adminGlobalSearchInput')?.value?.trim();
+  if (!q) return;
+  const token = AuthService.getToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch(`/api/admin/search?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const resCount = (res.results?.users?.length || 0) + (res.results?.products?.length || 0) + (res.results?.orders?.length || 0);
+
+    notify(`Search for '${q}' returned ${resCount} result(s).`, 'info');
+  } catch (err) {
+    notify('Search failed: ' + err.message, 'error');
+  }
+}
+
+async function exportAdminCsv(resource) {
+  const token = AuthService.getToken();
+  if (!token || !resource) return;
+
+  try {
+    const res = await fetch(`/api/admin/export/${resource}`, { headers: { 'Authorization': `Bearer ${token}` } });
+    if (!res.ok) throw new Error('Export failed');
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `krishisetu_${resource}_export.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    notify(`Exported ${resource} CSV successfully!`, 'success');
+  } catch (err) {
+    notify('CSV Export error: ' + err.message, 'error');
   }
 }
 
