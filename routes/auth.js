@@ -231,15 +231,73 @@ router.post('/admin-seed', async (req, res, next) => {
   }
 });
 
-// GET CURRENT AUTHENTICATED USER
-router.get('/me', authenticateUser, (req, res) => {
-  res.json({ user: req.user });
+// GET CURRENT AUTHENTICATED USER (PHASE 1)
+router.get('/me', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  let token = null;
+
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.substring(7);
+  } else if (req.headers['x-access-token']) {
+    token = req.headers['x-access-token'];
+  }
+
+  if (!token) {
+    return res.json({ authenticated: false, user: null });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const result = await db.query(
+      'SELECT id, name, contact, role, account_status, email_verified, phone, phone_verified, show_phone, profile_photo FROM users WHERE id = $1',
+      [decoded.id]
+    );
+
+    if (!result.rows.length) {
+      return res.json({ authenticated: false, user: null });
+    }
+
+    const user = result.rows[0];
+
+    if (user.account_status === 'frozen' || user.account_status === 'suspended') {
+      return res.status(403).json({
+        authenticated: false,
+        error: 'Your KrishiSetu account has been temporarily frozen. Please contact support.'
+      });
+    }
+
+    res.json({
+      authenticated: true,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.contact,
+        role: user.role,
+        account_status: user.account_status || 'active',
+        email_verified: Boolean(user.email_verified),
+        phone: user.phone || null,
+        phone_verified: Boolean(user.phone_verified),
+        show_phone: Boolean(user.show_phone),
+        profile_photo: user.profile_photo || null
+      }
+    });
+  } catch (err) {
+    res.json({ authenticated: false, user: null });
+  }
+});
+
+// LOGOUT ROUTE
+router.post('/logout', (req, res) => {
+  res.json({ message: 'Signed out successfully.' });
 });
 
 // GET USER PROFILE
 router.get('/profile', authenticateUser, async (req, res, next) => {
   try {
-    const userRes = await db.query('SELECT id, name, contact, role, created_at FROM users WHERE id = $1', [req.user.id]);
+    const userRes = await db.query(
+      'SELECT id, name, contact, role, account_status, email_verified, phone, phone_verified, show_phone, profile_photo, created_at FROM users WHERE id = $1',
+      [req.user.id]
+    );
     if (!userRes.rows.length) return res.status(404).json({ error: 'User not found.' });
 
     const user = userRes.rows[0];
@@ -259,10 +317,82 @@ router.get('/profile', authenticateUser, async (req, res, next) => {
   }
 });
 
-// UPDATE USER PROFILE
+// UPDATE USER PROFILE & SELLER PHOTO/PHONE SETTINGS
+router.put('/profile', authenticateUser, async (req, res, next) => {
+  const { bio, location, show_phone, phone, profile_photo } = req.body;
+
+  try {
+    if (phone) {
+      // Validate phone format
+      const cleanPhone = String(phone).replace(/[^0-9+]/g, '');
+      if (cleanPhone.length < 10) {
+        return res.status(400).json({ error: 'Please enter a valid 10-digit phone number.' });
+      }
+      await db.query(
+        'UPDATE users SET phone = $1, show_phone = $2, profile_photo = COALESCE($3, profile_photo), updated_at = CURRENT_TIMESTAMP WHERE id = $4',
+        [cleanPhone, Boolean(show_phone), profile_photo || null, req.user.id]
+      );
+    } else if (profile_photo) {
+      await db.query(
+        'UPDATE users SET profile_photo = $1, show_phone = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3',
+        [profile_photo, Boolean(show_phone), req.user.id]
+      );
+    } else {
+      await db.query(
+        'UPDATE users SET show_phone = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+        [Boolean(show_phone), req.user.id]
+      );
+    }
+
+    if (req.user.role === 'seller') {
+      await db.query(
+        'UPDATE seller_profiles SET bio = COALESCE($1, bio), location = COALESCE($2, location), show_phone = $3, profile_photo = COALESCE($4, profile_photo), updated_at = CURRENT_TIMESTAMP WHERE user_id = $5',
+        [bio || null, location || null, Boolean(show_phone), profile_photo || null, req.user.id]
+      );
+    }
+
+    res.json({ message: 'Profile updated successfully.' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// VERIFY SELLER/USER PHONE WITH OTP
+router.post('/verify-phone', authenticateUser, async (req, res, next) => {
+  const { phone, otp } = req.body;
+  if (!phone || !otp) {
+    return res.status(400).json({ error: 'Phone number and verification OTP code are required.' });
+  }
+
+  const cleanPhone = String(phone).replace(/[^0-9+]/g, '');
+
+  try {
+    await OtpService.verifyOtp({ contact: cleanPhone, purpose: 'phone_verification', otp });
+    await db.query(
+      'UPDATE users SET phone = $1, phone_verified = true, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+      [cleanPhone, req.user.id]
+    );
+
+    if (req.user.role === 'seller') {
+      await db.query(
+        'UPDATE seller_profiles SET phone = $1, phone_verified = true, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2',
+        [cleanPhone, req.user.id]
+      );
+    }
+
+    res.json({ message: 'Phone number verified successfully.' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PUBLIC SELLER PROFILE LOOKUP
 router.get('/sellers/:id', async (req, res, next) => {
   try {
-    const sellerRes = await db.query('SELECT id, name, contact, created_at FROM users WHERE id = $1 AND role = \'seller\'', [req.params.id]);
+    const sellerRes = await db.query(
+      'SELECT id, name, contact, role, email_verified, phone, phone_verified, show_phone, profile_photo, created_at FROM users WHERE id = $1 AND role = \'seller\'',
+      [req.params.id]
+    );
     if (!sellerRes.rows.length) return res.status(404).json({ error: 'Seller not found.' });
 
     const seller = sellerRes.rows[0];
@@ -271,14 +401,25 @@ router.get('/sellers/:id', async (req, res, next) => {
 
     const prodRes = await db.query('SELECT * FROM products WHERE seller_id = $1 AND status != \'inactive\'', [seller.id]);
 
+    const canCall = Boolean(seller.phone_verified && seller.show_phone && seller.phone);
+
     res.json({
       seller: {
         id: seller.id,
         name: seller.name,
         contact: seller.contact,
+        email: seller.contact,
+        emailVerified: Boolean(seller.email_verified || profile.verification_status === 'verified'),
+        phone: canCall ? seller.phone : null,
+        phoneVerified: Boolean(seller.phone_verified),
+        showPhone: Boolean(seller.show_phone),
+        profilePhoto: seller.profile_photo || profile.profile_photo || null,
         businessName: profile.business_name || `${seller.name}'s Farm`,
-        description: profile.description || 'Verified KrishiSetu Local Producer',
+        bio: profile.bio || profile.description || 'Verified KrishiSetu Local Producer',
+        location: profile.location || 'Nashik, Maharashtra',
         verificationStatus: profile.verification_status || 'verified',
+        rating: Number(profile.rating || 5.0),
+        reviewCount: Number(profile.review_count || 0),
         createdAt: seller.created_at
       },
       products: prodRes.rows

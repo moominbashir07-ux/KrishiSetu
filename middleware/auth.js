@@ -19,13 +19,24 @@ async function authenticateUser(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    const result = await db.query('SELECT id, name, contact, role FROM users WHERE id = $1', [decoded.id]);
+    const result = await db.query(
+      'SELECT id, name, contact, role, account_status, email_verified, phone, phone_verified, show_phone, profile_photo FROM users WHERE id = $1',
+      [decoded.id]
+    );
     
     if (!result.rows.length) {
       return res.status(401).json({ error: 'Invalid or expired user session.' });
     }
 
-    req.user = result.rows[0];
+    const user = result.rows[0];
+
+    if (user.account_status === 'frozen' || user.account_status === 'suspended') {
+      return res.status(403).json({ 
+        error: 'Your KrishiSetu account has been temporarily frozen. Please contact support.' 
+      });
+    }
+
+    req.user = user;
     next();
   } catch (err) {
     return res.status(401).json({ error: 'Invalid authentication token.' });
@@ -39,6 +50,11 @@ function requireRole(role) {
     }
 
     if (req.user.role !== role) {
+      if (role === 'customer' && req.user.role === 'seller') {
+        return res.status(403).json({
+          error: 'Sellers cannot add products to a shopping cart. Switch to your buyer account to purchase products.'
+        });
+      }
       return res.status(403).json({ 
         error: `Access denied. Requires '${role}' role, but user is '${req.user.role}'.` 
       });
@@ -82,7 +98,7 @@ async function requireProductOwnership(req, res, next) {
 
     if (product.seller_id !== req.user.id) {
       return res.status(403).json({ 
-        error: 'Forbidden. You do not have permission to modify or delete another seller\'s product.' 
+        error: 'You can only manage your own listings.' 
       });
     }
 

@@ -187,6 +187,7 @@
         <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" onclick="onNavMarketplaceClick()" type="button">Marketplace</button>
         <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" onclick="showScreen('price')" type="button">Mandi Rates</button>
         <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" id="sellNavBtn" onclick="showScreen('sell')" type="button" style="display:none">Sell Produce</button>
+        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" id="adminNavBtn" onclick="showScreen('adminView'); loadAdminDashboard();" type="button" style="display:none">🛡 Admin Panel</button>
         <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" onclick="showScreen('orders')" type="button">Orders</button>
         <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" onclick="showScreen('about')" type="button">About Us</button>
       </div>
@@ -216,8 +217,10 @@
     <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); onNavMarketplaceClick();" type="button">🛒 Marketplace</button>
     <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); showScreen('price');" type="button">📊 Mandi Rates</button>
     <button id="mobileSellBtn" class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface hidden" onclick="toggleMobileMenu(); showScreen('sell');" type="button">👨‍🌾 Sell Produce</button>
+    <button id="mobileAdminBtn" class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface hidden" onclick="toggleMobileMenu(); showScreen('adminView'); loadAdminDashboard();" type="button">🛡 Admin Panel</button>
     <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); showScreen('orders');" type="button">📦 Orders Tracking</button>
     <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); showScreen('about');" type="button">🌾 About Us</button>
+    <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); openFeedbackModal();" type="button">💬 Platform Feedback</button>
   </div>
 </nav>
 
@@ -524,8 +527,119 @@
       <p class="text-body-default text-soil-brown mb-6 max-w-2xl mx-auto">
         KrishiSetu is an agricultural price intelligence and direct farm-to-customer marketplace designed to empower local farmers with direct consumer access, transparent platform fees, and live AGMARKNET mandi rates.
       </p>
-      <div class="inline-block bg-surface px-6 py-3 rounded-xl border border-primary/20 text-primary font-bold text-sm">
+      <div class="inline-block bg-surface px-6 py-3 rounded-xl border border-primary/20 text-primary font-bold text-sm mb-6">
         🚀 Made by Team Red
+      </div>
+      <div class="mt-4">
+        <button class="bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors px-6 py-2.5 rounded-xl font-bold text-xs" onclick="openFeedbackModal()" type="button">💬 Give Platform Feedback</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. ADMIN DASHBOARD CONTROL SCREEN (ADMIN ONLY) -->
+  <section class="screen max-w-6xl mx-auto px-margin-mobile md:px-margin-desktop py-8" id="adminView">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+      <div>
+        <h2 class="text-headline-md font-bold text-primary">Admin Operations Control Center</h2>
+        <p class="text-body-sm text-soil-brown">Manage users, freeze suspicious accounts, moderate product listings, reviews, and feedback.</p>
+      </div>
+      <div class="flex gap-2">
+        <button class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors" onclick="loadAdminDashboard()" type="button">🔄 Refresh Data</button>
+      </div>
+    </div>
+
+    <!-- Admin Overview Stats Cards Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" id="adminStatsGrid">
+      <div class="bg-white p-4 rounded-xl border border-border-subtle shadow-sm text-center">
+        <span class="text-[10px] font-bold text-soil-brown uppercase">Total Users</span>
+        <h3 class="text-2xl font-bold text-primary mt-1" id="admTotalUsers">0</h3>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-border-subtle shadow-sm text-center">
+        <span class="text-[10px] font-bold text-soil-brown uppercase">Frozen Accounts</span>
+        <h3 class="text-2xl font-bold text-error-crisp mt-1" id="admFrozenUsers">0</h3>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-border-subtle shadow-sm text-center">
+        <span class="text-[10px] font-bold text-soil-brown uppercase">Active Products</span>
+        <h3 class="text-2xl font-bold text-primary mt-1" id="admTotalProducts">0</h3>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-border-subtle shadow-sm text-center">
+        <span class="text-[10px] font-bold text-soil-brown uppercase">Total Orders</span>
+        <h3 class="text-2xl font-bold text-success-emerald mt-1" id="admTotalOrders">0</h3>
+      </div>
+    </div>
+
+    <!-- Admin Tabs -->
+    <div class="flex gap-2 border-b border-border-subtle mb-6 overflow-x-auto pb-1">
+      <button id="admTabUsers" class="px-4 py-2 text-xs font-bold text-primary border-b-2 border-primary" onclick="switchAdminTab('users')" type="button">Users Security & Freeze</button>
+      <button id="admTabProducts" class="px-4 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('products')" type="button">Product Listings</button>
+      <button id="admTabReviews" class="px-4 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('reviews')" type="button">Reviews Moderation</button>
+      <button id="admTabFeedback" class="px-4 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('feedback')" type="button">Platform Feedback</button>
+    </div>
+
+    <!-- Admin Users Table Container -->
+    <div id="adminTabContentUsers" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
+      <div class="flex justify-between items-center mb-4">
+        <h4 class="font-bold text-primary">User Accounts & Freeze Controls</h4>
+        <select id="adminUserFilter" class="p-2 border border-border-subtle rounded-lg text-xs bg-input-bg" onchange="loadAdminUsers()">
+          <option value="">All Roles</option>
+          <option value="customer">Customers Only</option>
+          <option value="seller">Sellers Only</option>
+          <option value="admin">Admins</option>
+        </select>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr class="border-b border-border-subtle text-soil-brown uppercase">
+              <th class="py-2">User Name</th>
+              <th class="py-2">Contact</th>
+              <th class="py-2">Role</th>
+              <th class="py-2">Status</th>
+              <th class="py-2">Action</th>
+            </tr>
+          </thead>
+          <tbody id="adminUsersRows">
+            <tr><td colspan="5" class="py-4 text-center text-soil-brown">Loading users...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Admin Products Table Container -->
+    <div id="adminTabContentProducts" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
+      <h4 class="font-bold text-primary mb-4">Product Listings Moderation</h4>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr class="border-b border-border-subtle text-soil-brown uppercase">
+              <th class="py-2">Product Name</th>
+              <th class="py-2">Seller</th>
+              <th class="py-2">Price</th>
+              <th class="py-2">Stock</th>
+              <th class="py-2">Status</th>
+              <th class="py-2">Action</th>
+            </tr>
+          </thead>
+          <tbody id="adminProductsRows">
+            <tr><td colspan="6" class="py-4 text-center text-soil-brown">Loading products...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Admin Reviews Container -->
+    <div id="adminTabContentReviews" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
+      <h4 class="font-bold text-primary mb-4">Customer Reviews Moderation</h4>
+      <div id="adminReviewsContainer" class="space-y-3">
+        <div class="p-4 text-center text-soil-brown">Loading reviews...</div>
+      </div>
+    </div>
+
+    <!-- Admin Feedback Container -->
+    <div id="adminTabContentFeedback" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
+      <h4 class="font-bold text-primary mb-4">Platform Feedback Submissions</h4>
+      <div id="adminFeedbackContainer" class="space-y-3">
+        <div class="p-4 text-center text-soil-brown">Loading feedback...</div>
       </div>
     </div>
   </section>
@@ -596,6 +710,53 @@
   <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl relative max-h-[90vh] overflow-y-auto" id="sellerModalContent">
     <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" onclick="closeSellerModal()" type="button">✕</button>
     <div class="text-center py-6 text-soil-brown">Loading seller profile...</div>
+  </div>
+</div>
+
+<!-- PRODUCT DETAILS MODAL (WITH SELLER CARD, VERIFIED REVIEWS, CALL SELLER) -->
+<div id="productDetailsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-white rounded-2xl max-w-xl w-[92vw] p-6 shadow-xl relative max-h-[90vh] overflow-y-auto" id="productDetailsModalContent">
+    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" onclick="closeProductDetailsModal()" type="button">✕</button>
+    <div class="text-center py-8 text-soil-brown">Loading product details...</div>
+  </div>
+</div>
+
+<!-- PLATFORM FEEDBACK MODAL -->
+<div id="feedbackModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-white rounded-2xl max-w-md w-[92vw] p-6 shadow-xl relative">
+    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" onclick="closeFeedbackModal()" type="button">✕</button>
+    <h3 class="text-xl font-bold text-primary mb-1">Platform Feedback</h3>
+    <p class="text-xs text-soil-brown mb-4">Share your feedback to help us improve KrishiSetu.</p>
+    <div class="space-y-3">
+      <div>
+        <label class="block text-[10px] font-bold text-soil-brown uppercase mb-1">RATING</label>
+        <select id="fbRating" class="w-full p-2.5 border border-border-subtle rounded-lg bg-input-bg text-xs outline-none">
+          <option value="5">⭐⭐⭐⭐⭐ 5 - Excellent</option>
+          <option value="4">⭐⭐⭐⭐ 4 - Very Good</option>
+          <option value="3">⭐⭐⭐ 3 - Good</option>
+          <option value="2">⭐⭐ 2 - Fair</option>
+          <option value="1">⭐ 1 - Poor</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-soil-brown uppercase mb-1">CATEGORY</label>
+        <select id="fbCategory" class="w-full p-2.5 border border-border-subtle rounded-lg bg-input-bg text-xs outline-none">
+          <option value="Website">Website UX & Navigation</option>
+          <option value="Seller">Seller Experience</option>
+          <option value="Buyer">Buyer Experience</option>
+          <option value="Delivery">Delivery & Logistics</option>
+          <option value="Payment">Platform Fees & Payment</option>
+          <option value="Mandi Rates">Mandi Rates Accuracy</option>
+          <option value="Bug">Report a Bug</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-soil-brown uppercase mb-1">YOUR MESSAGE *</label>
+        <textarea id="fbMessage" rows="3" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-xs outline-none" placeholder="Describe your experience or suggestion..."></textarea>
+      </div>
+      <button class="w-full bg-primary text-white py-3 rounded-lg font-bold text-sm hover:bg-primary-container transition-colors mt-2" onclick="submitFeedbackForm()" type="button">Submit Feedback</button>
+    </div>
   </div>
 </div>
 
@@ -781,6 +942,7 @@ function toggleMobileMenu() {
 }
 
 function onUserSignedIn(user) {
+  currentUserId = user.id;
   currentRole = user.role;
   localStorage.setItem('krishisetu_current_user', JSON.stringify(user));
   $('authHeaderBtn').textContent = 'Sign Out (' + user.name.split(' ')[0] + ')';
@@ -789,15 +951,23 @@ function onUserSignedIn(user) {
   const badge = $('userRoleBadge');
   if (badge) {
     badge.classList.remove('hidden');
-    badge.textContent = currentRole === 'seller' ? '👨‍🌾 Seller' : '🛒 Buyer';
+    if (currentRole === 'admin') badge.textContent = '🛡 Admin';
+    else if (currentRole === 'seller') badge.textContent = '👨‍🌾 Seller';
+    else badge.textContent = '🛒 Buyer';
   }
 
   $('profileNavBtn').classList.remove('hidden');
   $('sellNavBtn').style.display = currentRole === 'seller' ? 'inline-block' : 'none';
+  $('adminNavBtn').style.display = currentRole === 'admin' ? 'inline-block' : 'none';
+  
   if ($('mobileSellBtn')) $('mobileSellBtn').classList.toggle('hidden', currentRole !== 'seller');
+  if ($('mobileAdminBtn')) $('mobileAdminBtn').classList.toggle('hidden', currentRole !== 'admin');
 
   if (currentRole === 'seller') {
     showScreen('sell');
+  } else if (currentRole === 'admin') {
+    showScreen('adminView');
+    loadAdminDashboard();
   } else {
     showScreen('buyer-market');
   }
@@ -811,8 +981,11 @@ function logoutUser() {
   if (badge) badge.classList.add('hidden');
   $('profileNavBtn').classList.add('hidden');
   currentRole = 'customer';
+  currentUserId = null;
   $('sellNavBtn').style.display = 'none';
+  $('adminNavBtn').style.display = 'none';
   if ($('mobileSellBtn')) $('mobileSellBtn').classList.add('hidden');
+  if ($('mobileAdminBtn')) $('mobileAdminBtn').classList.add('hidden');
   notify('Signed out successfully.', 'info');
   showScreen('landing');
 }
@@ -857,6 +1030,7 @@ function showScreen(id) {
   if (id === 'buyer-market') renderProducts();
   if (id === 'cart') renderCartScreen();
   if (id === 'profile') renderProfileScreen();
+  if (id === 'adminView') loadAdminDashboard();
 }
 
 function emoji(c) {
@@ -888,19 +1062,22 @@ function renderProductCard(p) {
     if (dist) distStr = `${dist} km away (${p.location || 'Local'})`;
   }
 
+  const isOwner = currentUserId && p.seller_id === currentUserId;
+  const isSeller = currentRole === 'seller';
+
   const imgHtml = p.image_url 
-    ? `<img src="${p.image_url}" class="w-full h-36 object-cover rounded-lg mb-3 border border-border-subtle" alt="${p.name}">`
-    : `<div class="w-full h-36 bg-surface rounded-lg flex items-center justify-center text-4xl mb-3 border border-border-subtle">${emoji(p.name)}</div>`;
+    ? `<img src="${p.image_url}" class="w-full h-36 object-cover rounded-lg mb-3 border border-border-subtle cursor-pointer" onclick="openProductDetailsModal('${p.id}')" alt="${p.name}">`
+    : `<div class="w-full h-36 bg-surface rounded-lg flex items-center justify-center text-4xl mb-3 border border-border-subtle cursor-pointer" onclick="openProductDetailsModal('${p.id}')">${emoji(p.name)}</div>`;
 
   return `
-    <div class="bg-white p-4 rounded-2xl border border-border-subtle shadow-sm flex flex-col justify-between">
+    <div class="bg-white p-4 rounded-2xl border border-border-subtle shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
       <div>
         ${imgHtml}
         <div class="flex justify-between items-center mb-1">
           <span class="text-[10px] font-bold text-success-emerald bg-surface px-2 py-0.5 rounded border border-success-emerald/20">${p.grade || 'Fresh'}</span>
           <button class="text-[10px] font-bold text-soil-brown hover:text-primary underline" onclick="viewSellerModal('${p.seller_id}')" type="button">👨‍🌾 ${p.sellerName || 'Farmer'}</button>
         </div>
-        <h4 class="font-bold text-on-surface text-base">${p.name}</h4>
+        <h4 class="font-bold text-on-surface text-base cursor-pointer hover:text-primary" onclick="openProductDetailsModal('${p.id}')">${p.name}</h4>
         <p class="text-xs text-soil-brown mt-1 line-clamp-2">${p.description || 'Fresh direct farm produce'}</p>
         <div class="text-xs text-soil-brown mt-2">📍 ${distStr} · ${p.quantity || 100} kg available</div>
       </div>
@@ -909,9 +1086,15 @@ function renderProductCard(p) {
           <span class="text-xl font-extrabold text-primary">₹${p.price}</span>
           <span class="text-[10px] text-soil-brown block">per kg</span>
         </div>
-        ${currentRole === 'seller' 
-          ? `<button class="bg-error-container text-on-error-container px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-error/10" onclick="deleteProduct('${p.id}')" type="button">Delete</button>`
-          : `<button class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary-container shadow-sm" onclick="addToCart('${p.id}')" type="button">+ ADD TO CART</button>`}
+        <div class="flex items-center gap-2">
+          <button class="bg-surface text-primary border border-primary/20 px-2.5 py-1.5 rounded-lg text-[11px] font-bold hover:bg-primary hover:text-white transition-colors" onclick="openProductDetailsModal('${p.id}')" type="button">Details</button>
+          ${isOwner 
+            ? `<button class="bg-error-container text-on-error-container px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-error/10" onclick="deleteProduct('${p.id}')" type="button">Delete</button>`
+            : isSeller 
+              ? `<span class="text-[10px] text-soil-brown font-semibold">View Only</span>`
+              : `<button class="bg-primary text-white px-3.5 py-1.5 rounded-lg text-xs font-bold hover:bg-primary-container shadow-sm" onclick="addToCart('${p.id}')" type="button">+ CART</button>`
+          }
+        </div>
       </div>
     </div>
   `;
@@ -982,6 +1165,7 @@ async function publishProduct() {
 }
 
 async function deleteProduct(id) {
+  if (!confirm('Are you sure you want to remove this produce listing?')) return;
   try {
     await ProductService.deleteProduct(id);
     notify('Produce listing removed.', 'success');

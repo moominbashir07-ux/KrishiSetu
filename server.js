@@ -12,6 +12,8 @@ const cartRouter = require('./routes/cart');
 const ordersRouter = require('./routes/orders');
 const sellerVerificationRouter = require('./routes/sellerVerification');
 const adminRouter = require('./routes/admin');
+const reviewsRouter = require('./routes/reviews');
+const feedbackRouter = require('./routes/feedback');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -52,6 +54,8 @@ app.use('/api/cart', cartRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/seller/verification', sellerVerificationRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/reviews', reviewsRouter);
+app.use('/api/feedback', feedbackRouter);
 
 // Helper functions for Mandi price and date normalization
 function parseMandiPrice(val) {

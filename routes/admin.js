@@ -7,6 +7,129 @@ const router = express.Router();
 // All routes require authenticated ADMIN role
 router.use(authenticateUser, requireRole('admin'));
 
+// GET ALL USERS (ADMIN)
+router.get('/users', async (req, res, next) => {
+  const { role, status } = req.query;
+
+  try {
+    let sql = 'SELECT id, name, contact, role, account_status, email_verified, phone, phone_verified, profile_photo, created_at FROM users';
+    const conditions = [];
+    const params = [];
+
+    if (role && ['customer', 'seller', 'admin'].includes(role)) {
+      params.push(role);
+      conditions.push(`role = $${params.length}`);
+    }
+
+    if (status && ['active', 'frozen', 'suspended'].includes(status)) {
+      params.push(status);
+      conditions.push(`account_status = $${params.length}`);
+    }
+
+    if (conditions.length > 0) {
+      sql += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    sql += ' ORDER BY created_at DESC';
+
+    const result = await db.query(sql, params);
+    res.json({ users: result.rows });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// UPDATE USER ACCOUNT STATUS (FREEZE / UNFREEZE / SUSPEND)
+router.put('/users/:id/status', async (req, res, next) => {
+  const { status } = req.body;
+  const userId = req.params.id;
+
+  if (!['active', 'frozen', 'suspended'].includes(status)) {
+    return res.status(400).json({ error: 'Status must be one of: active, frozen, suspended.' });
+  }
+
+  try {
+    const userRes = await db.query('SELECT id, name, role FROM users WHERE id = $1', [userId]);
+    if (!userRes.rows.length) {
+      return res.status(404).json({ error: 'User account not found.' });
+    }
+
+    await db.query(
+      'UPDATE users SET account_status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+      [status, userId]
+    );
+
+    res.json({
+      message: `User account '${userId}' status updated to '${status}'.`,
+      userId,
+      status
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET ALL PRODUCTS (ADMIN MODERATION)
+router.get('/products', async (req, res, next) => {
+  try {
+    const result = await db.query(
+      `SELECT p.*, u.name as "sellerName", u.contact as "sellerContact"
+       FROM products p
+       JOIN users u ON p.seller_id = u.id
+       ORDER BY p.created_at DESC`
+    );
+    res.json({ products: result.rows });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// DELETE / REMOVE PRODUCT (ADMIN MODERATION)
+router.delete('/products/:id', async (req, res, next) => {
+  try {
+    await db.query("UPDATE products SET status = 'inactive', updated_at = CURRENT_TIMESTAMP WHERE id = $1", [req.params.id]);
+    res.json({ message: 'Product listing removed by admin.', productId: req.params.id });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET ALL ORDERS (ADMIN)
+router.get('/orders', async (req, res, next) => {
+  try {
+    const result = await db.query('SELECT * FROM orders ORDER BY created_at DESC');
+    res.json({ orders: result.rows });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET ALL REVIEWS (ADMIN MODERATION)
+router.get('/reviews', async (req, res, next) => {
+  try {
+    const result = await db.query(
+      `SELECT r.*, u.name as "buyerName", p.name as "productName"
+       FROM reviews r
+       JOIN users u ON r.buyer_id = u.id
+       JOIN products p ON r.product_id = p.id
+       ORDER BY r.created_at DESC`
+    );
+    res.json({ reviews: result.rows });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// DELETE REVIEW (ADMIN MODERATION)
+router.delete('/reviews/:id', async (req, res, next) => {
+  try {
+    await db.query('DELETE FROM reviews WHERE id = $1', [req.params.id]);
+    res.json({ message: 'Review removed by admin.', reviewId: req.params.id });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET ALL SELLER VERIFICATION APPLICATIONS
 router.get('/verifications', async (req, res, next) => {
   const { status } = req.query;
@@ -109,16 +232,22 @@ router.put('/verifications/:id', async (req, res, next) => {
 // GET ADMIN METRICS SUMMARY
 router.get('/metrics', async (req, res, next) => {
   try {
-    const metricsRes = await db.query('SELECT COUNT(*) as count FROM users WHERE role = \'seller\'');
+    const metricsRes = await db.query('SELECT COUNT(*) as count FROM users');
     const metrics = metricsRes.rows[0] || {};
 
     res.json({
       metrics: {
+        totalUsers: Number(metrics.totalUsers || 0),
         totalSellers: Number(metrics.totalSellers || metrics.count || 0),
+        totalCustomers: Number(metrics.totalCustomers || 0),
+        frozenUsers: Number(metrics.frozenUsers || 0),
         pendingVerifications: Number(metrics.pendingVerifications || 0),
         verifiedSellers: Number(metrics.verifiedSellers || 0),
         rejectedVerifications: Number(metrics.rejectedVerifications || 0),
-        totalOrders: Number(metrics.totalOrders || 0)
+        totalProducts: Number(metrics.totalProducts || 0),
+        totalOrders: Number(metrics.totalOrders || 0),
+        totalReviews: Number(metrics.totalReviews || 0),
+        totalFeedback: Number(metrics.totalFeedback || 0)
       }
     });
   } catch (err) {

@@ -22,7 +22,9 @@ class LocalFallbackDB {
       seller_verifications: [],
       otps: [],
       order_status_history: [],
-      market_price_snapshots: []
+      market_price_snapshots: [],
+      reviews: [],
+      feedback: []
     };
   }
 
@@ -31,21 +33,39 @@ class LocalFallbackDB {
 
     // 1. SELECT USERS
     if (q.includes('FROM users')) {
+      let users = [...this.tables.users].map(u => ({
+        account_status: 'active',
+        email_verified: true,
+        phone: null,
+        phone_verified: false,
+        show_phone: false,
+        profile_photo: null,
+        ...u
+      }));
+
       if (q.includes('contact =')) {
         const contact = params[0];
-        const found = this.tables.users.find(u => u.contact === contact);
+        const found = users.find(u => u.contact === contact);
         return { rows: found ? [{ ...found }] : [] };
       }
       if (q.includes('id =')) {
         const id = params[0];
-        const found = this.tables.users.find(u => u.id === id);
+        const found = users.find(u => u.id === id);
         return { rows: found ? [{ ...found }] : [] };
       }
       if (q.includes("role = 'seller'")) {
-        const sellers = this.tables.users.filter(u => u.role === 'seller');
+        const sellers = users.filter(u => u.role === 'seller');
         return { rows: sellers };
       }
-      return { rows: [...this.tables.users] };
+      if (q.includes('role = $1')) {
+        const role = params[0];
+        users = users.filter(u => u.role === role);
+      }
+      if (q.includes('account_status = $')) {
+        const status = params[params.length - 1];
+        users = users.filter(u => u.account_status === status);
+      }
+      return { rows: users };
     }
 
     // 2. INSERT USERS
@@ -56,6 +76,12 @@ class LocalFallbackDB {
         contact: params[2],
         password_hash: params[3],
         role: params[4],
+        account_status: 'active',
+        email_verified: true,
+        phone: null,
+        phone_verified: false,
+        show_phone: false,
+        profile_photo: null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -63,16 +89,128 @@ class LocalFallbackDB {
       return { rows: [{ ...user }] };
     }
 
-    // 2B. UPDATE USERS (PASSWORD RESET)
-    if (q.startsWith('UPDATE users SET password_hash =')) {
-      const newHash = params[0];
-      const contact = params[1];
-      const user = this.tables.users.find(u => u.contact === contact);
+    // 2B. UPDATE USERS
+    if (q.startsWith('UPDATE users')) {
+      const idOrContact = params[params.length - 1];
+      const user = this.tables.users.find(u => u.id === idOrContact || u.contact === idOrContact);
       if (user) {
-        user.password_hash = newHash;
+        if (q.includes('password_hash =')) {
+          user.password_hash = params[0];
+        }
+        if (q.includes('account_status =')) {
+          user.account_status = params[0];
+        }
+        if (q.includes('email_verified =')) {
+          user.email_verified = Boolean(params[0]);
+        }
+        if (q.includes('phone_verified =')) {
+          user.phone_verified = Boolean(params[0]);
+          if (params.length > 2 && params[1]) user.phone = params[1];
+        }
+        if (q.includes('profile_photo =')) {
+          user.profile_photo = params[0];
+        }
         user.updated_at = new Date().toISOString();
       }
       return { rows: user ? [{ ...user }] : [] };
+    }
+
+    // 15. REVIEWS
+    if (q.startsWith('INSERT INTO reviews')) {
+      const rev = {
+        id: params[0], product_id: params[1], buyer_id: params[2], order_id: params[3],
+        rating: Number(params[4]), comment: params[5], created_at: new Date().toISOString()
+      };
+      this.tables.reviews.unshift(rev);
+      return { rows: [{ ...rev }] };
+    }
+
+    if (q.includes('FROM reviews')) {
+      let revs = [...this.tables.reviews];
+      if (q.includes('product_id = $1')) {
+        const prodId = params[0];
+        revs = revs.filter(r => r.product_id === prodId);
+      }
+      if (q.includes('buyer_id = $1')) {
+        const buyerId = params[0];
+        revs = revs.filter(r => r.buyer_id === buyerId);
+      }
+
+      const enriched = revs.map(r => {
+        const buyer = this.tables.users.find(u => u.id === r.buyer_id) || {};
+        return {
+          ...r,
+          buyerName: buyer.name || 'Verified Buyer',
+          verifiedPurchase: true
+        };
+      });
+      return { rows: enriched };
+    }
+
+    if (q.startsWith('DELETE FROM reviews')) {
+      const id = params[0];
+      this.tables.reviews = this.tables.reviews.filter(r => r.id !== id);
+      return { rows: [] };
+    }
+
+    // 16. FEEDBACK
+    if (q.startsWith('INSERT INTO feedback')) {
+      const fb = {
+        id: params[0], user_id: params[1] || null, user_name: params[2] || 'Anonymous',
+        user_email: params[3] || '', rating: Number(params[4] || 5), category: params[5] || 'General',
+        message: params[6], status: 'new', created_at: new Date().toISOString()
+      };
+      this.tables.feedback.unshift(fb);
+      return { rows: [{ ...fb }] };
+    }
+
+    if (q.includes('FROM feedback')) {
+      let fbs = [...this.tables.feedback];
+      if (params.length > 0 && params[0]) {
+        fbs = fbs.filter(f => f.status === params[0]);
+      }
+      return { rows: fbs };
+    }
+
+    if (q.startsWith('UPDATE feedback')) {
+      const id = params[1] || params[0];
+      const fb = this.tables.feedback.find(x => x.id === id);
+      if (fb) {
+        fb.status = params[0];
+        fb.updated_at = new Date().toISOString();
+      }
+      return { rows: fb ? [{ ...fb }] : [] };
+    }
+
+    // 13. ADMIN METRICS
+    if (q.includes('COUNT(')) {
+      const totalUsers = this.tables.users.length;
+      const sellersCount = this.tables.users.filter(u => u.role === 'seller').length;
+      const customersCount = this.tables.users.filter(u => u.role === 'customer').length;
+      const frozenCount = this.tables.users.filter(u => u.account_status === 'frozen' || u.account_status === 'suspended').length;
+      const pendingVerifs = this.tables.seller_verifications.filter(sv => sv.status === 'pending').length;
+      const verifiedSellers = this.tables.seller_verifications.filter(sv => sv.status === 'verified').length;
+      const rejectedVerifs = this.tables.seller_verifications.filter(sv => sv.status === 'rejected').length;
+      const totalProducts = this.tables.products.filter(p => p.status !== 'inactive').length;
+      const totalOrders = this.tables.orders.length;
+      const totalReviews = this.tables.reviews.length;
+      const totalFeedback = this.tables.feedback.length;
+
+      return {
+        rows: [{
+          totalUsers,
+          totalSellers: sellersCount,
+          totalCustomers: customersCount,
+          frozenUsers: frozenCount,
+          pendingVerifications: pendingVerifs,
+          verifiedSellers,
+          rejectedVerifications: rejectedVerifs,
+          totalProducts,
+          totalOrders,
+          totalReviews,
+          totalFeedback
+        }]
+      };
     }
 
     // 3. INSERT SELLER / CUSTOMER PROFILES

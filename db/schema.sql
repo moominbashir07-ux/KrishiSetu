@@ -184,6 +184,51 @@ CREATE TABLE IF NOT EXISTS market_price_snapshots (
     fetched_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Ensure column additions for existing tables
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT false;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(50);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_verified BOOLEAN DEFAULT false;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS show_phone BOOLEAN DEFAULT false;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_photo TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS account_status VARCHAR(50) DEFAULT 'active';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP WITH TIME ZONE;
+
+ALTER TABLE seller_profiles ADD COLUMN IF NOT EXISTS profile_photo TEXT;
+ALTER TABLE seller_profiles ADD COLUMN IF NOT EXISTS phone VARCHAR(50);
+ALTER TABLE seller_profiles ADD COLUMN IF NOT EXISTS phone_verified BOOLEAN DEFAULT false;
+ALTER TABLE seller_profiles ADD COLUMN IF NOT EXISTS show_phone BOOLEAN DEFAULT false;
+ALTER TABLE seller_profiles ADD COLUMN IF NOT EXISTS location TEXT;
+ALTER TABLE seller_profiles ADD COLUMN IF NOT EXISTS bio TEXT;
+ALTER TABLE seller_profiles ADD COLUMN IF NOT EXISTS rating NUMERIC(3,2) DEFAULT 5.0;
+ALTER TABLE seller_profiles ADD COLUMN IF NOT EXISTS review_count INTEGER DEFAULT 0;
+
+-- 15. REVIEWS TABLE (VERIFIED CUSTOMER PURCHASES)
+CREATE TABLE IF NOT EXISTS reviews (
+    id VARCHAR(50) PRIMARY KEY,
+    product_id VARCHAR(50) NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    buyer_id VARCHAR(50) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    order_id VARCHAR(50) NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    comment TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unique_buyer_order_product UNIQUE (buyer_id, order_id, product_id)
+);
+
+-- 16. FEEDBACK TABLE (PLATFORM FEEDBACK)
+CREATE TABLE IF NOT EXISTS feedback (
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) REFERENCES users(id) ON DELETE SET NULL,
+    user_name VARCHAR(255),
+    user_email VARCHAR(255),
+    rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+    category VARCHAR(50) NOT NULL CHECK (category IN ('Website', 'Seller', 'Buyer', 'Delivery', 'Payment', 'Mandi Rates', 'Bug', 'Other')),
+    message TEXT NOT NULL,
+    status VARCHAR(50) DEFAULT 'new' CHECK (status IN ('new', 'reviewed', 'resolved')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- INDEXES FOR PRODUCTION QUERY PERFORMANCE
 CREATE INDEX IF NOT EXISTS idx_products_seller ON products(seller_id);
 CREATE INDEX IF NOT EXISTS idx_products_status ON products(status);
@@ -196,3 +241,7 @@ CREATE INDEX IF NOT EXISTS idx_seller_verifications_status ON seller_verificatio
 CREATE INDEX IF NOT EXISTS idx_otps_contact ON otps(contact);
 CREATE INDEX IF NOT EXISTS idx_order_history_order ON order_status_history(order_id);
 CREATE INDEX IF NOT EXISTS idx_market_snapshots_lookup ON market_price_snapshots(commodity, state, market, arrival_date);
+CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_buyer ON reviews(buyer_id);
+CREATE INDEX IF NOT EXISTS idx_feedback_status ON feedback(status);
+
