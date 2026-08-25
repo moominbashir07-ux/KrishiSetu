@@ -159,6 +159,16 @@
         .agri-notification.error { border-left-color: #E64B3C; }
         .agri-notification.warning { border-left-color: #F7D34A; }
         .agri-notification.success { border-left-color: #0F7B45; }
+        
+        .navbar-logo {
+            height: 40px;
+            width: auto;
+            display: block;
+            object-fit: contain;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
 </style>
 </head>
 <body class="font-body-default min-h-screen flex flex-col">
@@ -171,7 +181,7 @@
   <div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-4 max-w-max-width mx-auto">
     <div class="flex items-center gap-6">
       <a class="flex items-center" href="#" onclick="showScreen('landing')" title="KrishiSetu Home">
-        <img src="images/logo.png" class="h-9 w-auto object-contain" alt="KrishiSetu Logo">
+        <img src="images/logo.png" class="navbar-logo" alt="KrishiSetu Logo">
       </a>
       <div class="hidden md:flex gap-6 items-center">
         <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-body-default font-semibold" onclick="onNavMarketplaceClick()" type="button">Marketplace</button>
