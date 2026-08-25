@@ -514,9 +514,11 @@ async function initDb() {
 
   if (connectionString) {
     try {
+      const isProduction = process.env.NODE_ENV === 'production' || connectionString.includes('supabase.co');
       pool = new Pool({
         connectionString,
-        connectionTimeoutMillis: 3000,
+        ssl: isProduction ? { rejectUnauthorized: false } : false,
+        connectionTimeoutMillis: 5000,
         idleTimeoutMillis: 10000,
         max: 10
       });
