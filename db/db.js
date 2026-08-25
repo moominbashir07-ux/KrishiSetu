@@ -510,9 +510,26 @@ class LocalFallbackDB {
       return { rows: enriched };
     }
     if (q.startsWith('UPDATE orders')) {
+      if (q.includes('transaction_id = $1') || q.includes('transaction_id = $2')) {
+        const orderId = params[params.length - 1];
+        const o = this.tables.orders.find(x => x.id === orderId || x.order_number === orderId);
+        if (o) {
+          if (q.includes('payment_status = $1')) {
+            o.payment_status = params[0];
+            o.transaction_id = params[1];
+          } else if (q.includes('payment_status = $2')) {
+            o.transaction_id = params[0];
+            o.payment_status = params[1];
+          } else {
+            o.transaction_id = params[0];
+          }
+          o.updated_at = new Date().toISOString();
+        }
+        return { rows: o ? [{ ...o }] : [] };
+      }
       if (q.includes('payment_status = $1')) {
         const payStatus = params[0];
-        const orderId = params[1];
+        const orderId = params[params.length - 1];
         const o = this.tables.orders.find(x => x.id === orderId || x.order_number === orderId);
         if (o) {
           o.payment_status = payStatus;

@@ -568,7 +568,7 @@
       <h2 class="text-headline-lg font-bold text-primary mt-2 mb-4">About KrishiSetu</h2>
       <p class="text-body-default text-soil-brown mb-6 max-w-2xl mx-auto">
         KrishiSetu is an agricultural price intelligence and direct farm-to-customer marketplace designed to empower local farmers with direct consumer access, transparent platform fees, and live AGMARKNET mandi rates.
-      </p>
+</p>
       <div class="inline-block bg-surface px-6 py-3 rounded-xl border border-primary/20 text-primary font-bold text-sm mb-6">
         🚀 Made by Code Red
       </div>
@@ -578,457 +578,483 @@
     </div>
   </section>
 
-  <!-- 9. ADMIN DASHBOARD CONTROL SCREEN V3 (MASTER COMMAND CENTER) -->
-  <section class="screen max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-6" id="adminView">
-    <!-- Admin Master Top Navigation Bar V3 -->
-    <div class="bg-white p-5 rounded-2xl border border-border-subtle shadow-sm mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+  <!-- 9. ADMIN DASHBOARD CONTROL SCREEN V4 (MASTER COMMAND CENTER - STANDALONE DARK THEME) -->
+  <section class="screen w-full min-h-screen bg-slate-950 text-slate-100 font-sans" id="adminView">
+    <!-- Admin Master Top Navigation Bar -->
+    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 md:px-8 py-3.5 flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary font-bold text-xl">🛡</div>
+        <button class="md:hidden text-slate-400 hover:text-white p-2 text-xl" onclick="$('adminSidebar').classList.toggle('hidden')" type="button">☰</button>
+        <div class="w-10 h-10 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center justify-center text-emerald-400 font-black text-xl shadow-inner">🛡</div>
         <div>
-          <h2 class="text-headline-md font-bold text-primary flex items-center gap-2">
-            Master Command Center V3
-            <span class="text-[10px] bg-success-emerald/10 text-success-emerald px-2 py-0.5 rounded-full border border-success-emerald/20 font-extrabold uppercase">● Live Command Control</span>
-          </h2>
-          <p class="text-xs text-soil-brown">Executive GMV/revenue analytics, seller/customer governance, live presence, financial expenses & database inspector.</p>
+          <h1 class="text-base md:text-lg font-black tracking-tight text-white flex items-center gap-2">
+            KrishiSetu V4 Master Control
+            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 font-bold uppercase tracking-wider">● Operational</span>
+          </h1>
+          <p class="text-[11px] text-slate-400 hidden sm:block">Executive Command Center · Governance · Financial BI · Live Presence</p>
         </div>
       </div>
 
-      <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
-        <!-- Global Search Bar -->
-        <div class="relative flex-1 md:w-64">
-          <input type="text" id="adminGlobalSearchInput" placeholder="Global search (user, order, product)..." class="w-full pl-8 pr-3 py-2 border border-border-subtle rounded-xl text-xs bg-input-bg font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20" onkeyup="if(event.key==='Enter') executeAdminGlobalSearch()">
-          <span class="absolute left-2.5 top-2.5 text-xs text-soil-brown">🔍</span>
+      <!-- Top Bar Actions & Grouped Search -->
+      <div class="flex items-center gap-3">
+        <div class="relative hidden sm:block w-64 md:w-80">
+          <input type="text" id="adminGlobalSearchInput" placeholder="Grouped search (user, order, txn, product)..." class="w-full pl-8 pr-3 py-1.5 bg-slate-800/80 border border-slate-700 rounded-xl text-xs text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50" onkeyup="if(event.key==='Enter') executeAdminGlobalSearch()">
+          <span class="absolute left-2.5 top-2 text-xs text-slate-400">🔍</span>
         </div>
 
-        <!-- Export Dropdown -->
-        <select id="adminCsvExportSelect" class="p-2 border border-border-subtle rounded-xl text-xs bg-input-bg font-bold text-primary" onchange="if(this.value){ exportAdminCsv(this.value); this.value=''; }">
-          <option value="">📥 Export CSV...</option>
-          <option value="users">Export Users CSV</option>
-          <option value="orders">Export Orders CSV</option>
-          <option value="products">Export Products CSV</option>
-          <option value="expenses">Export Expenses CSV</option>
-          <option value="login-history">Export Login History CSV</option>
-          <option value="audit-logs">Export Audit Logs CSV</option>
+        <select id="adminCsvExportSelect" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 font-bold focus:outline-none" onchange="if(this.value){ exportAdminCsv(this.value); this.value=''; }">
+          <option value="">📥 Export CSV</option>
+          <option value="users">Users</option>
+          <option value="orders">Orders</option>
+          <option value="products">Products</option>
+          <option value="expenses">Expenses</option>
+          <option value="login-history">Login History</option>
+          <option value="audit-logs">Audit Logs</option>
         </select>
 
-        <button class="bg-primary text-white px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-primary-container transition-colors shrink-0" onclick="loadAdminDashboard()" type="button">🔄 Refresh Data</button>
-      </div>
-    </div>
+        <button class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shrink-0" onclick="loadAdminDashboard()" type="button">🔄 Refresh</button>
 
-    <!-- Executive V3 Business KPI Overview Cards -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-6" id="adminStatsGrid">
-      <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
-        <span class="text-[10px] font-bold text-soil-brown uppercase block">Gross Sales (GMV)</span>
-        <h3 class="text-xl font-bold text-primary mt-0.5" id="admGmv">₹0</h3>
-      </div>
-      <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
-        <span class="text-[10px] font-bold text-soil-brown uppercase block">Platform Revenue</span>
-        <h3 class="text-xl font-bold text-success-emerald mt-0.5" id="admPlatformRevenue">₹0</h3>
-      </div>
-      <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
-        <span class="text-[10px] font-bold text-soil-brown uppercase block">Seller Earnings</span>
-        <h3 class="text-xl font-bold text-primary mt-0.5" id="admSellerEarnings">₹0</h3>
-      </div>
-      <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
-        <span class="text-[10px] font-bold text-soil-brown uppercase block">Net Profit</span>
-        <h3 class="text-base font-bold text-primary mt-0.5 leading-tight" id="admNetProfit">₹0</h3>
-      </div>
-      <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
-        <span class="text-[10px] font-bold text-soil-brown uppercase block">Total Orders</span>
-        <h3 class="text-xl font-bold text-success-emerald mt-0.5" id="admTotalOrders">0</h3>
-      </div>
-      <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm text-center">
-        <span class="text-[10px] font-bold text-soil-brown uppercase block">Online Now (60s)</span>
-        <h3 class="text-xl font-bold text-success-emerald mt-0.5" id="admOnlineUsers">0</h3>
-      </div>
-    </div>
-
-    <!-- Master Command Navigation Tabs -->
-    <div class="flex gap-2 border-b border-border-subtle mb-6 overflow-x-auto pb-1 whitespace-nowrap">
-      <button id="admTabAnalytics" class="px-3.5 py-2 text-xs font-bold text-primary border-b-2 border-primary" onclick="switchAdminTab('analytics')" type="button">📈 Sales Analytics</button>
-      <button id="admTabUsers" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('users')" type="button">👥 Users & Freeze</button>
-      <button id="admTabSellers" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('sellers')" type="button">👨‍🌾 Sellers</button>
-      <button id="admTabCustomers" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('customers')" type="button">🛒 Customers</button>
-      <button id="admTabProducts" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('products')" type="button">🌾 Products</button>
-      <button id="admTabOrders" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('orders')" type="button">📦 Orders Monitoring</button>
-      <button id="admTabPayments" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('payments')" type="button">💳 Payments</button>
-      <button id="admTabLive" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('live')" type="button">🟢 Live Activity</button>
-      <button id="admTabLoginHistory" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('loginHistory')" type="button">🔑 Security & Logins</button>
-      <button id="admTabFeedback" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('feedback')" type="button">💬 Feedback</button>
-      <button id="admTabReviews" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('reviews')" type="button">⭐ Reviews</button>
-      <button id="admTabAudit" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('audit')" type="button">📜 Audit Logs</button>
-      <button id="admTabFinance" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('finance')" type="button">💸 Finance & Expenses</button>
-      <button id="admTabDatabase" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('database')" type="button">🗄 Database</button>
-      <button id="admTabHealth" class="px-3.5 py-2 text-xs font-bold text-soil-brown" onclick="switchAdminTab('health')" type="button">🩺 System Health</button>
-    </div>
-
-    <!-- TAB 1: SALES ANALYTICS & REVENUE -->
-    <div id="adminTabContentAnalytics" class="space-y-6">
-      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
-        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
-          <div>
-            <h4 class="font-bold text-primary text-base">Platform Gross Merchandise Value (GMV) vs Revenue</h4>
-            <p class="text-xs text-soil-brown">Real order volume and revenue generation across platform orders.</p>
-          </div>
-          <select id="analyticsDateRange" class="p-2 border border-border-subtle rounded-xl text-xs bg-input-bg font-bold text-primary" onchange="loadAdminAnalytics(this.value)">
-            <option value="30d">Last 30 Days</option>
-            <option value="7d">Last 7 Days</option>
-            <option value="today">Today</option>
-            <option value="1y">Full Year</option>
-          </select>
-        </div>
-        <div class="w-full overflow-hidden">
-          <canvas id="adminSalesChart" class="w-full h-64 border border-border-subtle/40 rounded-xl bg-surface/30"></canvas>
+        <div class="flex items-center gap-2 border-l border-slate-800 pl-3">
+          <span class="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center text-xs font-bold text-emerald-400 border border-slate-700">ADM</span>
+          <button class="text-slate-400 hover:text-rose-400 text-xs font-bold" onclick="AuthService.logout(); showScreen('buyer-market');" type="button">Logout</button>
         </div>
       </div>
+    </header>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
-          <h4 class="font-bold text-primary mb-3 text-sm">Top Selling Products</h4>
-          <div id="adminTopProductsList" class="space-y-2 text-xs">
-            <div class="p-3 text-center text-soil-brown">Loading top products...</div>
+    <!-- Main Container: Sidebar + Tab View Content -->
+    <div class="flex min-h-[calc(100vh-60px)]">
+      <!-- PERSISTENT ADMIN SIDEBAR (20 NAVIGATION ITEMS) -->
+      <aside id="adminSidebar" class="w-64 bg-slate-900 border-r border-slate-800 p-4 space-y-1 shrink-0 hidden md:block overflow-y-auto max-h-[calc(100vh-60px)]">
+        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 mb-2">Executive Navigation</div>
+        <button id="admTabAnalytics" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('analytics')">📊 Executive Overview</button>
+        <button id="admTabLive" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('live')">🟢 Live Presence & Stream</button>
+        <button id="admTabUsers" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('users')">👥 User Accounts Governance</button>
+        <button id="admTabCustomers" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('customers')">🛒 Customer Roster</button>
+        <button id="admTabSellers" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('sellers')">👨‍🌾 Sellers & Verification</button>
+        <button id="admTabProducts" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('products')">🌾 Product Moderation</button>
+        <button id="admTabOrders" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('orders')">📦 Orders Control Room</button>
+        <button id="admTabPayments" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('payments')">💳 Payment Control Room</button>
+        <button id="admTabFinance" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('finance')">💸 Profit & Expenses BI</button>
+        <button id="admTabMandi" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('mandi')">🏛 Mandi Intelligence & Debug</button>
+        <button id="admTabReviews" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('reviews')">⭐ Reviews Moderation</button>
+        <button id="admTabFeedback" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('feedback')">💬 Platform Feedback</button>
+        <button id="admTabLoginHistory" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('loginHistory')">🔑 Security & Login Audits</button>
+        <button id="admTabAudit" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('audit')">📜 System Audit Logs</button>
+        <button id="admTabDatabase" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('database')">🗄 DB Table Inspector</button>
+        <button id="admTabHealth" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('health')">🩺 System Health Monitor</button>
+      </aside>
+
+      <!-- Main Dashboard Content Area -->
+      <main class="flex-1 p-4 md:p-8 space-y-6 overflow-y-auto">
+        <!-- Executive V4 Business KPI Overview Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5" id="adminStatsGrid">
+          <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 text-center shadow-lg">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Gross Sales (GMV)</span>
+            <h3 class="text-xl font-bold text-emerald-400 mt-1" id="admGmv">₹0</h3>
+          </div>
+          <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 text-center shadow-lg">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Platform Revenue</span>
+            <h3 class="text-xl font-bold text-emerald-400 mt-1" id="admPlatformRevenue">₹0</h3>
+          </div>
+          <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 text-center shadow-lg">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Seller Earnings</span>
+            <h3 class="text-xl font-bold text-blue-400 mt-1" id="admSellerEarnings">₹0</h3>
+          </div>
+          <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 text-center shadow-lg">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Net Profit</span>
+            <h3 class="text-sm font-bold text-emerald-400 mt-1 leading-snug" id="admNetProfit">₹0</h3>
+          </div>
+          <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 text-center shadow-lg">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Orders</span>
+            <h3 class="text-xl font-bold text-amber-400 mt-1" id="admTotalOrders">0</h3>
+          </div>
+          <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 text-center shadow-lg">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Online Now (60s)</span>
+            <h3 class="text-xl font-bold text-emerald-400 mt-1" id="admOnlineUsers">0</h3>
           </div>
         </div>
-        <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
-          <h4 class="font-bold text-primary mb-3 text-sm">Payment Method Breakdown</h4>
-          <div id="adminPaymentMethodSummary" class="space-y-3 text-xs">
-            <div class="p-3 text-center text-soil-brown">Loading payment distribution...</div>
+
+        <!-- TAB 1: EXECUTIVE OVERVIEW & SALES ANALYTICS -->
+        <div id="adminTabContentAnalytics" class="space-y-6">
+          <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+            <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
+              <div>
+                <h4 class="font-bold text-white text-base">Platform GMV & Revenue Analytics</h4>
+                <p class="text-xs text-slate-400">Order merchandise value and platform fee trends.</p>
+              </div>
+              <select id="analyticsDateRange" class="p-2 border border-slate-700 rounded-xl text-xs bg-slate-800 font-bold text-emerald-400" onchange="loadAdminAnalytics(this.value)">
+                <option value="30d">Last 30 Days</option>
+                <option value="7d">Last 7 Days</option>
+                <option value="today">Today</option>
+                <option value="1y">Full Year</option>
+              </select>
+            </div>
+            <div class="w-full overflow-hidden">
+              <canvas id="adminSalesChart" class="w-full h-64 border border-slate-800 rounded-xl bg-slate-950/40"></canvas>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+              <h4 class="font-bold text-white mb-3 text-sm">Top Selling Products</h4>
+              <div id="adminTopProductsList" class="space-y-2 text-xs">
+                <div class="p-3 text-center text-slate-500">Loading top products...</div>
+              </div>
+            </div>
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+              <h4 class="font-bold text-white mb-3 text-sm">Payment Method Distribution</h4>
+              <div id="adminPaymentMethodSummary" class="space-y-3 text-xs">
+                <div class="p-3 text-center text-slate-500">Loading payment distribution...</div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- TAB 2: USERS & FREEZE MANAGEMENT -->
-    <div id="adminTabContentUsers" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
-      <div class="flex justify-between items-center mb-4">
-        <h4 class="font-bold text-primary">User Accounts & Access Control</h4>
-        <select id="adminUserFilter" class="p-2 border border-border-subtle rounded-lg text-xs bg-input-bg font-bold" onchange="loadAdminUsers()">
-          <option value="">All Roles</option>
-          <option value="customer">Customers Only</option>
-          <option value="seller">Sellers Only</option>
-          <option value="admin">Admins</option>
-        </select>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs">
-          <thead>
-            <tr class="border-b border-border-subtle text-soil-brown uppercase">
-              <th class="py-2">User Name</th>
-              <th class="py-2">Contact</th>
-              <th class="py-2">Role</th>
-              <th class="py-2">Status</th>
-              <th class="py-2">Action</th>
-            </tr>
-          </thead>
-          <tbody id="adminUsersRows">
-            <tr><td colspan="5" class="py-4 text-center text-soil-brown">Loading users...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB 3: DETAILED SELLERS LIST -->
-    <div id="adminTabContentSellers" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
-      <h4 class="font-bold text-primary mb-4">Platform Sellers & Performance Governance</h4>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs">
-          <thead>
-            <tr class="border-b border-border-subtle text-soil-brown uppercase">
-              <th class="py-2">Seller / Business</th>
-              <th class="py-2">Contact</th>
-              <th class="py-2">Verification</th>
-              <th class="py-2">Products</th>
-              <th class="py-2">GMV Generated</th>
-              <th class="py-2">Platform Fees</th>
-              <th class="py-2">Rating</th>
-              <th class="py-2">Status</th>
-              <th class="py-2">Action</th>
-            </tr>
-          </thead>
-          <tbody id="adminSellersRows">
-            <tr><td colspan="9" class="py-4 text-center text-soil-brown">Loading sellers...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB 4: DETAILED CUSTOMERS LIST -->
-    <div id="adminTabContentCustomers" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
-      <h4 class="font-bold text-primary mb-4">Platform Customers & Purchase History</h4>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs">
-          <thead>
-            <tr class="border-b border-border-subtle text-soil-brown uppercase">
-              <th class="py-2">Customer Name</th>
-              <th class="py-2">Contact</th>
-              <th class="py-2">Location</th>
-              <th class="py-2">Orders Count</th>
-              <th class="py-2">Total Spending</th>
-              <th class="py-2">Account Status</th>
-              <th class="py-2">Action</th>
-            </tr>
-          </thead>
-          <tbody id="adminCustomersRows">
-            <tr><td colspan="7" class="py-4 text-center text-soil-brown">Loading customers...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB 5: PRODUCTS MODERATION -->
-    <div id="adminTabContentProducts" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
-      <h4 class="font-bold text-primary mb-4">Product Listings Moderation</h4>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs">
-          <thead>
-            <tr class="border-b border-border-subtle text-soil-brown uppercase">
-              <th class="py-2">Product Name</th>
-              <th class="py-2">Seller</th>
-              <th class="py-2">Price</th>
-              <th class="py-2">Stock</th>
-              <th class="py-2">Status</th>
-              <th class="py-2">Action</th>
-            </tr>
-          </thead>
-          <tbody id="adminProductsRows">
-            <tr><td colspan="6" class="py-4 text-center text-soil-brown">Loading products...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB 6: ORDERS MONITORING (NO NORMAL SELLER ACCEPT BUTTON) -->
-    <div id="adminTabContentOrders" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
-      <div class="flex justify-between items-center mb-4">
-        <div>
-          <h4 class="font-bold text-primary text-base">Real-Time Order Fulfillment Monitoring</h4>
-          <p class="text-xs text-soil-brown">Admin monitors order progress. Normal fulfillment acceptance belongs strictly to sellers.</p>
-        </div>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs">
-          <thead>
-            <tr class="border-b border-border-subtle text-soil-brown uppercase">
-              <th class="py-2">Order #</th>
-              <th class="py-2">Customer</th>
-              <th class="py-2">Fulfilling Seller</th>
-              <th class="py-2">GMV Total</th>
-              <th class="py-2">Platform Fee</th>
-              <th class="py-2">Payment Status</th>
-              <th class="py-2">Fulfillment Status</th>
-              <th class="py-2">Action</th>
-            </tr>
-          </thead>
-          <tbody id="adminOrdersRows">
-            <tr><td colspan="8" class="py-4 text-center text-soil-brown">Loading orders...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB 7: PAYMENTS VERIFICATION -->
-    <div id="adminTabContentPayments" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
-      <h4 class="font-bold text-primary mb-4">UPI Payments Verification & Control</h4>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs">
-          <thead>
-            <tr class="border-b border-border-subtle text-soil-brown uppercase">
-              <th class="py-2">Order #</th>
-              <th class="py-2">Customer</th>
-              <th class="py-2">Method</th>
-              <th class="py-2">Total Amount</th>
-              <th class="py-2">Payment Status</th>
-              <th class="py-2">Action</th>
-            </tr>
-          </thead>
-          <tbody id="adminPaymentsRows">
-            <tr><td colspan="6" class="py-4 text-center text-soil-brown">Loading payment submissions...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB 8: LIVE & ONLINE PRESENCE -->
-    <div id="adminTabContentLive" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
-      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
-        <h4 class="font-bold text-primary mb-3 text-sm flex items-center gap-2">
-          <span>🟢</span> Currently Active Users
-        </h4>
-        <div id="adminOnlineUsersContainer" class="space-y-2 text-xs">
-          <div class="p-3 text-center text-soil-brown">Loading active users...</div>
-        </div>
-      </div>
-      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
-        <h4 class="font-bold text-primary mb-3 text-sm flex items-center gap-2">
-          <span>⚡</span> Live Activity Event Stream
-        </h4>
-        <div id="adminLiveActivityContainer" class="space-y-2 text-xs max-h-96 overflow-y-auto">
-          <div class="p-3 text-center text-soil-brown">Loading activity stream...</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 9: LOGIN HISTORY -->
-    <div id="adminTabContentLoginHistory" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
-      <h4 class="font-bold text-primary mb-4">User Login History & Authentication Audit</h4>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs">
-          <thead>
-            <tr class="border-b border-border-subtle text-soil-brown uppercase">
-              <th class="py-2">Contact / User</th>
-              <th class="py-2">Role</th>
-              <th class="py-2">Status</th>
-              <th class="py-2">IP Address</th>
-              <th class="py-2">Failure Reason / Details</th>
-              <th class="py-2">Timestamp</th>
-            </tr>
-          </thead>
-          <tbody id="adminLoginHistoryRows">
-            <tr><td colspan="6" class="py-4 text-center text-soil-brown">Loading login history...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB 10: FEEDBACK -->
-    <div id="adminTabContentFeedback" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
-      <h4 class="font-bold text-primary mb-4">Platform Feedback Submissions</h4>
-      <div id="adminFeedbackContainer" class="space-y-3">
-        <div class="p-4 text-center text-soil-brown">Loading feedback...</div>
-      </div>
-    </div>
-
-    <!-- TAB 11: REVIEWS -->
-    <div id="adminTabContentReviews" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
-      <h4 class="font-bold text-primary mb-4">Customer Reviews Moderation</h4>
-      <div id="adminReviewsContainer" class="space-y-3">
-        <div class="p-4 text-center text-soil-brown">Loading reviews...</div>
-      </div>
-    </div>
-
-    <!-- TAB 12: AUDIT LOGS -->
-    <div id="adminTabContentAudit" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
-      <h4 class="font-bold text-primary mb-4">Admin Security Audit Logs</h4>
-      <div id="adminAuditLogsContainer" class="space-y-2 text-xs">
-        <div class="p-4 text-center text-soil-brown">Loading audit logs...</div>
-      </div>
-    </div>
-
-    <!-- TAB 13: FINANCE & PLATFORM EXPENSES -->
-    <div id="adminTabContentFinance" class="space-y-6 hidden">
-      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
-        <h4 class="font-bold text-primary mb-2 text-base">Financial Governance & Profit Breakdown</h4>
-        <p class="text-xs text-soil-brown mb-4">Track GMV, KrishiSetu Platform Fees, Seller Payouts, Platform Expenses, and Net Profit.</p>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-          <div class="p-3 bg-surface rounded-xl border border-primary/20">
-            <span class="text-[10px] font-bold text-soil-brown uppercase">Gross Sales (GMV)</span>
-            <h4 class="text-lg font-bold text-primary" id="finGmv">₹0</h4>
+        <!-- TAB 2: LIVE PRESENCE & ACTIVITY FEED -->
+        <div id="adminTabContentLive" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
+          <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+            <h4 class="font-bold text-white mb-3 text-sm flex items-center gap-2">
+              <span class="text-emerald-400">🟢</span> Online Users Monitor (60s Heartbeat)
+            </h4>
+            <div id="adminOnlineUsersContainer" class="space-y-2 text-xs max-h-96 overflow-y-auto">
+              <div class="p-3 text-center text-slate-500">Loading active users...</div>
+            </div>
           </div>
-          <div class="p-3 bg-surface rounded-xl border border-primary/20">
-            <span class="text-[10px] font-bold text-soil-brown uppercase">Platform Revenue (Fees)</span>
-            <h4 class="text-lg font-bold text-success-emerald" id="finRevenue">₹0</h4>
-          </div>
-          <div class="p-3 bg-surface rounded-xl border border-primary/20">
-            <span class="text-[10px] font-bold text-soil-brown uppercase">Recorded Expenses</span>
-            <h4 class="text-lg font-bold text-error" id="finExpenses">₹0</h4>
-          </div>
-          <div class="p-3 bg-surface rounded-xl border border-primary/20">
-            <span class="text-[10px] font-bold text-soil-brown uppercase">Calculated Net Profit</span>
-            <h4 class="text-sm font-bold text-primary leading-tight" id="finNetProfit">₹0</h4>
+          <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+            <h4 class="font-bold text-white mb-3 text-sm flex items-center gap-2">
+              <span>⚡</span> Live Activity Event Stream
+            </h4>
+            <div id="adminLiveActivityContainer" class="space-y-2 text-xs max-h-96 overflow-y-auto">
+              <div class="p-3 text-center text-slate-500">Loading activity stream...</div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Add Expense Form -->
-      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
-        <h4 class="font-bold text-primary mb-3 text-sm">Record Platform Expense</h4>
-        <form id="adminExpenseForm" onsubmit="event.preventDefault(); recordAdminExpense();" class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
-          <div>
-            <label class="font-bold text-soil-brown block mb-1">Expense Title</label>
-            <input type="text" id="expTitle" required placeholder="e.g. AWS Server Hosting" class="w-full p-2.5 border border-border-subtle rounded-xl bg-input-bg focus:bg-white">
-          </div>
-          <div>
-            <label class="font-bold text-soil-brown block mb-1">Category</label>
-            <select id="expCategory" class="w-full p-2.5 border border-border-subtle rounded-xl bg-input-bg font-bold text-primary">
-              <option value="Cloud Hosting">Cloud Hosting & Infra</option>
-              <option value="SMS OTP Service">SMS / OTP Gateway</option>
-              <option value="Payment Gateway">Payment Gateway Fees</option>
-              <option value="Marketing">Marketing & Promotion</option>
-              <option value="Operations">Platform Operations</option>
+        <!-- TAB 3: USERS & FREEZE MANAGEMENT -->
+        <div id="adminTabContentUsers" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl hidden">
+          <div class="flex justify-between items-center mb-4">
+            <h4 class="font-bold text-white text-base">User Accounts Governance</h4>
+            <select id="adminUserFilter" class="p-2 border border-slate-700 rounded-lg text-xs bg-slate-800 font-bold text-slate-200" onchange="loadAdminUsers()">
+              <option value="">All Roles</option>
+              <option value="customer">Customers Only</option>
+              <option value="seller">Sellers Only</option>
+              <option value="admin">Admins</option>
             </select>
           </div>
-          <div>
-            <label class="font-bold text-soil-brown block mb-1">Amount (₹)</label>
-            <input type="number" id="expAmount" required min="1" step="0.01" placeholder="1500.00" class="w-full p-2.5 border border-border-subtle rounded-xl bg-input-bg focus:bg-white">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="border-b border-slate-800 text-slate-400 uppercase">
+                  <th class="py-2.5">User Name</th>
+                  <th class="py-2.5">Contact</th>
+                  <th class="py-2.5">Role</th>
+                  <th class="py-2.5">Status</th>
+                  <th class="py-2.5">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminUsersRows">
+                <tr><td colspan="5" class="py-4 text-center text-slate-500">Loading users...</td></tr>
+              </tbody>
+            </table>
           </div>
-          <div class="flex items-end">
-            <button type="submit" class="w-full bg-primary text-white p-2.5 rounded-xl font-bold hover:bg-primary-container">➕ Add Expense</button>
+        </div>
+
+        <!-- TAB 4: SELLERS ROSTER & VERIFICATION -->
+        <div id="adminTabContentSellers" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl hidden">
+          <h4 class="font-bold text-white mb-4 text-base">Platform Sellers & Performance Governance</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="border-b border-slate-800 text-slate-400 uppercase">
+                  <th class="py-2.5">Seller / Business</th>
+                  <th class="py-2.5">Contact</th>
+                  <th class="py-2.5">Verification</th>
+                  <th class="py-2.5">Products</th>
+                  <th class="py-2.5">GMV Generated</th>
+                  <th class="py-2.5">Platform Fees</th>
+                  <th class="py-2.5">Rating</th>
+                  <th class="py-2.5">Status</th>
+                  <th class="py-2.5">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminSellersRows">
+                <tr><td colspan="9" class="py-4 text-center text-slate-500">Loading sellers...</td></tr>
+              </tbody>
+            </table>
           </div>
-        </form>
-      </div>
-
-      <!-- Expenses List Table -->
-      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
-        <h4 class="font-bold text-primary mb-4 text-sm">Platform Expense Log</h4>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead>
-              <tr class="border-b border-border-subtle text-soil-brown uppercase">
-                <th class="py-2">Title</th>
-                <th class="py-2">Category</th>
-                <th class="py-2">Amount</th>
-                <th class="py-2">Logged By</th>
-                <th class="py-2">Date</th>
-              </tr>
-            </thead>
-            <tbody id="adminExpensesRows">
-              <tr><td colspan="5" class="py-4 text-center text-soil-brown">Loading expenses...</td></tr>
-            </tbody>
-          </table>
         </div>
-      </div>
-    </div>
 
-    <!-- TAB 14: DATABASE INSPECTOR -->
-    <div id="adminTabContentDatabase" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
-      <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
-        <div>
-          <h4 class="font-bold text-primary text-base">Whitelisted Database Inspector</h4>
-          <p class="text-xs text-soil-brown">Inspect database table records. Sensitive credentials (passwords, OTPs) are masked.</p>
+        <!-- TAB 5: CUSTOMERS ROSTER -->
+        <div id="adminTabContentCustomers" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl hidden">
+          <h4 class="font-bold text-white mb-4 text-base">Platform Customers & Purchase History</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="border-b border-slate-800 text-slate-400 uppercase">
+                  <th class="py-2.5">Customer Name</th>
+                  <th class="py-2.5">Contact</th>
+                  <th class="py-2.5">Location</th>
+                  <th class="py-2.5">Orders Count</th>
+                  <th class="py-2.5">Total Spending</th>
+                  <th class="py-2.5">Account Status</th>
+                  <th class="py-2.5">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminCustomersRows">
+                <tr><td colspan="7" class="py-4 text-center text-slate-500">Loading customers...</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div class="flex items-center gap-2">
-          <select id="dbInspectorTableSelect" class="p-2 border border-border-subtle rounded-lg text-xs bg-input-bg font-bold text-primary">
-            <option value="users">users</option>
-            <option value="seller_profiles">seller_profiles</option>
-            <option value="customer_profiles">customer_profiles</option>
-            <option value="products">products</option>
-            <option value="orders">orders</option>
-            <option value="order_items">order_items</option>
-            <option value="cart_items">cart_items</option>
-            <option value="reviews">reviews</option>
-            <option value="feedback">feedback</option>
-            <option value="notifications">notifications</option>
-            <option value="seller_verifications">seller_verifications</option>
-            <option value="admin_audit_logs">admin_audit_logs</option>
-            <option value="market_price_snapshots">market_price_snapshots</option>
-            <option value="login_history">login_history</option>
-            <option value="user_activity">user_activity</option>
-            <option value="platform_expenses">platform_expenses</option>
-          </select>
-          <button class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary-container" onclick="inspectSelectedAdminTable()" type="button">Inspect Table</button>
-        </div>
-      </div>
-      <div id="dbInspectorContainer" class="overflow-x-auto border border-border-subtle rounded-xl p-3 bg-input-bg text-xs">
-        <div class="p-6 text-center text-soil-brown">Select a table above and click "Inspect Table" to view masked database records.</div>
-      </div>
-    </div>
 
-    <!-- TAB 15: SYSTEM HEALTH -->
-    <div id="adminTabContentHealth" class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hidden">
-      <h4 class="font-bold text-primary mb-4 text-base">System Operational Health Monitor</h4>
-      <div id="adminSystemHealthContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-        <div class="p-4 text-center text-soil-brown">Checking system components health...</div>
-      </div>
+        <!-- TAB 6: PRODUCTS MODERATION -->
+        <div id="adminTabContentProducts" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl hidden">
+          <h4 class="font-bold text-white mb-4 text-base">Product Listings Moderation</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="border-b border-slate-800 text-slate-400 uppercase">
+                  <th class="py-2.5">Product Name</th>
+                  <th class="py-2.5">Seller</th>
+                  <th class="py-2.5">Price</th>
+                  <th class="py-2.5">Stock</th>
+                  <th class="py-2.5">Status</th>
+                  <th class="py-2.5">Action</th>
+                </tr>
+              </thead>
+              <tbody id="adminProductsRows">
+                <tr><td colspan="6" class="py-4 text-center text-slate-500">Loading products...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 7: ORDERS MONITORING (NO SELLER ACCEPT BUTTON) -->
+        <div id="adminTabContentOrders" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl hidden">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h4 class="font-bold text-white text-base">Real-Time Order Fulfillment Monitoring</h4>
+              <p class="text-xs text-slate-400">Admin monitors order progress. Normal fulfillment acceptance belongs strictly to sellers.</p>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="border-b border-slate-800 text-slate-400 uppercase">
+                  <th class="py-2.5">Order #</th>
+                  <th class="py-2.5">Customer</th>
+                  <th class="py-2.5">Fulfilling Seller</th>
+                  <th class="py-2.5">GMV Total</th>
+                  <th class="py-2.5">Platform Fee</th>
+                  <th class="py-2.5">Payment Status</th>
+                  <th class="py-2.5">Fulfillment Status</th>
+                  <th class="py-2.5">Action</th>
+                </tr>
+              </thead>
+              <tbody id="adminOrdersRows">
+                <tr><td colspan="8" class="py-4 text-center text-slate-500">Loading orders...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 8: PAYMENTS CONTROL ROOM -->
+        <div id="adminTabContentPayments" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl hidden">
+          <h4 class="font-bold text-white mb-4 text-base">Payments & Transaction Monitoring</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="border-b border-slate-800 text-slate-400 uppercase">
+                  <th class="py-2.5">Order #</th>
+                  <th class="py-2.5">Customer</th>
+                  <th class="py-2.5">Method</th>
+                  <th class="py-2.5">Amount</th>
+                  <th class="py-2.5">Payment Status</th>
+                  <th class="py-2.5">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminPaymentsRows">
+                <tr><td colspan="6" class="py-4 text-center text-slate-500">Loading payments...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 9: MANDI INTELLIGENCE & DEBUG PANEL -->
+        <div id="adminTabContentMandi" class="space-y-6 hidden">
+          <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+            <h4 class="font-bold text-white mb-2 text-base flex items-center gap-2">
+              <span>🌾</span> AGMARKNET / Mandi API Live Health Monitor
+            </h4>
+            <p class="text-xs text-slate-400 mb-4">Real-time status of government Data.gov.in AGMARKNET mandi API proxy and price archive cache.</p>
+            <div id="adminMandiHealthContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              <div class="p-4 text-center text-slate-500">Checking Mandi API health...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 10: PROFIT & EXPENSES -->
+        <div id="adminTabContentFinance" class="space-y-6 hidden">
+          <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+            <h4 class="font-bold text-white mb-2 text-base">Financial BI & Profit Governance</h4>
+            <p class="text-xs text-slate-400 mb-4">Track GMV, KrishiSetu Platform Fees, Seller Payouts, Platform Expenses, and Net Profit.</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700">
+                <span class="text-[10px] font-bold text-slate-400 uppercase">Gross Sales (GMV)</span>
+                <h4 class="text-lg font-bold text-emerald-400" id="finGmv">₹0</h4>
+              </div>
+              <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700">
+                <span class="text-[10px] font-bold text-slate-400 uppercase">Platform Revenue (Fees)</span>
+                <h4 class="text-lg font-bold text-emerald-400" id="finRevenue">₹0</h4>
+              </div>
+              <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700">
+                <span class="text-[10px] font-bold text-slate-400 uppercase">Recorded Expenses</span>
+                <h4 class="text-lg font-bold text-rose-400" id="finExpenses">₹0</h4>
+              </div>
+              <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700">
+                <span class="text-[10px] font-bold text-slate-400 uppercase">Calculated Net Profit</span>
+                <h4 class="text-sm font-bold text-emerald-400 leading-tight" id="finNetProfit">₹0</h4>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Expense Form -->
+          <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+            <h4 class="font-bold text-white mb-3 text-sm">Record Platform Expense</h4>
+            <form id="adminExpenseForm" onsubmit="event.preventDefault(); recordAdminExpense();" class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+              <div>
+                <label class="font-bold text-slate-400 block mb-1">Expense Title</label>
+                <input type="text" id="expTitle" required placeholder="e.g. AWS Server Hosting" class="w-full p-2.5 border border-slate-700 rounded-xl bg-slate-800 text-white focus:outline-none">
+              </div>
+              <div>
+                <label class="font-bold text-slate-400 block mb-1">Category</label>
+                <select id="expCategory" class="w-full p-2.5 border border-slate-700 rounded-xl bg-slate-800 font-bold text-emerald-400 focus:outline-none">
+                  <option value="Cloud Hosting">Cloud Hosting & Infra</option>
+                  <option value="SMS OTP Service">SMS / OTP Gateway</option>
+                  <option value="Payment Gateway">Payment Gateway Fees</option>
+                  <option value="Marketing">Marketing & Promotion</option>
+                  <option value="Operations">Platform Operations</option>
+                </select>
+              </div>
+              <div>
+                <label class="font-bold text-slate-400 block mb-1">Amount (₹)</label>
+                <input type="number" id="expAmount" required min="1" step="0.01" placeholder="1500.00" class="w-full p-2.5 border border-slate-700 rounded-xl bg-slate-800 text-white focus:outline-none">
+              </div>
+              <div class="flex items-end">
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white p-2.5 rounded-xl font-bold transition-colors">➕ Add Expense</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Expenses List Table -->
+          <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+            <h4 class="font-bold text-white mb-4 text-sm">Platform Expense Log</h4>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="border-b border-slate-800 text-slate-400 uppercase">
+                    <th class="py-2.5">Title</th>
+                    <th class="py-2.5">Category</th>
+                    <th class="py-2.5">Amount</th>
+                    <th class="py-2.5">Logged By</th>
+                    <th class="py-2.5">Date</th>
+                  </tr>
+                </thead>
+                <tbody id="adminExpensesRows">
+                  <tr><td colspan="5" class="py-4 text-center text-slate-500">Loading expenses...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 11: REVIEWS MODERATION -->
+        <div id="adminTabContentReviews" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl hidden">
+          <h4 class="font-bold text-white mb-4 text-base">Customer Reviews Moderation</h4>
+          <div id="adminReviewsContainer" class="space-y-3">
+            <div class="p-4 text-center text-slate-500">Loading reviews...</div>
+          </div>
+        </div>
+
+        <!-- TAB 12: FEEDBACK SUBMISSIONS -->
+        <div id="adminTabContentFeedback" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl hidden">
+          <h4 class="font-bold text-white mb-4 text-base">Platform Feedback Submissions</h4>
+          <div id="adminFeedbackContainer" class="space-y-3">
+            <div class="p-4 text-center text-slate-500">Loading feedback...</div>
+          </div>
+        </div>
+
+        <!-- TAB 13: LOGIN HISTORY -->
+        <div id="adminTabContentLoginHistory" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl hidden">
+          <h4 class="font-bold text-white mb-4 text-base">User Login History & Security Audit</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="border-b border-slate-800 text-slate-400 uppercase">
+                  <th class="py-2.5">Contact / User</th>
+                  <th class="py-2.5">Role</th>
+                  <th class="py-2.5">Status</th>
+                  <th class="py-2.5">IP Address</th>
+                  <th class="py-2.5">Failure Reason / Details</th>
+                  <th class="py-2.5">Timestamp</th>
+                </tr>
+              </thead>
+              <tbody id="adminLoginHistoryRows">
+                <tr><td colspan="6" class="py-4 text-center text-slate-500">Loading login history...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 14: AUDIT LOGS -->
+        <div id="adminTabContentAudit" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl hidden">
+          <h4 class="font-bold text-white mb-4 text-base">Admin Security Audit Logs</h4>
+          <div id="adminAuditLogsContainer" class="space-y-2 text-xs">
+            <div class="p-4 text-center text-slate-500">Loading audit logs...</div>
+          </div>
+        </div>
+
+        <!-- TAB 15: DATABASE INSPECTOR -->
+        <div id="adminTabContentDatabase" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl hidden">
+          <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
+            <div>
+              <h4 class="font-bold text-white text-base">Whitelisted Database Inspector</h4>
+              <p class="text-xs text-slate-400">Inspect database table records. Sensitive credentials (passwords, OTPs) are masked.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <select id="dbInspectorTableSelect" class="p-2 border border-slate-700 rounded-lg text-xs bg-slate-800 font-bold text-emerald-400">
+                <option value="users">users</option>
+                <option value="seller_profiles">seller_profiles</option>
+                <option value="customer_profiles">customer_profiles</option>
+                <option value="products">products</option>
+                <option value="orders">orders</option>
+                <option value="order_items">order_items</option>
+                <option value="cart_items">cart_items</option>
+                <option value="reviews">reviews</option>
+                <option value="feedback">feedback</option>
+                <option value="notifications">notifications</option>
+                <option value="seller_verifications">seller_verifications</option>
+                <option value="admin_audit_logs">admin_audit_logs</option>
+                <option value="market_price_snapshots">market_price_snapshots</option>
+                <option value="login_history">login_history</option>
+                <option value="user_activity">user_activity</option>
+                <option value="platform_expenses">platform_expenses</option>
+              </select>
+              <button class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-emerald-500" onclick="inspectSelectedAdminTable()" type="button">Inspect Table</button>
+            </div>
+          </div>
+          <div id="dbInspectorContainer" class="overflow-x-auto border border-slate-800 rounded-xl p-3 bg-slate-950 text-xs">
+            <div class="p-6 text-center text-slate-500">Select a table above and click "Inspect Table" to view masked database records.</div>
+          </div>
+        </div>
+
+        <!-- TAB 16: SYSTEM HEALTH -->
+        <div id="adminTabContentHealth" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl hidden">
+          <h4 class="font-bold text-white mb-4 text-base">System Operational Health Monitor</h4>
+          <div id="adminSystemHealthContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div class="p-4 text-center text-slate-500">Checking system components health...</div>
+          </div>
+        </div>
+      </main>
     </div>
   </section>
 
@@ -1074,6 +1100,24 @@
       <div class="flex justify-end gap-2">
         <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold text-soil-brown border border-border-subtle hover:bg-input-bg" onclick="$('adminEmergencyOverrideModal').classList.add('hidden')">Cancel</button>
         <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-error text-white hover:bg-error/90" onclick="submitEmergencyAdminOverride()">Execute Override</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- USER PROFILE INSPECTOR DRAWER (ADMIN ONLY) -->
+  <div id="adminUserProfileDrawer" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-end hidden">
+    <div class="bg-slate-900 text-slate-100 max-w-xl w-full h-full p-6 shadow-2xl overflow-y-auto border-l border-slate-800 relative">
+      <button class="absolute top-4 right-4 text-slate-400 font-bold text-xl hover:text-white" onclick="$('adminUserProfileDrawer').classList.add('hidden')" type="button">✕</button>
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center font-bold text-2xl" id="drawerUserAvatar">👤</div>
+        <div>
+          <h3 class="text-xl font-bold text-white flex items-center gap-2" id="drawerUserName">User Profile</h3>
+          <p class="text-xs text-slate-400" id="drawerUserRoleContact">contact@example.com</p>
+        </div>
+      </div>
+
+      <div class="space-y-6 text-xs" id="drawerProfileContent">
+        <div class="p-4 text-center text-slate-400">Loading user profile details...</div>
       </div>
     </div>
   </div>
@@ -3741,6 +3785,115 @@ async function inspectSelectedAdminTable() {
     `;
   } catch (err) {
     container.innerHTML = `<div class="p-4 text-center text-error">Database Inspector Error: ${err.message}</div>`;
+  }
+}
+
+async function openAdminUserProfileDrawer(userId) {
+  const drawer = $('adminUserProfileDrawer');
+  const content = $('drawerProfileContent');
+  if (!drawer || !content) return;
+
+  drawer.classList.remove('hidden');
+  content.innerHTML = '<div class="p-6 text-center text-slate-400">Loading profile analytics for user ' + userId + '...</div>';
+
+  const token = AuthService.getToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch(`/api/admin/users/${userId}/profile`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const prof = res.profile || {};
+    const u = prof.user || {};
+    const orders = prof.orders || [];
+
+    $('drawerUserName').textContent = u.name || 'User Profile';
+    $('drawerUserRoleContact').textContent = `${(u.role || 'user').toUpperCase()} · ${u.contact || ''}`;
+    $('drawerUserAvatar').textContent = u.role === 'seller' ? '👨‍🌾' : (u.role === 'admin' ? '🛡' : '🛒');
+
+    content.innerHTML = `
+      <div class="grid grid-cols-2 gap-3 bg-slate-800/80 p-4 rounded-xl border border-slate-700">
+        <div><span class="text-slate-400 uppercase text-[10px] block font-bold">User ID</span><b class="text-white font-mono">${u.id}</b></div>
+        <div><span class="text-slate-400 uppercase text-[10px] block font-bold">Account Status</span><b class="${u.account_status === 'active' ? 'text-emerald-400' : 'text-rose-400'} font-bold uppercase">${u.account_status || 'active'}</b></div>
+        <div><span class="text-slate-400 uppercase text-[10px] block font-bold">Total Spending</span><b class="text-emerald-400">₹${prof.totalSpending || 0}</b></div>
+        <div><span class="text-slate-400 uppercase text-[10px] block font-bold">Total Sales (GMV)</span><b class="text-emerald-400">₹${prof.totalSalesGmv || 0}</b></div>
+      </div>
+
+      <div>
+        <h4 class="font-bold text-white mb-2 text-sm uppercase text-slate-400">Recent Orders History (${orders.length})</h4>
+        <div class="space-y-2 max-h-48 overflow-y-auto">
+          ${orders.length ? orders.map(o => `
+            <div class="p-2.5 bg-slate-800 rounded-lg border border-slate-700 flex justify-between items-center">
+              <div><b class="text-white font-mono">#${o.order_number || o.id}</b> <span class="text-slate-400">(${o.payment_method || 'cod'})</span></div>
+              <div class="text-right"><b class="text-emerald-400">₹${o.total_amount}</b> <span class="text-[10px] bg-slate-700 px-1.5 py-0.5 rounded text-slate-300 ml-1">${o.status}</span></div>
+            </div>
+          `).join('') : '<p class="text-slate-500 text-center py-2">No orders recorded.</p>'}
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 flex gap-2">
+        <button class="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded-xl text-xs" onclick="$('adminUserProfileDrawer').classList.add('hidden'); openAdminReasonModal('${u.id}', 'frozen');">Freeze Account</button>
+        <button class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2 rounded-xl text-xs" onclick="$('adminUserProfileDrawer').classList.add('hidden'); openAdminReasonModal('${u.id}', 'suspended');">Suspend Account</button>
+        <button class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs" onclick="$('adminUserProfileDrawer').classList.add('hidden'); openAdminReasonModal('${u.id}', 'active');">Reactivate</button>
+      </div>
+    `;
+  } catch (err) {
+    content.innerHTML = `<div class="p-4 text-center text-rose-400">Error loading profile: ${err.message}</div>`;
+  }
+}
+
+async function executeAdminGlobalSearch() {
+  const q = $('adminGlobalSearchInput')?.value?.trim();
+  if (!q) return;
+
+  const token = AuthService.getToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch(`/api/admin/search?q=${encodeURIComponent(q)}`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const r = res.results || {};
+
+    const usersCount = (r.users || []).length;
+    const ordersCount = (r.orders || []).length;
+    const productsCount = (r.products || []).length;
+    const feedbackCount = (r.feedback || []).length;
+
+    notify(`🔍 Search results for "${q}": Found ${usersCount} users, ${ordersCount} orders, ${productsCount} products, ${feedbackCount} feedback entries.`, 'info');
+  } catch (err) {
+    notify('Search failed: ' + err.message, 'error');
+  }
+}
+
+async function loadAdminMandiHealth() {
+  const token = AuthService.getToken();
+  if (!token) return;
+
+  const container = $('adminMandiHealthContainer');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/admin/mandi-health', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+    const mh = res.mandiHealth || {};
+    const samples = mh.sanitizedSample || [];
+
+    container.innerHTML = `
+      <div class="p-4 bg-slate-800 rounded-xl border border-slate-700 text-center">
+        <span class="text-slate-400 block text-[10px] uppercase font-bold">API Proxy Status</span>
+        <h3 class="text-base font-bold text-emerald-400 mt-1">● ${mh.status || 'Operational'}</h3>
+      </div>
+      <div class="p-4 bg-slate-800 rounded-xl border border-slate-700 text-center">
+        <span class="text-slate-400 block text-[10px] uppercase font-bold">Configured API Source</span>
+        <h3 class="text-xs font-bold text-slate-200 mt-1">${mh.source || 'AGMARKNET Live API'}</h3>
+      </div>
+      <div class="p-4 bg-slate-800 rounded-xl border border-slate-700 text-center">
+        <span class="text-slate-400 block text-[10px] uppercase font-bold">Market Snapshots Cached</span>
+        <h3 class="text-base font-bold text-emerald-400 mt-1">${mh.recordsCount || 0} Records</h3>
+      </div>
+      <div class="col-span-full p-4 bg-slate-950 rounded-xl border border-slate-800 text-xs">
+        <span class="text-slate-400 font-bold uppercase text-[10px] block mb-2">Sanitized Raw API Response Sample</span>
+        <pre class="text-emerald-400 font-mono text-[10px] overflow-x-auto whitespace-pre-wrap">${JSON.stringify(samples, null, 2)}</pre>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div class="p-4 text-center text-rose-400">Failed to fetch Mandi health: ${err.message}</div>`;
   }
 }
 

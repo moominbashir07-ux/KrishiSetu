@@ -483,4 +483,151 @@ router.put('/:id/status', authenticateUser, requireAnyRole('seller', 'admin'), a
   }
 });
 
+// CUSTOMER SUBMIT ONLINE PAYMENT VERIFICATION (REQUIRES MANDATORY TRANSACTION ID)
+router.post('/:id/verify-payment', authenticateUser, requireRole('customer'), async (req, res, next) => {
+  const { transactionId } = req.body;
+  const orderIdentifier = req.params.id;
+
+  if (!transactionId || typeof transactionId !== 'string' || !transactionId.trim() || transactionId.trim().length < 5) {
+    return res.status(400).json({ error: 'A valid Transaction ID (minimum 5 characters) is required to submit payment verification.' });
+  }
+
+  const cleanTxnId = transactionId.trim();
+
+  try {
+    const orderRes = await db.query(
+      'SELECT id, order_number, customer_id, seller_id, total_amount, payment_status FROM orders WHERE id = $1 OR order_number = $1',
+      [orderIdentifier]
+    );
+
+    if (!orderRes.rows.length) {
+      return res.status(404).json({ error: 'Order not found.' });
+    }
+
+    const order = orderRes.rows[0];
+
+    // IDOR Protection: Must be the customer who placed the order
+    if (order.customer_id !== req.user.id) {
+      return res.status(403).json({ error: 'Forbidden. You can only submit payment verification for your own orders.' });
+    }
+
+    await db.query(
+      'UPDATE orders SET payment_status = $1, transaction_id = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3',
+      ['submitted', cleanTxnId, order.id]
+    );
+
+    // Send notification to Seller that payment verification is required
+    const notifId = 'NOTIF_' + Date.now() + Math.random().toString(36).substring(2, 6);
+    await db.query(
+      `INSERT INTO notifications (id, user_id, type, title, message, read, order_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [
+        notifId, order.seller_id, 'payment_verification_required',
+        `💳 Payment Verification Required #${order.order_number || order.id}`,
+        `Customer submitted payment verification (Txn ID: ${cleanTxnId}) for Order #${order.order_number || order.id} (₹${order.total_amount}). Please verify.`,
+        false, order.id
+      ]
+    ).catch(e => console.warn('Payment notification warn:', e.message));
+
+    res.json({
+      message: 'Payment verification submitted. Waiting for seller confirmation.',
+      orderId: order.id,
+      transactionId: cleanTxnId,
+      paymentStatus: 'submitted'
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// SELLER VERIFY OR REJECT ONLINE PAYMENT
+router.put('/:id/seller-verify-payment', authenticateUser, requireAnyRole('seller', 'admin'), async (req, res, next) => {
+  const { action, reason } = req.body;
+  const orderIdentifier = req.params.id;
+
+  if (!['approve', 'reject'].includes(action)) {
+    return res.status(400).json({ error: "Action must be either 'approve' or 'reject'." });
+  }
+
+  try {
+    const orderRes = await db.query(
+      'SELECT id, order_number, customer_id, seller_id, total_amount, transaction_id, status FROM orders WHERE id = $1 OR order_number = $1',
+      [orderIdentifier]
+    );
+
+    if (!orderRes.rows.length) {
+      return res.status(404).json({ error: 'Order not found.' });
+    }
+
+    const order = orderRes.rows[0];
+
+    // IDOR Protection: Seller must own the order (unless admin override)
+    if (req.user.role === 'seller' && order.seller_id !== req.user.id) {
+      return res.status(403).json({ error: 'Forbidden. You can only verify payments for orders placed with your farm.' });
+    }
+
+    if (action === 'approve') {
+      await db.query(
+        "UPDATE orders SET payment_status = 'verified', status = 'Farmer Confirmed', step = 2, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+        [order.id]
+      );
+
+      // Record state history
+      const historyId = 'OSH_' + Date.now() + Math.random().toString(36).substring(2, 5);
+      await db.query(
+        `INSERT INTO order_status_history (id, order_id, previous_status, new_status, changed_by)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [historyId, order.id, order.status, 'Farmer Confirmed', req.user.id]
+      ).catch(() => {});
+
+      // Send notification to customer
+      const notifId = 'NOTIF_' + Date.now() + Math.random().toString(36).substring(2, 6);
+      await db.query(
+        `INSERT INTO notifications (id, user_id, type, title, message, read, order_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [
+          notifId, order.customer_id, 'payment_verified',
+          `✅ Payment Verified #${order.order_number || order.id}`,
+          `Your payment (Txn ID: ${order.transaction_id || 'N/A'}) has been verified by the seller. Order is now Confirmed!`,
+          false, order.id
+        ]
+      ).catch(() => {});
+
+      res.json({
+        message: `Payment verified and order #${order.order_number || order.id} confirmed.`,
+        orderId: order.id,
+        paymentStatus: 'verified',
+        status: 'Farmer Confirmed'
+      });
+    } else {
+      await db.query(
+        "UPDATE orders SET payment_status = 'rejected', updated_at = CURRENT_TIMESTAMP WHERE id = $1",
+        [order.id]
+      );
+
+      const failReason = reason ? `Reason: ${reason}` : 'Seller was unable to locate matching transaction.';
+      const notifId = 'NOTIF_' + Date.now() + Math.random().toString(36).substring(2, 6);
+      await db.query(
+        `INSERT INTO notifications (id, user_id, type, title, message, read, order_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [
+          notifId, order.customer_id, 'payment_failed',
+          `⚠️ Payment Verification Failed #${order.order_number || order.id}`,
+          `Payment could not be verified for Order #${order.order_number || order.id} (Txn ID: ${order.transaction_id || 'N/A'}). ${failReason}`,
+          false, order.id
+        ]
+      ).catch(() => {});
+
+      res.json({
+        message: `Payment marked as rejected for order #${order.order_number || order.id}.`,
+        orderId: order.id,
+        paymentStatus: 'rejected',
+        reason: reason || null
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

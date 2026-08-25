@@ -574,25 +574,32 @@ router.get('/system-health', async (req, res, next) => {
   }
 });
 
-// GLOBAL ADMIN SEARCH ENDPOINT
+// GLOBAL GROUPED ADMIN SEARCH ENDPOINT
 router.get('/search', async (req, res, next) => {
   const q = String(req.query.q || '').trim().toLowerCase();
-  if (!q) return res.json({ results: { users: [], products: [], orders: [] } });
+  if (!q) return res.json({ results: { users: [], customers: [], sellers: [], products: [], orders: [], transactions: [], feedback: [], reviews: [] } });
 
   try {
-    const [uRes, pRes, oRes] = await Promise.all([
+    const [uRes, pRes, oRes, fRes, rRes] = await Promise.all([
       db.query("SELECT id, name, contact, role, account_status FROM users"),
-      db.query("SELECT id, name, category, price, status FROM products"),
-      db.query("SELECT id, order_number, customer_id, seller_id, total_amount, status FROM orders")
+      db.query("SELECT id, name, category, price, status, seller_id FROM products"),
+      db.query("SELECT id, order_number, customer_id, seller_id, total_amount, payment_method, payment_status, transaction_id, status FROM orders"),
+      db.query("SELECT id, user_name, category, message, rating FROM feedback"),
+      db.query("SELECT id, buyer_id, product_id, rating, comment FROM reviews")
     ]);
 
     const users = (uRes.rows || []).filter(u => u.name.toLowerCase().includes(q) || u.contact.toLowerCase().includes(q) || u.id.toLowerCase().includes(q));
+    const customers = users.filter(u => u.role === 'customer');
+    const sellers = users.filter(u => u.role === 'seller');
     const products = (pRes.rows || []).filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || p.id.toLowerCase().includes(q));
     const orders = (oRes.rows || []).filter(o => (o.order_number || '').toLowerCase().includes(q) || o.id.toLowerCase().includes(q) || o.status.toLowerCase().includes(q));
+    const transactions = (oRes.rows || []).filter(o => (o.transaction_id || '').toLowerCase().includes(q) || (o.payment_status || '').toLowerCase().includes(q));
+    const feedback = (fRes.rows || []).filter(f => (f.user_name || '').toLowerCase().includes(q) || (f.message || '').toLowerCase().includes(q) || (f.category || '').toLowerCase().includes(q));
+    const reviews = (rRes.rows || []).filter(r => (r.comment || '').toLowerCase().includes(q) || r.id.toLowerCase().includes(q));
 
     res.json({
       query: q,
-      results: { users, products, orders }
+      results: { users, customers, sellers, products, orders, transactions, feedback, reviews }
     });
   } catch (err) {
     next(err);
@@ -814,6 +821,83 @@ router.get('/metrics', async (req, res, next) => {
     };
 
     res.json({ metrics });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// USER PROFILE INSPECTOR ENDPOINT (ADMIN ONLY)
+router.get('/users/:id/profile', async (req, res, next) => {
+  const targetId = req.params.id;
+
+  try {
+    const userRes = await db.query(
+      'SELECT id, name, contact, role, account_status, email_verified, phone, phone_verified, profile_photo, created_at FROM users WHERE id = $1',
+      [targetId]
+    );
+
+    if (!userRes.rows.length) {
+      return res.status(404).json({ error: 'User profile not found.' });
+    }
+
+    const user = userRes.rows[0];
+
+    const [cpRes, spRes, oRes, pRes, rRes, fRes, actRes] = await Promise.all([
+      db.query('SELECT * FROM customer_profiles WHERE user_id = $1', [targetId]),
+      db.query('SELECT * FROM seller_profiles WHERE user_id = $1', [targetId]),
+      db.query('SELECT * FROM orders WHERE customer_id = $1 OR seller_id = $1 ORDER BY created_at DESC', [targetId]),
+      db.query('SELECT * FROM products WHERE seller_id = $1', [targetId]),
+      db.query('SELECT * FROM reviews WHERE buyer_id = $1', [targetId]),
+      db.query('SELECT * FROM feedback WHERE user_id = $1', [targetId]),
+      db.query('SELECT * FROM user_activity WHERE user_id = $1', [targetId])
+    ]);
+
+    const customerProfile = cpRes.rows[0] || null;
+    const sellerProfile = spRes.rows[0] || null;
+    const userOrders = oRes.rows || [];
+    const products = pRes.rows || [];
+    const reviews = rRes.rows || [];
+    const feedback = fRes.rows || [];
+    const activity = actRes.rows[0] || null;
+
+    const totalSpending = userOrders.filter(o => o.customer_id === targetId).reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
+    const totalSalesGmv = userOrders.filter(o => o.seller_id === targetId).reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
+
+    res.json({
+      profile: {
+        user,
+        customerProfile,
+        sellerProfile,
+        orders: userOrders,
+        products,
+        reviews,
+        feedback,
+        activity,
+        totalSpending,
+        totalSalesGmv
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// MANDI API HEALTH & RAW INSPECTOR ENDPOINT (ADMIN ONLY)
+router.get('/mandi-health', async (req, res, next) => {
+  try {
+    const snapRes = await db.query('SELECT * FROM market_price_snapshots ORDER BY fetched_at DESC LIMIT 5');
+    const records = snapRes.rows || [];
+
+    res.json({
+      mandiHealth: {
+        status: records.length ? 'Operational' : 'Degraded',
+        source: 'AGMARKNET / data.gov.in API',
+        lastSuccessfulFetch: records.length ? (records[0].fetched_at || new Date().toISOString()) : new Date().toISOString(),
+        recordsCount: records.length,
+        cacheStatus: 'Active (30 mins TTL)',
+        sanitizedSample: records.slice(0, 3)
+      }
+    });
   } catch (err) {
     next(err);
   }

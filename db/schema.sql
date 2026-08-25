@@ -109,7 +109,11 @@ CREATE TABLE IF NOT EXISTS orders (
     seller_id VARCHAR(50) NOT NULL REFERENCES users(id),
     status VARCHAR(50) DEFAULT 'Order Placed' CHECK (status IN ('Order Placed', 'Farmer Confirmed', 'Preparing', 'Ready', 'Completed', 'Cancelled', 'Rejected')),
     total_amount NUMERIC(10,2) NOT NULL CHECK (total_amount >= 0),
+    platform_fee NUMERIC(10,2) DEFAULT 0,
     buyer_contact VARCHAR(255),
+    payment_method VARCHAR(50) DEFAULT 'cod',
+    payment_status VARCHAR(50) DEFAULT 'pending',
+    transaction_id VARCHAR(100),
     step INTEGER DEFAULT 1 CHECK (step >= 1 AND step <= 5),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
