@@ -429,4 +429,32 @@ router.get('/sellers/:id', async (req, res, next) => {
   }
 });
 
+// PROMOTES A SPECIFIC USER TO ADMIN (REQUIRES SECURE SERVER SECRET)
+router.post('/admin-promote', async (req, res, next) => {
+  const { contact, adminSecret } = req.body;
+  const secret = process.env.ADMIN_SEED_SECRET || 'krishisetu_admin_seed_secret_2026';
+  
+  if (!adminSecret || adminSecret !== secret) {
+    return res.status(403).json({ error: 'Forbidden. Invalid admin secret.' });
+  }
+
+  if (!contact) {
+    return res.status(400).json({ error: 'Contact email/phone is required.' });
+  }
+
+  try {
+    const normalizedContact = contact.trim().toLowerCase();
+    const userRes = await db.query('SELECT id, name, contact, role FROM users WHERE contact = $1', [normalizedContact]);
+    
+    if (!userRes.rows.length) {
+      return res.status(404).json({ error: 'User account not found.' });
+    }
+
+    await db.query('UPDATE users SET role = $1 WHERE contact = $2', ['admin', normalizedContact]);
+    res.json({ message: `User ${normalizedContact} successfully promoted to Admin.`, user: { ...userRes.rows[0], role: 'admin' } });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

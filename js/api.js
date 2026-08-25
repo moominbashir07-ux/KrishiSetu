@@ -194,10 +194,16 @@ const OrderService = {
     return ApiService.request('/api/orders');
   },
 
-  async updateStatus(orderId, step) {
+  async updateStatus(orderId, statusOrStep) {
+    const body = typeof statusOrStep === 'object'
+      ? statusOrStep
+      : typeof statusOrStep === 'number'
+        ? { step: statusOrStep }
+        : { status: statusOrStep };
+
     return ApiService.request(`/api/orders/${orderId}/status`, {
       method: 'PUT',
-      body: JSON.stringify({ step })
+      body: JSON.stringify(body)
     });
   }
 };

@@ -87,6 +87,16 @@ class LocalFallbackDB {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
+      if (params.length >= 6) {
+        for (let i = 5; i < params.length; i++) {
+          const val = params[i];
+          if (val === 'active' || val === 'frozen' || val === 'suspended') {
+            user.account_status = val;
+          } else if (typeof val === 'string' && (val.startsWith('+') || val.match(/\d/))) {
+            user.phone = val;
+          }
+        }
+      }
       this.tables.users.push(user);
       return { rows: [{ ...user }] };
     }
@@ -199,8 +209,14 @@ class LocalFallbackDB {
     }
 
     if (q.includes('FROM notifications')) {
-      const uid = params[0];
-      let list = this.tables.notifications.filter(n => n.user_id === uid);
+      let list = [...this.tables.notifications];
+      if (q.includes('WHERE id = $1')) {
+        const notifId = params[0];
+        list = list.filter(n => n.id === notifId);
+      } else if (params.length > 0 && params[0]) {
+        const uid = params[0];
+        list = list.filter(n => n.user_id === uid);
+      }
       return { rows: list };
     }
 
@@ -459,14 +475,25 @@ class LocalFallbackDB {
       const enriched = found.map(o => {
         const items = this.tables.order_items.filter(oi => oi.order_id === o.id);
         const seller = this.tables.users.find(u => u.id === o.seller_id) || {};
+        const customer = this.tables.users.find(u => u.id === o.customer_id) || {};
+        const cp = this.tables.customer_profiles.find(x => x.user_id === o.customer_id) || {};
         const sp = this.tables.seller_profiles.find(x => x.user_id === o.seller_id) || {};
         const firstItem = items[0] || {};
+        const customerAddr = cp.address ? `${cp.address}, ${cp.city || ''}, ${cp.state || ''}` : (o.buyer_contact || 'Standard Delivery');
+
         return {
           ...o, items, product: firstItem.product_name_snapshot || 'Produce', qty: firstItem.quantity || 1,
           price: firstItem.unit_price_snapshot || o.total_amount, total: o.total_amount,
           sellerName: seller.name || 'Local Farmer', sellerContact: seller.contact || 'Contact not provided',
           sellerVerificationStatus: sp.verification_status || 'pending',
-          sellerLocation: 'Location pending'
+          sellerLocation: 'Location pending',
+          customerName: customer.name || 'Customer',
+          customerEmail: customer.contact || '',
+          customerPhone: customer.phone || customer.contact || '',
+          customerAddress: customerAddr,
+          customerCity: cp.city || '',
+          customerState: cp.state || '',
+          customerPincode: cp.pincode || ''
         };
       });
       return { rows: enriched };

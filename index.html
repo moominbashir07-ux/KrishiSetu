@@ -1878,17 +1878,173 @@ async function submitFeedbackForm() {
   }
 }
 
+async function openProductDetailsModal(productId, event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  const modal = $('productDetailsModal');
+  const content = $('productDetailsModalContent');
+  if (!modal || !content) return;
+
+  modal.classList.remove('hidden');
+  content.innerHTML = `
+    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" onclick="closeProductDetailsModal()" type="button">✕</button>
+    <div class="text-center py-8 text-soil-brown flex flex-col items-center justify-center gap-2">
+      <div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <span>Loading product details...</span>
+    </div>
+  `;
+
+  try {
+    const res = await fetch(`/api/products/${productId}`).then(r => r.json());
+    const p = res.product || res;
+    if (!p || !p.id) throw new Error('Product details unavailable.');
+
+    let seller = {};
+    let reviews = [];
+    try {
+      const [sellerRes, reviewsRes] = await Promise.all([
+        fetch(`/api/auth/sellers/${p.seller_id}`).then(r => r.json()).catch(() => ({})),
+        fetch(`/api/products/${p.id}/reviews`).then(r => r.json()).catch(() => ({}))
+      ]);
+      seller = sellerRes.seller || {};
+      reviews = reviewsRes.reviews || [];
+    } catch {}
+
+    const isOwner = currentUserId && p.seller_id === currentUserId;
+    const isSeller = currentRole === 'seller';
+    const canCallSeller = seller.phone_verified && seller.show_phone && seller.phone;
+
+    const imgHtml = p.image_url 
+      ? `<img src="${p.image_url}" class="w-full h-56 object-cover rounded-xl mb-4 border border-border-subtle shadow-sm" alt="${p.name}">`
+      : `<div class="w-full h-48 bg-surface rounded-xl flex items-center justify-center text-6xl mb-4 border border-border-subtle">${emoji(p.name)}</div>`;
+
+    const sellerAvatar = getSellerAvatarHtml(seller.name || p.sellerName, seller.profile_photo, 'w-10 h-10');
+
+    const reviewsHtml = reviews.length ? reviews.map(r => `
+      <div class="p-3 bg-surface rounded-xl border border-border-subtle text-xs mb-2">
+        <div class="flex justify-between items-center mb-1">
+          <span class="font-bold text-primary">${r.buyerName || 'Verified Buyer'}</span>
+          <span class="text-harvest-gold font-bold">⭐ ${r.rating} / 5</span>
+        </div>
+        <p class="text-soil-brown text-xs">${r.comment || ''}</p>
+        <span class="text-[9px] text-soil-brown/70 block mt-1">${new Date(r.created_at || Date.now()).toLocaleDateString()}</span>
+      </div>
+    `).join('') : '<p class="text-xs text-soil-brown italic py-2">No verified reviews for this produce yet.</p>';
+
+    content.innerHTML = `
+      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" onclick="closeProductDetailsModal()" type="button">✕</button>
+      <div>
+        ${imgHtml}
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <span class="text-[10px] font-bold text-success-emerald bg-surface px-2.5 py-1 rounded border border-success-emerald/20 uppercase tracking-wide">${p.category || 'Agricultural'} · ${p.grade || 'Grade A'}</span>
+            <h3 class="text-xl font-bold text-primary mt-1">${p.name}</h3>
+          </div>
+          <div class="text-right">
+            <span class="text-2xl font-black text-primary">₹${p.price}</span>
+            <span class="text-xs text-soil-brown block">per ${p.price_unit || 'kg'}</span>
+          </div>
+        </div>
+
+        <p class="text-xs text-soil-brown my-3 leading-relaxed">${p.description || 'Fresh direct farm produce listing.'}</p>
+        
+        <div class="grid grid-cols-2 gap-2 text-xs text-soil-brown bg-input-bg p-3 rounded-xl mb-4 border border-border-subtle">
+          <div>📍 <b>Location:</b> ${p.location || 'Maharashtra'}</div>
+          <div>📦 <b>Available Stock:</b> ${p.quantity || 100} kg</div>
+        </div>
+
+        <!-- SELLER INFORMATION CARD -->
+        <div class="p-4 bg-surface rounded-2xl border border-primary/20 mb-4">
+          <div class="flex items-center gap-3 mb-2">
+            ${sellerAvatar}
+            <div>
+              <h4 class="font-bold text-primary text-sm flex items-center gap-1.5">
+                <span>${seller.name || p.sellerName || 'Farmer Producer'}</span>
+                <span class="text-[10px] bg-success-emerald text-white px-1.5 py-0.5 rounded font-bold">Verified ✓</span>
+              </h4>
+              <span class="text-[11px] text-soil-brown block">${seller.location || 'Local Farm Producer'}</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 text-[10px] font-semibold text-soil-brown my-2">
+            <span class="bg-white px-2 py-0.5 rounded border border-border-subtle">✓ Email Verified</span>
+            ${seller.phone_verified ? '<span class="bg-white px-2 py-0.5 rounded border border-border-subtle text-success-emerald">✓ Phone Verified</span>' : ''}
+            <span class="bg-white px-2 py-0.5 rounded border border-border-subtle text-harvest-gold">⭐ ${seller.rating || '5.0'} (${seller.reviewCount || 0} reviews)</span>
+          </div>
+          <p class="text-xs text-soil-brown italic mt-1">${seller.bio || seller.description || 'Direct Agricultural Producer on KrishiSetu.'}</p>
+          
+          ${canCallSeller ? `
+            <a href="tel:${seller.phone}" class="inline-flex items-center gap-1.5 mt-3 bg-success-emerald text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary transition-colors shadow-sm">
+              📞 Call Seller (${seller.phone})
+            </a>
+          ` : ''}
+        </div>
+
+        <!-- VERIFIED REVIEWS SECTION -->
+        <div class="mb-4">
+          <h4 class="font-bold text-primary text-xs uppercase mb-2">Customer Reviews (${reviews.length})</h4>
+          <div class="max-h-40 overflow-y-auto pr-1">
+            ${reviewsHtml}
+          </div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="pt-3 border-t border-border-subtle flex justify-end gap-3">
+          ${isOwner ? `
+            <button class="bg-error-container text-error px-4 py-2 rounded-xl text-xs font-bold hover:bg-error/20" onclick="closeProductDetailsModal(); deleteProduct('${p.id}');" type="button">Delete Listing</button>
+          ` : isSeller ? `
+            <span class="text-xs text-soil-brown font-semibold py-2">View Only (Seller Account)</span>
+          ` : `
+            <button class="w-full bg-primary text-white py-3 rounded-xl font-bold text-sm hover:bg-primary-container shadow-md transition-all" onclick="closeProductDetailsModal(); addToCart('${p.id}');" type="button">+ ADD TO CART (₹${p.price}/kg)</button>
+          `}
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    content.innerHTML = `
+      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" onclick="closeProductDetailsModal()" type="button">✕</button>
+      <div class="text-center py-6 text-error font-semibold">Failed to load product details: ${err.message}</div>
+    `;
+  }
+}
+
+function closeProductDetailsModal() {
+  const modal = $('productDetailsModal');
+  if (modal) modal.classList.add('hidden');
+}
+
 function closeSellerModal() {
   $('sellerModal').classList.add('hidden');
 }
 
-async function advanceOrderStatus(orderId, nextStatus) {
+async function advanceOrderStatus(orderId, nextStatus, btnElement) {
+  if (btnElement) {
+    btnElement.disabled = true;
+    btnElement.dataset.originalText = btnElement.textContent;
+    btnElement.textContent = 'Accepting...';
+  }
+
   try {
-    await OrderService.updateStatus(orderId, nextStatus);
-    notify(`Order status updated to: ${nextStatus}`, 'success');
-    renderOrders();
+    const res = await OrderService.updateStatus(orderId, nextStatus);
+    notify(`Order status updated to: ${res.status || nextStatus}`, 'success');
+
+    if (btnElement) {
+      btnElement.textContent = 'Order Accepted ✓';
+      btnElement.className = 'bg-success-emerald text-white text-xs font-bold px-3 py-1.5 rounded-lg';
+    }
+
+    setTimeout(() => {
+      renderOrders();
+      fetchNotifications();
+    }, 400);
   } catch (err) {
-    notify('Failed to update status: ' + err.message, 'error');
+    if (btnElement) {
+      btnElement.disabled = false;
+      btnElement.textContent = btnElement.dataset.originalText || 'Try Again';
+    }
+    notify('Failed to update order status: ' + err.message, 'error');
   }
 }
 
@@ -1911,29 +2067,81 @@ async function renderOrders() {
 
   container.innerHTML = orders.map(o => {
     let actionBtn = '';
-    if (currentRole === 'seller') {
+    if (currentRole === 'seller' || currentRole === 'admin') {
       if (o.status === 'Order Placed') {
-        actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary-container mt-2" onclick="advanceOrderStatus('${o.id}', 'Farmer Confirmed')">Accept Order</button>`;
+        actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" onclick="advanceOrderStatus('${o.id}', 'Farmer Confirmed', this)">Accept Order</button>`;
       } else if (o.status === 'Farmer Confirmed') {
-        actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary-container mt-2" onclick="advanceOrderStatus('${o.id}', 'Preparing')">Start Preparing</button>`;
+        actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" onclick="advanceOrderStatus('${o.id}', 'Preparing', this)">Start Preparing</button>`;
       } else if (o.status === 'Preparing') {
-        actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary-container mt-2" onclick="advanceOrderStatus('${o.id}', 'Ready')">Mark Ready</button>`;
+        actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" onclick="advanceOrderStatus('${o.id}', 'Ready', this)">Mark Ready</button>`;
       } else if (o.status === 'Ready') {
-        actionBtn = `<button class="bg-success-emerald text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary-container mt-2" onclick="advanceOrderStatus('${o.id}', 'Completed')">Mark Completed</button>`;
+        actionBtn = `<button class="bg-success-emerald text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" onclick="advanceOrderStatus('${o.id}', 'Completed', this)">Mark Completed</button>`;
       }
     }
 
-    return `
-      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
-        <div class="flex justify-between items-center mb-3">
-          <div>
-            <h4 class="font-bold text-primary text-sm">Order #${o.id}</h4>
-            <span class="text-xs text-soil-brown">${new Date(o.createdAt || Date.now()).toLocaleDateString()}</span>
-          </div>
-          <span class="bg-surface text-success-emerald text-xs font-bold px-3 py-1 rounded-full border border-success-emerald/20">${o.status}</span>
+    const itemsListHtml = (o.items && o.items.length)
+      ? o.items.map(i => `<div class="flex justify-between py-1 border-b border-border-subtle/50"><span>${i.name} — ${i.quantity} kg</span><span class="font-bold">₹${i.subtotal}</span></div>`).join('')
+      : `<div class="flex justify-between py-1 border-b border-border-subtle/50"><span>${o.product} — ${o.qty} kg</span><span class="font-bold">₹${o.total}</span></div>`;
+
+    const isSellerView = currentRole === 'seller' || currentRole === 'admin';
+
+    const customerDetailsHtml = isSellerView ? `
+      <div class="p-3 bg-surface rounded-xl border border-primary/20 mb-3 text-xs">
+        <h5 class="font-bold text-primary mb-1 uppercase text-[10px]">Customer Contact & Delivery Info</h5>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-soil-brown">
+          <div>👤 <b>Customer Name:</b> <span class="text-on-surface font-semibold">${o.customerName || 'Customer'}</span></div>
+          <div>📧 <b>Email:</b> <span class="text-on-surface">${o.customerEmail || 'Not provided'}</span></div>
+          <div>📞 <b>Phone:</b> <span class="text-on-surface font-bold text-primary">${o.customerPhone || 'Not provided'}</span></div>
+          <div>📍 <b>Delivery Address:</b> <span class="text-on-surface">${o.deliveryAddress || 'Standard Delivery'}</span></div>
         </div>
-        <div class="text-sm font-bold text-on-surface">Total Amount: ₹${o.total || 0}</div>
-        ${actionBtn}
+      </div>
+    ` : `
+      <div class="p-3 bg-surface rounded-xl border border-primary/20 mb-3 text-xs">
+        <h5 class="font-bold text-primary mb-1 uppercase text-[10px]">Seller / Producer Info</h5>
+        <div class="text-soil-brown">
+          👨‍🌾 <b>Farmer / Seller:</b> <span class="text-on-surface font-semibold">${o.sellerName || 'Local Farmer'}</span> (${o.sellerVerificationStatus === 'verified' ? '✓ Verified' : 'Pending'})
+        </div>
+      </div>
+    `;
+
+    return `
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div>
+          <div class="flex justify-between items-start mb-3 pb-3 border-b border-border-subtle">
+            <div>
+              <h4 class="font-bold text-primary text-base">ORDER #${o.id}</h4>
+              <span class="text-xs text-soil-brown">Placed on ${o.createdAt || new Date().toLocaleDateString()}</span>
+            </div>
+            <span class="bg-surface text-success-emerald text-xs font-bold px-3 py-1 rounded-full border border-success-emerald/20">${o.status}</span>
+          </div>
+
+          ${customerDetailsHtml}
+
+          <div class="mb-3">
+            <h5 class="font-bold text-primary text-xs uppercase mb-1">Products Ordered</h5>
+            <div class="space-y-1 text-xs text-soil-brown">
+              ${itemsListHtml}
+            </div>
+          </div>
+
+          <div class="space-y-1 text-xs text-soil-brown pt-2 border-t border-border-subtle">
+            ${o.subtotal ? `<div class="flex justify-between"><span>Items Subtotal:</span><span class="font-bold text-on-surface">₹${o.subtotal}</span></div>` : ''}
+            ${o.platformFee !== undefined ? `<div class="flex justify-between"><span>Platform Fee:</span><span class="font-bold text-on-surface">₹${o.platformFee}</span></div>` : ''}
+            <div class="flex justify-between text-sm font-extrabold text-primary pt-1">
+              <span>Total Amount Payable:</span>
+              <span>₹${o.total || 0}</span>
+            </div>
+          </div>
+
+          <div class="mt-3 text-[11px] text-soil-brown flex flex-wrap justify-between items-center bg-input-bg p-2.5 rounded-lg border border-border-subtle">
+            <span>💳 <b>Payment Method:</b> <span class="uppercase font-bold">${o.payment_method === 'upi_qr' ? 'UPI Scanner' : 'Pay on Delivery'}</span></span>
+            <span>Status: <b class="capitalize text-primary">${o.payment_status || 'pending'}</b></span>
+          </div>
+        </div>
+
+        <div>
+          ${actionBtn}
+        </div>
       </div>
     `;
   }).join('');

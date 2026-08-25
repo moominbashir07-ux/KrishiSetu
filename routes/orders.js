@@ -228,34 +228,45 @@ router.get('/', authenticateUser, async (req, res, next) => {
     let queryText = '';
     let params = [];
 
+    const fields = `
+      o.id, o.order_number, o.status, o.step, o.total_amount as total, o.buyer_contact, o.created_at, o.customer_id, o.seller_id,
+      o.payment_method, o.payment_status,
+      su.name as "sellerName", su.contact as "sellerContact", COALESCE(sp.verification_status, 'pending') as "sellerVerificationStatus",
+      cu.name as "customerName", cu.contact as "customerEmail", cu.phone as "customerPhone",
+      cp.address as "customerAddress", cp.city as "customerCity", cp.state as "customerState", cp.pincode as "customerPincode"
+    `;
+
     if (role === 'admin') {
       queryText = `
-        SELECT o.id, o.order_number, o.status, o.step, o.total_amount as total, o.buyer_contact, o.created_at, o.customer_id, o.seller_id,
-               u.name as "sellerName", u.contact as "sellerContact", COALESCE(sp.verification_status, 'pending') as "sellerVerificationStatus"
+        SELECT ${fields}
         FROM orders o
-        JOIN users u ON o.seller_id = u.id
+        JOIN users su ON o.seller_id = su.id
         LEFT JOIN seller_profiles sp ON o.seller_id = sp.user_id
+        LEFT JOIN users cu ON o.customer_id = cu.id
+        LEFT JOIN customer_profiles cp ON o.customer_id = cp.user_id
         ORDER BY o.created_at DESC
       `;
     } else if (role === 'seller') {
       params = [userId];
       queryText = `
-        SELECT o.id, o.order_number, o.status, o.step, o.total_amount as total, o.buyer_contact, o.created_at, o.customer_id, o.seller_id,
-               u.name as "sellerName", u.contact as "sellerContact", COALESCE(sp.verification_status, 'pending') as "sellerVerificationStatus"
+        SELECT ${fields}
         FROM orders o
-        JOIN users u ON o.seller_id = u.id
+        JOIN users su ON o.seller_id = su.id
         LEFT JOIN seller_profiles sp ON o.seller_id = sp.user_id
+        LEFT JOIN users cu ON o.customer_id = cu.id
+        LEFT JOIN customer_profiles cp ON o.customer_id = cp.user_id
         WHERE o.seller_id = $1
         ORDER BY o.created_at DESC
       `;
     } else {
       params = [userId];
       queryText = `
-        SELECT o.id, o.order_number, o.status, o.step, o.total_amount as total, o.buyer_contact, o.created_at, o.customer_id, o.seller_id,
-               u.name as "sellerName", u.contact as "sellerContact", COALESCE(sp.verification_status, 'pending') as "sellerVerificationStatus"
+        SELECT ${fields}
         FROM orders o
-        JOIN users u ON o.seller_id = u.id
+        JOIN users su ON o.seller_id = su.id
         LEFT JOIN seller_profiles sp ON o.seller_id = sp.user_id
+        LEFT JOIN users cu ON o.customer_id = cu.id
+        LEFT JOIN customer_profiles cp ON o.customer_id = cp.user_id
         WHERE o.customer_id = $1
         ORDER BY o.created_at DESC
       `;
@@ -270,14 +281,43 @@ router.get('/', authenticateUser, async (req, res, next) => {
         [orderRow.id]
       );
 
-      const firstItem = itemsRes.rows[0] || {};
+      const items = (itemsRes.rows || []).map(i => ({
+        name: i.product_name_snapshot,
+        quantity: Number(i.quantity),
+        unitPrice: Number(i.unit_price_snapshot),
+        subtotal: Number(i.subtotal)
+      }));
+
+      const firstItem = items[0] || {};
+      const subtotalSum = items.reduce((sum, i) => sum + i.subtotal, 0);
+      const totalAmount = Number(orderRow.total || 0);
+      const platformFee = Math.max(0, Math.round((totalAmount - subtotalSum) * 100) / 100);
+
+      let deliveryAddr = orderRow.customerAddress;
+      if (orderRow.customerCity) deliveryAddr += `, ${orderRow.customerCity}`;
+      if (orderRow.customerState) deliveryAddr += `, ${orderRow.customerState}`;
+      if (orderRow.customerPincode) deliveryAddr += ` - ${orderRow.customerPincode}`;
+      if (!deliveryAddr) deliveryAddr = orderRow.buyer_contact || 'Delivery address provided at checkout';
+
       orders.push({
         id: orderRow.order_number || orderRow.id,
         dbId: orderRow.id,
-        product: firstItem.product_name_snapshot || 'Agricultural Produce',
+        orderNumber: orderRow.order_number || orderRow.id,
+        customer_id: orderRow.customer_id,
+        seller_id: orderRow.seller_id,
+        customerName: orderRow.customerName || 'Customer',
+        customerEmail: orderRow.customerEmail || 'Contact not provided',
+        customerPhone: orderRow.customerPhone || orderRow.customerEmail || 'Contact not provided',
+        deliveryAddress: deliveryAddr,
+        items,
+        product: firstItem.name || 'Product',
         qty: firstItem.quantity || 1,
-        price: firstItem.unit_price_snapshot || orderRow.total,
-        total: Number(orderRow.total),
+        price: firstItem.unitPrice || totalAmount,
+        subtotal: subtotalSum,
+        platformFee,
+        total: totalAmount,
+        payment_method: orderRow.payment_method || 'cod',
+        payment_status: orderRow.payment_status || 'pending',
         status: orderRow.status,
         step: Number(orderRow.step || 1),
         sellerName: orderRow.sellerName || 'Local Farmer',
@@ -360,9 +400,13 @@ router.put('/:id/status', authenticateUser, requireAnyRole('seller', 'admin'), a
     let targetStatus = status;
 
     if (!targetStatus && step !== undefined) {
-      const stepNum = Number(step);
-      const stepMap = { 1: 'Order Placed', 2: 'Farmer Confirmed', 3: 'Preparing', 4: 'Ready', 5: 'Completed' };
-      targetStatus = stepMap[stepNum];
+      if (typeof step === 'string' && isNaN(Number(step))) {
+        targetStatus = step;
+      } else {
+        const stepNum = Number(step);
+        const stepMap = { 1: 'Order Placed', 2: 'Farmer Confirmed', 3: 'Preparing', 4: 'Ready', 5: 'Completed' };
+        targetStatus = stepMap[stepNum];
+      }
     }
 
     if (!targetStatus) {
@@ -385,29 +429,46 @@ router.put('/:id/status', authenticateUser, requireAnyRole('seller', 'admin'), a
         [targetStatus, newStep, order.id]
       );
 
-      // Record state history log
-      const historyId = 'OSH_' + Date.now() + Math.random().toString(36).substring(2, 5);
-      await client.query(
-        `INSERT INTO order_status_history (id, order_id, previous_status, new_status, changed_by)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [historyId, order.id, currentStatus, targetStatus, req.user.id]
-      );
+      // Record state history log safely
+      try {
+        const historyId = 'OSH_' + Date.now() + Math.random().toString(36).substring(2, 5);
+        await client.query(
+          `INSERT INTO order_status_history (id, order_id, previous_status, new_status, changed_by)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [historyId, order.id, currentStatus, targetStatus, req.user.id]
+        );
+      } catch (hErr) {
+        console.warn('[ORDER HISTORY WARNING]', hErr.message);
+      }
 
-      // Send notification to Customer
-      const notifId = 'NOTIF_' + Date.now() + Math.random().toString(36).substring(2, 6);
-      const isConfirmed = targetStatus === 'Farmer Confirmed';
-      const notifTitle = isConfirmed 
-        ? `✅ Order Confirmed #${order.order_number || order.id}`
-        : `📦 Order Update #${order.order_number || order.id}`;
-      const notifMsg = isConfirmed
-        ? `Order #${order.order_number || order.id} has been confirmed by the seller.`
-        : `Your order status has been updated to "${targetStatus}".`;
+      // Send notification to Customer safely
+      try {
+        const notifId = 'NOTIF_' + Date.now() + Math.random().toString(36).substring(2, 6);
+        let notifTitle = `📦 Order Update #${order.order_number || order.id}`;
+        let notifMsg = `Your order #${order.order_number || order.id} status has been updated to "${targetStatus}".`;
 
-      await client.query(
-        `INSERT INTO notifications (id, user_id, type, title, message, read, order_id)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [notifId, order.customer_id, 'order_status', notifTitle, notifMsg, false, order.id]
-      );
+        if (targetStatus === 'Farmer Confirmed') {
+          notifTitle = `✅ Order Confirmed #${order.order_number || order.id}`;
+          notifMsg = `Your order #${order.order_number || order.id} has been confirmed by the seller.`;
+        } else if (targetStatus === 'Preparing') {
+          notifTitle = `📦 Order Preparing #${order.order_number || order.id}`;
+          notifMsg = `Your order #${order.order_number || order.id} is being prepared.`;
+        } else if (targetStatus === 'Ready') {
+          notifTitle = `📦 Order Ready #${order.order_number || order.id}`;
+          notifMsg = `Your order #${order.order_number || order.id} is ready.`;
+        } else if (targetStatus === 'Delivered' || targetStatus === 'Completed') {
+          notifTitle = `🎉 Order Delivered #${order.order_number || order.id}`;
+          notifMsg = `Your order #${order.order_number || order.id} has been delivered.`;
+        }
+
+        await client.query(
+          `INSERT INTO notifications (id, user_id, type, title, message, read, order_id)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [notifId, order.customer_id, 'order_status', notifTitle, notifMsg, false, order.id]
+        );
+      } catch (nErr) {
+        console.warn('[CUSTOMER NOTIFICATION WARNING]', nErr.message);
+      }
     });
 
     res.json({

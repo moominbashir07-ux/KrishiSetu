@@ -41,8 +41,8 @@ function errorHandler(err, req, res, next) {
   let publicMessage = err.message || 'Error processing request.';
 
   // Mask database connection/internal crash details safely if 500
-  if (statusCode === 500 && (publicMessage.includes('ECONNREFUSED') || publicMessage.includes('ENOTFOUND') || publicMessage.includes('FATAL'))) {
-    publicMessage = 'A backend database service error occurred. Please try again.';
+  if (statusCode === 500 && (publicMessage.includes('ECONNREFUSED') || publicMessage.includes('ENOTFOUND') || publicMessage.includes('FATAL') || publicMessage.includes('SELECT') || publicMessage.includes('INSERT') || publicMessage.includes('UPDATE') || publicMessage.includes('DELETE') || publicMessage.includes('PG error'))) {
+    publicMessage = 'An internal database error occurred. Please try again.';
   }
 
   res.status(statusCode).json({
