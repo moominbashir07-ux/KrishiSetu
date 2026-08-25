@@ -1,4 +1,6 @@
-// KrishiSetu Centralized Backend API Client Service (Phase 5B)
+// KrishiSetu Centralized Backend API Client Service (Phase 5B - Production Ready)
+
+const API_BASE_URL = (typeof window !== 'undefined' && window.__KRISHISETU_API_URL__) ? window.__KRISHISETU_API_URL__ : '';
 
 const ApiService = {
   getToken() {
@@ -24,8 +26,10 @@ const ApiService = {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
+    const targetUrl = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+
     try {
-      const res = await fetch(endpoint, {
+      const res = await fetch(targetUrl, {
         ...options,
         headers
       });

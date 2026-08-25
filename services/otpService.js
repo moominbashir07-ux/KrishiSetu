@@ -110,12 +110,14 @@ class OtpService {
       payload.accessToken = accessToken;
     }
 
+    const originUrl = process.env.APP_URL || 'http://localhost:3000';
+
     try {
       const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Origin': 'http://localhost:3000',
+          'Origin': originUrl,
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         },
         body: JSON.stringify(payload)

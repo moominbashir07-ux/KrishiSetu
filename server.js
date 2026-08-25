@@ -35,6 +35,16 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Production Health Check Endpoint (Task 15)
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'production',
+    database: db.isPgConnected() ? 'connected (postgresql)' : 'connected (fallback)'
+  });
+});
+
 // Register production backend API routes
 app.use('/api/auth', authRouter);
 app.use('/api/products', productsRouter);
