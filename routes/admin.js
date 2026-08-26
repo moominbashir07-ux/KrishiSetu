@@ -22,6 +22,18 @@ async function logAdminAction(adminId, action, targetId, details, reason = null)
   }
 }
 
+// GET DEPLOYED BUILD INFORMATION (ADMIN)
+router.get('/build-info', async (req, res) => {
+  res.json({
+    app: 'KrishiSetu',
+    environment: process.env.NODE_ENV || 'production',
+    commit: '888cb12',
+    version: '7.0.0',
+    adminVersion: 'V7 Master Control Center',
+    serverTime: new Date().toISOString()
+  });
+});
+
 // GET ALL USERS (ADMIN)
 router.get('/users', async (req, res, next) => {
   const { role, status, q } = req.query;
