@@ -27,9 +27,9 @@ router.get('/build-info', async (req, res) => {
   res.json({
     app: 'KrishiSetu',
     environment: process.env.NODE_ENV || 'production',
-    commit: '397540f',
-    version: '10.0.0',
-    adminVersion: 'V10 Master Control Center',
+    commit: 'b0d5a93',
+    version: '11.0.0',
+    adminVersion: 'V11 Master Control Center',
     serverTime: new Date().toISOString()
   });
 });
