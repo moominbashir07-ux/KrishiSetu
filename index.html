@@ -177,7 +177,7 @@
 <div id="topNotificationContainer"></div>
 
 <!-- TopNavBar -->
-<nav class="bg-surface dark:bg-inverse-surface text-primary dark:text-inverse-primary docked full-width top-0 z-50 shadow-[0_4px_18px_rgba(23,49,34,0.07)] sticky">
+<nav id="mainPublicNav" class="bg-surface dark:bg-inverse-surface text-primary dark:text-inverse-primary docked full-width top-0 z-50 shadow-[0_4px_18px_rgba(23,49,34,0.07)] sticky">
   <div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-3 md:py-4 max-w-max-width mx-auto">
     <div class="flex items-center gap-3 sm:gap-6">
       <a class="flex items-center" href="#" onclick="showScreen('landing')" title="KrishiSetu Home">
@@ -1292,7 +1292,7 @@
 </div>
 
 <!-- FOOTER -->
-<footer class="w-full mt-auto bg-surface-container-highest dark:bg-inverse-surface border-t border-border-subtle">
+<footer id="mainPublicFooter" class="w-full mt-auto bg-surface-container-highest dark:bg-inverse-surface border-t border-border-subtle">
   <div class="grid grid-cols-1 md:grid-cols-3 gap-lg px-margin-mobile md:px-margin-desktop py-xl max-w-max-width mx-auto">
     <div>
       <a class="text-headline-md font-headline-md font-black text-primary dark:text-inverse-primary mb-2 block" href="#">KrishiSetu</a>
@@ -1613,6 +1613,13 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const target = $(id);
   if (target) target.classList.add('active');
+
+  const nav = $('mainPublicNav');
+  const footer = $('mainPublicFooter');
+  const isAdmin = id === 'adminView';
+
+  if (nav) nav.classList.toggle('hidden', isAdmin);
+  if (footer) footer.classList.toggle('hidden', isAdmin);
 
   if (id === 'price') loadMarketPrices();
   if (id === 'orders') renderOrders();
