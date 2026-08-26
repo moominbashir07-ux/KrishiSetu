@@ -589,7 +589,7 @@
           <h1 class="text-base md:text-lg font-black tracking-tight text-white flex items-center gap-2">
             KrishiSetu Master Control Center
             <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 font-bold uppercase tracking-wider">● Operational</span>
-            <span class="text-[9px] bg-slate-800 text-emerald-400 font-mono px-2 py-0.5 rounded border border-slate-700" id="adminBuildBadge">Build: b0d5a93</span>
+            <span class="text-[9px] bg-slate-800 text-emerald-400 font-mono px-2 py-0.5 rounded border border-slate-700" id="adminBuildBadge">Build: 5e791c3</span>
           </h1>
           <p class="text-[11px] text-slate-400 hidden sm:block">Executive Command Center · Governance · Financial BI · Live Presence</p>
         </div>
@@ -1312,7 +1312,7 @@
 </footer>
 
 <!-- API SERVICES -->
-<script src="js/api.js?v=b0d5a93"></script>
+<script src="js/api.js?v=5e791c3"></script>
 <script>
 let currentRole = 'customer';
 let selectedRole = 'seller';
@@ -2966,12 +2966,16 @@ window.addEventListener('hashchange', handleUrlHashRouting);
 // ADMIN DASHBOARD & CONTROL CENTER ENGINE V3
 let currentAdminTab = 'analytics';
 
-function switchAdminTab(tab) {
+function switchAdminTab(tab, updateHash = true) {
   currentAdminTab = tab;
+  if (updateHash && window.history && window.history.replaceState) {
+    window.history.replaceState({}, '', `/admin#${tab}`);
+  }
+
   const tabs = [
     'analytics', 'users', 'sellers', 'customers', 'products', 
     'orders', 'payments', 'live', 'loginHistory', 'feedback', 
-    'reviews', 'audit', 'finance', 'database', 'health'
+    'reviews', 'audit', 'finance', 'database', 'health', 'settings'
   ];
   
   tabs.forEach(t => {
@@ -2982,9 +2986,9 @@ function switchAdminTab(tab) {
     
     if (btn) {
       if (t === tab) {
-        btn.className = 'px-3.5 py-2 text-xs font-bold text-primary border-b-2 border-primary';
+        btn.className = 'w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-emerald-400 bg-slate-800 border border-slate-700 shadow-sm';
       } else {
-        btn.className = 'px-3.5 py-2 text-xs font-bold text-soil-brown';
+        btn.className = 'w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors';
       }
     }
     if (content) {
@@ -3908,7 +3912,8 @@ async function loadAdminMandiHealth() {
 
 async function handleUrlHashRouting() {
   const isPathAdmin = window.location.pathname === '/admin' || window.location.pathname.endsWith('/admin');
-  const isHashAdmin = window.location.hash === '#admin';
+  const rawHash = (window.location.hash || '').replace(/^#/, '');
+  const isHashAdmin = rawHash === 'admin' || rawHash.length > 0;
 
   if (isPathAdmin || isHashAdmin) {
     const token = AuthService.getToken();
@@ -3941,6 +3946,16 @@ async function handleUrlHashRouting() {
       // Valid server-side authenticated admin
       currentRole = 'admin';
       currentUserId = user.id;
+
+      const validTabs = [
+        'analytics', 'users', 'sellers', 'customers', 'products', 
+        'orders', 'payments', 'live', 'loginHistory', 'feedback', 
+        'reviews', 'audit', 'finance', 'database', 'health', 'settings'
+      ];
+      if (rawHash && validTabs.includes(rawHash)) {
+        currentAdminTab = rawHash;
+      }
+
       showScreen('adminView');
       loadAdminDashboard();
     } catch (err) {
