@@ -2946,21 +2946,6 @@ function onFooterAuthClick() {
   }
 }
 
-function handleUrlHashRouting() {
-  const hash = window.location.hash;
-  const path = window.location.pathname;
-
-  if (path === '/admin' || hash === '#admin') {
-    if (currentRole === 'admin') {
-      showScreen('adminView');
-      loadAdminDashboard();
-    } else {
-      notify('Access denied. Protected admin route.', 'error');
-      showScreen('buyer-market');
-    }
-  }
-}
-
 window.addEventListener('hashchange', handleUrlHashRouting);
 
 // ADMIN DASHBOARD & CONTROL CENTER ENGINE V3
@@ -3913,7 +3898,12 @@ async function loadAdminMandiHealth() {
 async function handleUrlHashRouting() {
   const isPathAdmin = window.location.pathname === '/admin' || window.location.pathname.endsWith('/admin');
   const rawHash = (window.location.hash || '').replace(/^#/, '');
-  const isHashAdmin = rawHash === 'admin' || rawHash.length > 0;
+  const validTabs = [
+    'analytics', 'users', 'sellers', 'customers', 'products', 
+    'orders', 'payments', 'live', 'loginHistory', 'feedback', 
+    'reviews', 'audit', 'finance', 'database', 'health', 'settings'
+  ];
+  const isHashAdmin = rawHash === 'admin' || validTabs.includes(rawHash);
 
   if (isPathAdmin || isHashAdmin) {
     const token = AuthService.getToken();
@@ -3947,11 +3937,6 @@ async function handleUrlHashRouting() {
       currentRole = 'admin';
       currentUserId = user.id;
 
-      const validTabs = [
-        'analytics', 'users', 'sellers', 'customers', 'products', 
-        'orders', 'payments', 'live', 'loginHistory', 'feedback', 
-        'reviews', 'audit', 'finance', 'database', 'health', 'settings'
-      ];
       if (rawHash && validTabs.includes(rawHash)) {
         currentAdminTab = rawHash;
       }
