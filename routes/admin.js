@@ -24,12 +24,16 @@ async function logAdminAction(adminId, action, targetId, details, reason = null)
 
 // GET DEPLOYED BUILD INFORMATION (ADMIN)
 router.get('/build-info', async (req, res) => {
+  const commit = process.env.RENDER_GIT_COMMIT
+    ? process.env.RENDER_GIT_COMMIT.substring(0, 7)
+    : (process.env.GIT_COMMIT ? process.env.GIT_COMMIT.substring(0, 7) : 'e47dfcc');
+
   res.json({
     app: 'KrishiSetu',
     environment: process.env.NODE_ENV || 'production',
-    commit: '5e791c3',
-    version: '13.0.0',
-    adminVersion: 'V13 Master Control Center',
+    commit,
+    version: '14.0.0',
+    adminVersion: 'V14 Master Control Center',
     serverTime: new Date().toISOString()
   });
 });
