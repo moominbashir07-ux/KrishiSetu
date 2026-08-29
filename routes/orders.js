@@ -4,12 +4,12 @@ const { authenticateUser, requireRole, requireAnyRole } = require('../middleware
 
 const router = express.Router();
 
-let orderCounter = 100000;
+let orderCounter = Math.floor(Date.now() / 1000) % 900000 + 100000;
 
 function generateOrderNumber() {
   orderCounter += 1;
-  const seq = String(orderCounter).padStart(6, '0');
-  return `KS-2026-${seq}`;
+  const rand = Math.floor(100 + Math.random() * 900);
+  return `KS-2026-${orderCounter}-${rand}`;
 }
 
 const ALLOWED_TRANSITIONS = {
