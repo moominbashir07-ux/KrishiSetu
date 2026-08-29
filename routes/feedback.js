@@ -64,7 +64,14 @@ router.get('/', authenticateUser, requireRole('admin'), async (req, res, next) =
   const { status } = req.query;
 
   try {
-    const result = await db.query('SELECT * FROM feedback ORDER BY created_at DESC', status ? [status] : []);
+    let sql = 'SELECT * FROM feedback';
+    const params = [];
+    if (status && ['new', 'reviewed', 'resolved'].includes(status)) {
+      params.push(status);
+      sql += ` WHERE status = $${params.length}`;
+    }
+    sql += ' ORDER BY created_at DESC';
+    const result = await db.query(sql, params);
     res.json({ feedback: result.rows });
   } catch (err) {
     next(err);

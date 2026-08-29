@@ -189,6 +189,8 @@ router.post('/', authenticateUser, requireRole('customer'), async (req, res, nex
           status: 'Order Placed',
           step: 1,
           total: sellerTotal,
+          payment_method: payment_method,
+          payment_status: validPayStatus,
           product: items[0].product.name,
           qty: items[0].requestedQty,
           price: items[0].unitPrice,
@@ -483,13 +485,13 @@ router.put('/:id/status', authenticateUser, requireAnyRole('seller', 'admin'), a
   }
 });
 
-// CUSTOMER SUBMIT ONLINE PAYMENT VERIFICATION (REQUIRES MANDATORY TRANSACTION ID)
+// CUSTOMER SUBMIT ONLINE PAYMENT VERIFICATION (REQUIRES MANDATORY TRANSACTION ID & REPLAY PROTECTION)
 router.post('/:id/verify-payment', authenticateUser, requireRole('customer'), async (req, res, next) => {
   const { transactionId } = req.body;
   const orderIdentifier = req.params.id;
 
-  if (!transactionId || typeof transactionId !== 'string' || !transactionId.trim() || transactionId.trim().length < 5) {
-    return res.status(400).json({ error: 'A valid Transaction ID (minimum 5 characters) is required to submit payment verification.' });
+  if (!transactionId || typeof transactionId !== 'string' || !transactionId.trim() || transactionId.trim().length < 5 || transactionId.trim().length > 100) {
+    return res.status(400).json({ error: 'A valid Transaction ID (between 5 and 100 characters) is required to submit payment verification.' });
   }
 
   const cleanTxnId = transactionId.trim();
@@ -509,6 +511,18 @@ router.post('/:id/verify-payment', authenticateUser, requireRole('customer'), as
     // IDOR Protection: Must be the customer who placed the order
     if (order.customer_id !== req.user.id) {
       return res.status(403).json({ error: 'Forbidden. You can only submit payment verification for your own orders.' });
+    }
+
+    // Payment Security: Check for duplicate transaction ID replay across orders
+    const dupCheck = await db.query(
+      'SELECT id, order_number FROM orders WHERE LOWER(transaction_id) = LOWER($1) AND id != $2 AND payment_status != \'rejected\'',
+      [cleanTxnId, order.id]
+    );
+
+    if (dupCheck.rows.length > 0) {
+      return res.status(409).json({
+        error: `This Transaction ID has already been submitted for Order #${dupCheck.rows[0].order_number || dupCheck.rows[0].id}. Each payment requires a unique Transaction ID.`
+      });
     }
 
     await db.query(
@@ -540,7 +554,7 @@ router.post('/:id/verify-payment', authenticateUser, requireRole('customer'), as
   }
 });
 
-// SELLER VERIFY OR REJECT ONLINE PAYMENT
+// SELLER VERIFY OR REJECT ONLINE PAYMENT (STRICT STATE MACHINE ENFORCEMENT)
 router.put('/:id/seller-verify-payment', authenticateUser, requireAnyRole('seller', 'admin'), async (req, res, next) => {
   const { action, reason } = req.body;
   const orderIdentifier = req.params.id;
@@ -551,7 +565,7 @@ router.put('/:id/seller-verify-payment', authenticateUser, requireAnyRole('selle
 
   try {
     const orderRes = await db.query(
-      'SELECT id, order_number, customer_id, seller_id, total_amount, transaction_id, status FROM orders WHERE id = $1 OR order_number = $1',
+      'SELECT id, order_number, customer_id, seller_id, total_amount, transaction_id, payment_status, status FROM orders WHERE id = $1 OR order_number = $1',
       [orderIdentifier]
     );
 
@@ -564,6 +578,17 @@ router.put('/:id/seller-verify-payment', authenticateUser, requireAnyRole('selle
     // IDOR Protection: Seller must own the order (unless admin override)
     if (req.user.role === 'seller' && order.seller_id !== req.user.id) {
       return res.status(403).json({ error: 'Forbidden. You can only verify payments for orders placed with your farm.' });
+    }
+
+    // STATE MACHINE VALIDATION: Prevent invalid payment transitions
+    if (order.payment_status === 'verified') {
+      return res.status(409).json({ error: 'Payment for this order has already been verified and confirmed.' });
+    }
+
+    if (order.payment_status !== 'submitted' && req.user.role !== 'admin') {
+      return res.status(400).json({ 
+        error: `Cannot verify payment with status '${order.payment_status}'. Payment must be in 'submitted' state.` 
+      });
     }
 
     if (action === 'approve') {

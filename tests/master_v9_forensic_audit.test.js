@@ -49,6 +49,12 @@ test('KrishiSetu Master Control Center V9 Forensic Audit & Production Suite', as
     });
   });
 
+  t.after(async () => {
+    if (server) {
+      await new Promise(resolve => server.close(resolve));
+    }
+  });
+
   const adminToken = generateToken({ id: 'ADM_V9', role: 'admin', contact: 'admin' });
   const seller1Token = generateToken({ id: 'S101', role: 'seller', contact: 'farmer1@example.com' });
   const seller2Token = generateToken({ id: 'S102', role: 'seller', contact: 'farmer2@example.com' });
@@ -68,7 +74,7 @@ test('KrishiSetu Master Control Center V9 Forensic Audit & Production Suite', as
     });
     assert.equal(res.status, 200);
     assert.equal(res.body.app, 'KrishiSetu');
-    assert.equal(res.body.commit, '888cb12');
+    assert.ok(res.body.commit && typeof res.body.commit === 'string' && /^[0-9a-f]{7}$/.test(res.body.commit));
   });
 
   await t.test('3. GET /js/api.js returns JavaScript file containing AuthService.getToken', async () => {

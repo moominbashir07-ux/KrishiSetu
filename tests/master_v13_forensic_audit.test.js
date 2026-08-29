@@ -49,6 +49,12 @@ test('KrishiSetu Master Control Center V13 Final Production Hardening Suite', as
     });
   });
 
+  t.after(async () => {
+    if (server) {
+      await new Promise(resolve => server.close(resolve));
+    }
+  });
+
   const adminToken = generateToken({ id: 'ADM_V13', role: 'admin', contact: 'admin' });
   const seller1Token = generateToken({ id: 'S101', role: 'seller', contact: 'farmer1@example.com' });
   const seller2Token = generateToken({ id: 'S102', role: 'seller', contact: 'farmer2@example.com' });

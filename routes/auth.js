@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const db = require('../db/db');
 const { JWT_SECRET, authenticateUser } = require('../middleware/auth');
 const { validateAuthInput } = require('../middleware/validate');
-const { otpLimiter } = require('../middleware/security');
+const { otpLimiter, authLimiter } = require('../middleware/security');
 const OtpService = require('../services/otpService');
 
 const router = express.Router();
@@ -122,9 +122,9 @@ async function recordUserActivity(userId, contact, role, action, page) {
 }
 
 // SIGN IN ROUTE
-router.post('/signin', async (req, res, next) => {
+router.post('/signin', authLimiter, async (req, res, next) => {
   const { contact, password } = req.body;
-  if (!contact || !password) {
+  if (!contact || !password || typeof contact !== 'string' || typeof password !== 'string' || !contact.trim() || !password.trim()) {
     return res.status(400).json({ error: 'Please enter your phone/email and password.' });
   }
 
@@ -278,10 +278,10 @@ router.post('/reset-password', async (req, res, next) => {
 // SECURE ADMIN SEED / REGISTRATION ROUTE
 router.post('/admin-seed', async (req, res, next) => {
   const { name, contact, password, bootstrapKey } = req.body;
-  const expectedKey = process.env.ADMIN_BOOTSTRAP_KEY || 'krishisetu_admin_seed_secret_2026';
+  const expectedKey = process.env.ADMIN_BOOTSTRAP_KEY;
 
-  if (!bootstrapKey || bootstrapKey !== expectedKey) {
-    return res.status(403).json({ error: 'Forbidden. Invalid admin bootstrap authorization key.' });
+  if (!expectedKey || !bootstrapKey || bootstrapKey !== expectedKey) {
+    return res.status(403).json({ error: 'Forbidden. Admin bootstrap authorization is disabled or key is invalid.' });
   }
 
   if (!name || !contact || !password || password.length < 6) {
@@ -311,61 +311,6 @@ router.post('/admin-seed', async (req, res, next) => {
     });
   } catch (err) {
     next(err);
-  }
-});
-
-// GET CURRENT AUTHENTICATED USER (PHASE 1)
-router.get('/me', async (req, res) => {
-  const authHeader = req.headers.authorization;
-  let token = null;
-
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    token = authHeader.substring(7);
-  } else if (req.headers['x-access-token']) {
-    token = req.headers['x-access-token'];
-  }
-
-  if (!token) {
-    return res.json({ authenticated: false, user: null });
-  }
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const result = await db.query(
-      'SELECT id, name, contact, role, account_status, email_verified, phone, phone_verified, show_phone, profile_photo FROM users WHERE id = $1',
-      [decoded.id]
-    );
-
-    if (!result.rows.length) {
-      return res.json({ authenticated: false, user: null });
-    }
-
-    const user = result.rows[0];
-
-    if (user.account_status === 'frozen' || user.account_status === 'suspended') {
-      return res.status(403).json({
-        authenticated: false,
-        error: 'Your KrishiSetu account has been temporarily frozen. Please contact support.'
-      });
-    }
-
-    res.json({
-      authenticated: true,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.contact,
-        role: user.role,
-        account_status: user.account_status || 'active',
-        email_verified: Boolean(user.email_verified),
-        phone: user.phone || null,
-        phone_verified: Boolean(user.phone_verified),
-        show_phone: Boolean(user.show_phone),
-        profile_photo: user.profile_photo || null
-      }
-    });
-  } catch (err) {
-    res.json({ authenticated: false, user: null });
   }
 });
 

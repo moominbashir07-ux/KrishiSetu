@@ -157,6 +157,82 @@ router.get('/sellers', async (req, res, next) => {
   }
 });
 
+// GET SELLER VERIFICATIONS (ADMIN)
+router.get('/seller-verifications', async (req, res, next) => {
+  const { status } = req.query;
+  try {
+    let sql = `
+      SELECT sv.*, u.name as "sellerName", u.contact as "sellerContact", sp.business_name as "businessName"
+      FROM seller_verifications sv
+      JOIN users u ON sv.seller_id = u.id
+      LEFT JOIN seller_profiles sp ON sv.seller_id = sp.user_id
+    `;
+    const params = [];
+    if (status && ['pending', 'verified', 'rejected'].includes(status)) {
+      params.push(status);
+      sql += ' WHERE sv.status = $1';
+    }
+    sql += ' ORDER BY sv.submitted_at DESC';
+    const result = await db.query(sql, params);
+    res.json({ verifications: result.rows || [] });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// UPDATE SELLER VERIFICATION (APPROVE / REJECT WITH AUDIT LOGGING)
+router.put('/sellers/:id/verification', async (req, res, next) => {
+  const { status, reason } = req.body;
+  const sellerId = req.params.id;
+
+  if (!['verified', 'rejected'].includes(status)) {
+    return res.status(400).json({ error: "Verification status must be either 'verified' or 'rejected'." });
+  }
+
+  try {
+    const spRes = await db.query('SELECT user_id, verification_status, business_name FROM seller_profiles WHERE user_id = $1', [sellerId]);
+    if (!spRes.rows.length) {
+      return res.status(404).json({ error: 'Seller profile not found.' });
+    }
+
+    await db.query(
+      'UPDATE seller_profiles SET verification_status = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2',
+      [status, sellerId]
+    );
+
+    await db.query(
+      'UPDATE seller_verifications SET status = $1 WHERE seller_id = $2',
+      [status, sellerId]
+    ).catch(() => {});
+
+    const action = status === 'verified' ? 'SELLER_VERIFICATION_APPROVED' : 'SELLER_VERIFICATION_REJECTED';
+    const detail = `Seller '${sellerId}' verification status set to '${status}'`;
+    await logAdminAction(req.user.id, action, sellerId, detail, reason);
+
+    // Notify seller
+    const notifId = 'NOTIF_' + Date.now() + Math.random().toString(36).substring(2, 6);
+    const title = status === 'verified' ? '🎉 Farm Verified by KrishiSetu' : '⚠️ Seller Verification Update';
+    const msg = status === 'verified' 
+      ? 'Congratulations! Your farm verification has been approved. Verified Farmer badge is now active on your listings.'
+      : `Your seller verification was rejected. Reason: ${reason || 'Document verification could not be completed. Please re-submit valid credentials.'}`;
+
+    await db.query(
+      `INSERT INTO notifications (id, user_id, type, title, message, read)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [notifId, sellerId, 'verification_update', title, msg, false]
+    ).catch(() => {});
+
+    res.json({
+      message: `Seller '${sellerId}' verification status updated to '${status}'.`,
+      sellerId,
+      status,
+      reason: reason || null
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET DETAILED CUSTOMERS LIST (ADMIN)
 router.get('/customers', async (req, res, next) => {
   try {

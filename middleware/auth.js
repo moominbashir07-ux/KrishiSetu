@@ -56,7 +56,7 @@ function requireRole(role) {
         });
       }
       return res.status(403).json({ 
-        error: `Access denied. Requires '${role}' role, but user is '${req.user.role}'.` 
+        error: `Forbidden: Access denied. Requires '${role}' role, but user is '${req.user.role}'.` 
       });
     }
 
@@ -108,10 +108,15 @@ async function requireProductOwnership(req, res, next) {
   }
 }
 
+function generateToken(payload, expiresIn = '7d') {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn });
+}
+
 module.exports = {
   authenticateUser,
   requireRole,
   requireAnyRole,
   requireProductOwnership,
+  generateToken,
   JWT_SECRET
 };

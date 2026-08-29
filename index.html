@@ -1056,6 +1056,73 @@
             <div class="p-4 text-center text-slate-500">Checking system components health...</div>
           </div>
         </div>
+
+        <!-- TAB 17: PLATFORM SETTINGS -->
+        <div id="adminTabContentSettings" class="space-y-6 hidden">
+          <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+            <div class="flex justify-between items-center mb-4">
+              <div>
+                <h4 class="font-bold text-white text-base flex items-center gap-2">
+                  <span>⚙️</span> Platform Governance & Operational Settings
+                </h4>
+                <p class="text-xs text-slate-400">Live operational controls, marketplace parameters, and security policies.</p>
+              </div>
+              <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/20 font-bold">Config Synced</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Marketplace Commission -->
+              <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700 space-y-3">
+                <h5 class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Fee Structure</h5>
+                <div class="flex justify-between items-center py-2 border-b border-slate-700">
+                  <span class="text-xs text-slate-300">Standard Retail Fee Rate</span>
+                  <b class="text-white text-xs font-mono">2.0%</b>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-slate-700">
+                  <span class="text-xs text-slate-300">Bulk Order Rate (≥₹5,000 / 100kg)</span>
+                  <b class="text-white text-xs font-mono">0.5%</b>
+                </div>
+                <p class="text-[10px] text-slate-400">Platform fee is automatically deducted from gross merchandise value on orders.</p>
+              </div>
+
+              <!-- Integration Settings -->
+              <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700 space-y-3">
+                <h5 class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Mandi & OTP Providers</h5>
+                <div class="flex justify-between items-center py-2 border-b border-slate-700">
+                  <span class="text-xs text-slate-300">Price Intelligence API</span>
+                  <b class="text-emerald-400 text-xs">AGMARKNET (Live)</b>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-slate-700">
+                  <span class="text-xs text-slate-300">Snapshot Cache TTL</span>
+                  <b class="text-white text-xs font-mono">30 Minutes</b>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-slate-700">
+                  <span class="text-xs text-slate-300">Email OTP Dispatcher</span>
+                  <b class="text-blue-400 text-xs">EmailJS Service</b>
+                </div>
+              </div>
+
+              <!-- Security Policy -->
+              <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700 space-y-3 md:col-span-2">
+                <h5 class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Security & Defense Controls</h5>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div class="p-3 bg-slate-900 rounded-lg border border-slate-700/60">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">Rate Limiting</span>
+                    <b class="text-emerald-400 text-xs">300/15m (API) · 30/15m (Auth)</b>
+                  </div>
+                  <div class="p-3 bg-slate-900 rounded-lg border border-slate-700/60">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">IDOR & Isolation</span>
+                    <b class="text-emerald-400 text-xs">Server-Side Verified</b>
+                  </div>
+                  <div class="p-3 bg-slate-900 rounded-lg border border-slate-700/60">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">Database Inspector</span>
+                    <b class="text-emerald-400 text-xs">Whitelisted & Masked</b>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   </section>
@@ -1102,6 +1169,36 @@
       <div class="flex justify-end gap-2">
         <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold text-soil-brown border border-border-subtle hover:bg-input-bg" onclick="$('adminEmergencyOverrideModal').classList.add('hidden')">Cancel</button>
         <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-error text-white hover:bg-error/90" onclick="submitEmergencyAdminOverride()">Execute Override</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SELLER VERIFICATION REVIEW MODAL (ADMIN ONLY) -->
+  <div id="adminSellerVerifModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative">
+      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" onclick="$('adminSellerVerifModal').classList.add('hidden')" type="button">✕</button>
+      <h3 class="text-lg font-bold text-primary mb-1">Review Seller Verification</h3>
+      <p class="text-xs text-soil-brown mb-4">Review credentials and approve or reject verified farmer status.</p>
+      
+      <input type="hidden" id="verifModalSellerId" value="">
+
+      <div class="p-3 bg-input-bg rounded-xl text-xs space-y-1 mb-4">
+        <div><b class="text-primary">Farm/Business:</b> <span id="verifModalBusinessName" class="text-soil-brown">-</span></div>
+        <div><b class="text-primary">Contact:</b> <span id="verifModalContact" class="text-soil-brown">-</span></div>
+      </div>
+
+      <label class="text-xs font-bold text-soil-brown block mb-1">Verification Decision</label>
+      <select id="verifDecisionSelect" class="w-full p-2.5 border border-border-subtle rounded-xl text-xs bg-input-bg font-bold text-primary mb-3">
+        <option value="verified">✅ Approve (Verified Farmer Badge)</option>
+        <option value="rejected">❌ Reject (Invalid Documents)</option>
+      </select>
+
+      <label class="text-xs font-bold text-soil-brown block mb-1">Audit Reason (Mandatory if Rejecting)</label>
+      <textarea id="verifReasonTextarea" rows="3" placeholder="Provide notes or specific rejection reasons for the farmer..." class="w-full p-3 border border-border-subtle rounded-xl text-xs bg-input-bg mb-4 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
+
+      <div class="flex justify-end gap-2">
+        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold text-soil-brown border border-border-subtle hover:bg-input-bg" onclick="$('adminSellerVerifModal').classList.add('hidden')">Cancel</button>
+        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-primary text-white hover:bg-primary-container" onclick="submitSellerVerificationDecision()">Confirm Decision</button>
       </div>
     </div>
   </div>
@@ -1323,7 +1420,18 @@ let currentProductImageBase64 = null;
 
 const $ = (id) => document.getElementById(id);
 
-// AgriCore Top Notification Component
+// Comprehensive HTML entity encoder for XSS mitigation across all dynamic rendering
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// AgriCore Top Notification Component (Sanitized)
 function notify(msg, type = 'info') {
   const container = $('topNotificationContainer');
   if (!container) return;
@@ -1332,10 +1440,11 @@ function notify(msg, type = 'info') {
   notif.className = `agri-notification ${type}`;
   
   const icon = type === 'error' ? '⚠' : type === 'success' ? '✓' : 'ℹ';
+  const cleanMsg = escapeHtml(msg);
   notif.innerHTML = `
     <div class="flex items-center gap-2 text-sm font-semibold">
       <span>${icon}</span>
-      <span>${msg}</span>
+      <span>${cleanMsg}</span>
     </div>
     <button onclick="this.parentElement.remove()" class="text-soil-brown font-bold text-xs hover:text-primary">✕</button>
   `;
@@ -1538,9 +1647,9 @@ function onUserSignedIn(user) {
     else badge.textContent = '🛒 Buyer';
   }
 
-  $('profileNavBtn').classList.remove('hidden');
-  $('sellNavBtn').style.display = currentRole === 'seller' ? 'inline-block' : 'none';
-  $('adminNavBtn').style.display = currentRole === 'admin' ? 'inline-block' : 'none';
+  if ($('profileNavBtn')) $('profileNavBtn').classList.remove('hidden');
+  if ($('sellNavBtn')) $('sellNavBtn').style.display = currentRole === 'seller' ? 'inline-block' : 'none';
+  if ($('adminNavBtn')) $('adminNavBtn').style.display = currentRole === 'admin' ? 'inline-block' : 'none';
   
   if ($('mobileSellBtn')) $('mobileSellBtn').classList.toggle('hidden', currentRole !== 'seller');
   if ($('mobileAdminBtn')) $('mobileAdminBtn').classList.toggle('hidden', currentRole !== 'admin');
@@ -1563,16 +1672,18 @@ function onUserSignedIn(user) {
 
 function logoutUser() {
   AuthService.logout();
-  $('authHeaderBtn').textContent = 'Login';
-  $('authHeaderBtn').onclick = openAuthModal;
+  if ($('authHeaderBtn')) {
+    $('authHeaderBtn').textContent = 'Login';
+    $('authHeaderBtn').onclick = openAuthModal;
+  }
   const badge = $('userRoleBadge');
   if (badge) badge.classList.add('hidden');
-  $('profileNavBtn').classList.add('hidden');
+  if ($('profileNavBtn')) $('profileNavBtn').classList.add('hidden');
   if ($('notifBtn')) $('notifBtn').classList.add('hidden');
   currentRole = 'customer';
   currentUserId = null;
-  $('sellNavBtn').style.display = 'none';
-  $('adminNavBtn').style.display = 'none';
+  if ($('sellNavBtn')) $('sellNavBtn').style.display = 'none';
+  if ($('adminNavBtn')) $('adminNavBtn').style.display = 'none';
   if ($('mobileSellBtn')) $('mobileSellBtn').classList.add('hidden');
   if ($('mobileAdminBtn')) $('mobileAdminBtn').classList.add('hidden');
   notify('Signed out successfully.', 'info');
@@ -1866,6 +1977,11 @@ async function addToCart(productId, btnElem) {
 }
 
 async function updateCartBadge() {
+  if (currentRole !== 'customer') {
+    const badge = $('cartCountBadge');
+    if (badge) badge.textContent = '0';
+    return;
+  }
   try {
     const res = await CartService.getCart();
     const items = res.items || [];
@@ -2728,7 +2844,26 @@ function renderMandiUI(rawRecords, commodity, state, district = '', customMessag
   drawCompareChart(validRecords);
 }
 
+let currentChartMetric = 'modal_price';
+let currentMandiChartRecords = [];
+
+function setChartMetric(metric) {
+  currentChartMetric = metric;
+  const btns = document.querySelectorAll("button[onclick^='setChartMetric']");
+  btns.forEach(b => {
+    if (b.getAttribute('onclick').includes(metric)) {
+      b.className = 'px-3 py-1 text-xs font-bold bg-primary text-white rounded-lg shadow-sm';
+    } else {
+      b.className = 'px-3 py-1 text-xs font-bold bg-input-bg text-soil-brown hover:bg-slate-200 rounded-lg';
+    }
+  });
+  if (currentMandiChartRecords && currentMandiChartRecords.length) {
+    drawMandiChart(currentMandiChartRecords);
+  }
+}
+
 function drawMandiChart(records) {
+  currentMandiChartRecords = records || [];
   const c = $('mandiChart');
   if (!c) return;
   const ctx = c.getContext('2d');
@@ -2960,7 +3095,7 @@ function switchAdminTab(tab, updateHash = true) {
   const tabs = [
     'analytics', 'users', 'sellers', 'customers', 'products', 
     'orders', 'payments', 'live', 'loginHistory', 'feedback', 
-    'reviews', 'audit', 'finance', 'database', 'health', 'settings'
+    'reviews', 'audit', 'finance', 'mandi', 'database', 'health', 'settings'
   ];
   
   tabs.forEach(t => {
@@ -2994,8 +3129,10 @@ function switchAdminTab(tab, updateHash = true) {
   if (tab === 'reviews') loadAdminReviews();
   if (tab === 'audit') loadAdminAuditLogs();
   if (tab === 'finance') loadAdminExpenses();
+  if (tab === 'mandi') loadAdminMandiHealth();
   if (tab === 'database') loadAdminDatabaseTables();
   if (tab === 'health') loadAdminSystemHealth();
+  if (tab === 'settings') loadAdminSettings();
 }
 
 async function loadAdminDashboard() {
@@ -3163,24 +3300,25 @@ async function loadAdminUsers() {
       <tr class="border-b border-border-subtle hover:bg-surface">
         <td class="py-2.5 font-bold text-primary flex items-center gap-2">
           ${getSellerAvatarHtml(u.name, u.profile_photo, 'w-6 h-6')}
-          <span>${u.name}</span>
+          <button type="button" class="font-bold text-primary hover:underline text-left cursor-pointer" onclick="openAdminUserProfileDrawer('${escapeHtml(u.id)}')">${escapeHtml(u.name)}</button>
         </td>
-        <td class="py-2.5 text-soil-brown">${u.contact}</td>
-        <td class="py-2.5 uppercase font-semibold text-soil-brown text-[10px]">${u.role}</td>
+        <td class="py-2.5 text-soil-brown">${escapeHtml(u.contact)}</td>
+        <td class="py-2.5 uppercase font-semibold text-soil-brown text-[10px]">${escapeHtml(u.role)}</td>
         <td class="py-2.5">
-          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${u.account_status === 'active' ? 'bg-surface text-success-emerald border border-success-emerald/20' : 'bg-error-container text-error'}">${u.account_status || 'active'}</span>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${u.account_status === 'active' ? 'bg-surface text-success-emerald border border-success-emerald/20' : 'bg-error-container text-error'}">${escapeHtml(u.account_status || 'active')}</span>
         </td>
         <td class="py-2.5 flex items-center gap-1.5">
           ${u.account_status === 'active'
-            ? `<button class="bg-error-container text-error px-2.5 py-1 rounded text-[10px] font-bold hover:bg-error/20" onclick="promptAccountAction('${u.id}', 'frozen')" type="button">Freeze</button>
-               <button class="bg-harvest-gold/20 text-harvest-gold px-2.5 py-1 rounded text-[10px] font-bold hover:bg-harvest-gold/30" onclick="promptAccountAction('${u.id}', 'suspended')" type="button">Suspend</button>`
-            : `<button class="bg-surface text-success-emerald border border-success-emerald/20 px-2.5 py-1 rounded text-[10px] font-bold hover:bg-success-emerald hover:text-white" onclick="promptAccountAction('${u.id}', 'active')" type="button">Reactivate</button>`
+            ? `<button class="bg-error-container text-error px-2.5 py-1 rounded text-[10px] font-bold hover:bg-error/20" onclick="promptAccountAction('${escapeHtml(u.id)}', 'frozen')" type="button">Freeze</button>
+               <button class="bg-harvest-gold/20 text-harvest-gold px-2.5 py-1 rounded text-[10px] font-bold hover:bg-harvest-gold/30" onclick="promptAccountAction('${escapeHtml(u.id)}', 'suspended')" type="button">Suspend</button>`
+            : `<button class="bg-surface text-success-emerald border border-success-emerald/20 px-2.5 py-1 rounded text-[10px] font-bold hover:bg-success-emerald hover:text-white" onclick="promptAccountAction('${escapeHtml(u.id)}', 'active')" type="button">Reactivate</button>`
           }
+          <button class="bg-slate-700 text-slate-200 hover:bg-slate-600 px-2 py-1 rounded text-[10px] font-bold" onclick="openAdminUserProfileDrawer('${escapeHtml(u.id)}')" type="button">Profile</button>
         </td>
       </tr>
     `).join('') : '<tr><td colspan="5" class="py-4 text-center text-soil-brown">No user accounts found.</td></tr>';
   } catch (err) {
-    rowsEl.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-error">${err.message}</td></tr>`;
+    rowsEl.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-error">${escapeHtml(err.message)}</td></tr>`;
   }
 }
 
@@ -3230,21 +3368,22 @@ async function loadAdminSellers() {
 
     rowsEl.innerHTML = sellers.length ? sellers.map(s => `
       <tr class="border-b border-border-subtle hover:bg-surface">
-        <td class="py-2.5 font-bold text-primary">${s.businessName || s.name}</td>
-        <td class="py-2.5 text-soil-brown">${s.contact}</td>
-        <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${s.verificationStatus === 'verified' ? 'bg-surface text-success-emerald border border-success-emerald/20' : 'bg-harvest-gold/20 text-harvest-gold'}">${s.verificationStatus}</span></td>
+        <td class="py-2.5 font-bold text-primary">${escapeHtml(s.businessName || s.name)}</td>
+        <td class="py-2.5 text-soil-brown">${escapeHtml(s.contact)}</td>
+        <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${s.verificationStatus === 'verified' ? 'bg-surface text-success-emerald border border-success-emerald/20' : 'bg-harvest-gold/20 text-harvest-gold'}">${escapeHtml(s.verificationStatus)}</span></td>
         <td class="py-2.5 font-semibold text-soil-brown">${s.productsCount}</td>
-        <td class="py-2.5 font-bold text-primary">₹${s.totalSales.toLocaleString()}</td>
+        <td class="py-2.5 font-bold text-primary">₹${(s.totalSales || 0).toLocaleString()}</td>
         <td class="py-2.5 font-semibold text-success-emerald">₹${(s.platformFees || 0).toLocaleString()}</td>
         <td class="py-2.5 font-bold text-harvest-gold">⭐ ${s.rating}</td>
-        <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${s.accountStatus === 'active' ? 'bg-surface text-success-emerald' : 'bg-error-container text-error'}">${s.accountStatus}</span></td>
-        <td class="py-2.5">
-          <button class="bg-surface text-primary border border-primary/20 px-2 py-1 rounded text-[10px] font-bold hover:bg-primary hover:text-white" onclick="promptAccountAction('${s.id}', '${s.accountStatus === 'active' ? 'suspended' : 'active'}')">${s.accountStatus === 'active' ? 'Suspend' : 'Reactivate'}</button>
+        <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${s.accountStatus === 'active' ? 'bg-surface text-success-emerald' : 'bg-error-container text-error'}">${escapeHtml(s.accountStatus)}</span></td>
+        <td class="py-2.5 flex items-center gap-1.5">
+          <button class="bg-surface text-primary border border-primary/20 px-2 py-1 rounded text-[10px] font-bold hover:bg-primary hover:text-white" onclick="promptAccountAction('${escapeHtml(s.id)}', '${s.accountStatus === 'active' ? 'suspended' : 'active'}')">${s.accountStatus === 'active' ? 'Suspend' : 'Reactivate'}</button>
+          <button class="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1 rounded text-[10px] font-bold" onclick="reviewSellerVerification('${escapeHtml(s.id)}', '${escapeHtml(s.businessName || s.name)}', '${escapeHtml(s.contact)}')">Review</button>
         </td>
       </tr>
     `).join('') : '<tr><td colspan="9" class="py-4 text-center text-soil-brown">No registered sellers.</td></tr>';
   } catch (err) {
-    rowsEl.innerHTML = `<tr><td colspan="9" class="py-4 text-center text-error">${err.message}</td></tr>`;
+    rowsEl.innerHTML = `<tr><td colspan="9" class="py-4 text-center text-error">${escapeHtml(err.message)}</td></tr>`;
   }
 }
 
@@ -3260,14 +3399,14 @@ async function loadAdminCustomers() {
 
     rowsEl.innerHTML = customers.length ? customers.map(c => `
       <tr class="border-b border-border-subtle hover:bg-surface">
-        <td class="py-2.5 font-bold text-primary">${c.name}</td>
-        <td class="py-2.5 text-soil-brown">${c.contact}</td>
-        <td class="py-2.5 text-soil-brown">${c.city ? `${c.city}, ${c.state}` : 'Not provided'}</td>
+        <td class="py-2.5 font-bold text-primary">${escapeHtml(c.name)}</td>
+        <td class="py-2.5 text-soil-brown">${escapeHtml(c.contact)}</td>
+        <td class="py-2.5 text-soil-brown">${escapeHtml(c.city ? `${c.city}, ${c.state}` : 'Not provided')}</td>
         <td class="py-2.5 font-semibold text-soil-brown">${c.ordersCount}</td>
-        <td class="py-2.5 font-bold text-primary">₹${c.totalSpending.toLocaleString()}</td>
-        <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.accountStatus === 'active' ? 'bg-surface text-success-emerald' : 'bg-error-container text-error'}">${c.accountStatus}</span></td>
+        <td class="py-2.5 font-bold text-primary">₹${(c.totalSpending || 0).toLocaleString()}</td>
+        <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.accountStatus === 'active' ? 'bg-surface text-success-emerald' : 'bg-error-container text-error'}">${escapeHtml(c.accountStatus)}</span></td>
         <td class="py-2.5">
-          <button class="bg-surface text-primary border border-primary/20 px-2 py-1 rounded text-[10px] font-bold hover:bg-primary hover:text-white" onclick="promptAccountAction('${c.id}', '${c.accountStatus === 'active' ? 'frozen' : 'active'}')">${c.accountStatus === 'active' ? 'Freeze' : 'Unfreeze'}</button>
+          <button class="bg-surface text-primary border border-primary/20 px-2 py-1 rounded text-[10px] font-bold hover:bg-primary hover:text-white" onclick="promptAccountAction('${escapeHtml(c.id)}', '${c.accountStatus === 'active' ? 'frozen' : 'active'}')">${c.accountStatus === 'active' ? 'Freeze' : 'Unfreeze'}</button>
         </td>
       </tr>
     `).join('') : '<tr><td colspan="7" class="py-4 text-center text-soil-brown">No registered customers.</td></tr>';
@@ -3428,21 +3567,21 @@ async function loadAdminProducts() {
 
     rowsEl.innerHTML = products.length ? products.map(p => `
       <tr class="border-b border-border-subtle hover:bg-surface">
-        <td class="py-2.5 font-bold text-primary">${p.name}</td>
-        <td class="py-2.5 text-soil-brown">${p.sellerName || p.seller_id}</td>
-        <td class="py-2.5 font-semibold text-on-surface">₹${p.price} / kg</td>
-        <td class="py-2.5 text-soil-brown">${p.quantity} kg</td>
-        <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${p.status === 'active' ? 'bg-surface text-success-emerald' : 'bg-input-bg text-soil-brown'}">${p.status}</span></td>
+        <td class="py-2.5 font-bold text-primary">${escapeHtml(p.name)}</td>
+        <td class="py-2.5 text-soil-brown">${escapeHtml(p.sellerName || p.seller_id)}</td>
+        <td class="py-2.5 font-semibold text-on-surface">₹${Number(p.price || 0).toFixed(2)} / kg</td>
+        <td class="py-2.5 text-soil-brown">${escapeHtml(p.quantity)} kg</td>
+        <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${p.status === 'active' ? 'bg-surface text-success-emerald' : 'bg-input-bg text-soil-brown'}">${escapeHtml(p.status)}</span></td>
         <td class="py-2.5">
           ${p.status === 'active' 
-            ? `<button class="bg-error-container text-error px-2.5 py-1 rounded text-[10px] font-bold hover:bg-error/20" onclick="removeAdminProduct('${p.id}')" type="button">Deactivate</button>`
+            ? `<button class="bg-error-container text-error px-2.5 py-1 rounded text-[10px] font-bold hover:bg-error/20" onclick="removeAdminProduct('${escapeHtml(p.id)}')" type="button">Deactivate</button>`
             : `<span class="text-[10px] text-soil-brown">Deactivated</span>`
           }
         </td>
       </tr>
     `).join('') : '<tr><td colspan="6" class="py-4 text-center text-soil-brown">No products found.</td></tr>';
   } catch (err) {
-    rowsEl.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-error">${err.message}</td></tr>`;
+    rowsEl.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-error">${escapeHtml(err.message)}</td></tr>`;
   }
 }
 
@@ -3473,22 +3612,22 @@ async function loadAdminOrders() {
 
     rowsEl.innerHTML = orders.length ? orders.map(o => `
       <tr class="border-b border-border-subtle hover:bg-surface">
-        <td class="py-2.5 font-bold text-primary">#${o.order_number || o.id}</td>
-        <td class="py-2.5 text-soil-brown">${o.customerName || o.customer_id}</td>
-        <td class="py-2.5 text-soil-brown font-semibold">${o.sellerName || o.seller_id}</td>
+        <td class="py-2.5 font-bold text-primary">#${escapeHtml(o.order_number || o.id)}</td>
+        <td class="py-2.5 text-soil-brown">${escapeHtml(o.customerName || o.customer_id)}</td>
+        <td class="py-2.5 text-soil-brown font-semibold">${escapeHtml(o.sellerName || o.seller_id)}</td>
         <td class="py-2.5 font-bold text-primary">₹${(o.total_amount || 0).toLocaleString()}</td>
         <td class="py-2.5 font-semibold text-success-emerald">₹${(o.platform_fee || 0).toLocaleString()}</td>
-        <td class="py-2.5 font-semibold text-soil-brown uppercase text-[10px]">${o.payment_method || 'cod'} (${o.payment_status || 'pending'})</td>
+        <td class="py-2.5 font-semibold text-soil-brown uppercase text-[10px]">${escapeHtml(o.payment_method || 'cod')} (${escapeHtml(o.payment_status || 'pending')})</td>
         <td class="py-2.5">
-          <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-surface text-success-emerald border border-success-emerald/20">${o.status}</span>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-surface text-success-emerald border border-success-emerald/20">${escapeHtml(o.status)}</span>
         </td>
         <td class="py-2.5">
-          <button class="bg-error-container text-error px-2 py-1 rounded text-[10px] font-bold hover:bg-error/20" onclick="openEmergencyAdminOverrideModal('${o.id}')" type="button">🚨 Emergency Override</button>
+          <button class="bg-error-container text-error px-2 py-1 rounded text-[10px] font-bold hover:bg-error/20" onclick="openEmergencyAdminOverrideModal('${escapeHtml(o.id)}')" type="button">🚨 Emergency Override</button>
         </td>
       </tr>
     `).join('') : '<tr><td colspan="8" class="py-4 text-center text-soil-brown">No orders found.</td></tr>';
   } catch (err) {
-    rowsEl.innerHTML = `<tr><td colspan="8" class="py-4 text-center text-error">${err.message}</td></tr>`;
+    rowsEl.innerHTML = `<tr><td colspan="8" class="py-4 text-center text-error">${escapeHtml(err.message)}</td></tr>`;
   }
 }
 
@@ -3828,14 +3967,59 @@ async function openAdminUserProfileDrawer(userId) {
       </div>
 
       <div class="pt-4 border-t border-slate-800 flex gap-2">
-        <button class="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded-xl text-xs" onclick="$('adminUserProfileDrawer').classList.add('hidden'); openAdminReasonModal('${u.id}', 'frozen');">Freeze Account</button>
-        <button class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2 rounded-xl text-xs" onclick="$('adminUserProfileDrawer').classList.add('hidden'); openAdminReasonModal('${u.id}', 'suspended');">Suspend Account</button>
-        <button class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs" onclick="$('adminUserProfileDrawer').classList.add('hidden'); openAdminReasonModal('${u.id}', 'active');">Reactivate</button>
+        <button class="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded-xl text-xs" onclick="$('adminUserProfileDrawer').classList.add('hidden'); promptAccountAction('${escapeHtml(u.id)}', 'frozen');">Freeze Account</button>
+        <button class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2 rounded-xl text-xs" onclick="$('adminUserProfileDrawer').classList.add('hidden'); promptAccountAction('${escapeHtml(u.id)}', 'suspended');">Suspend Account</button>
+        <button class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs" onclick="$('adminUserProfileDrawer').classList.add('hidden'); promptAccountAction('${escapeHtml(u.id)}', 'active');">Reactivate</button>
       </div>
     `;
   } catch (err) {
-    content.innerHTML = `<div class="p-4 text-center text-rose-400">Error loading profile: ${err.message}</div>`;
+    content.innerHTML = `<div class="p-4 text-center text-rose-400">Error loading profile: ${escapeHtml(err.message)}</div>`;
   }
+}
+
+function reviewSellerVerification(sellerId, businessName, contact) {
+  $('verifModalSellerId').value = sellerId;
+  $('verifModalBusinessName').textContent = businessName || 'Farmer';
+  $('verifModalContact').textContent = contact || 'N/A';
+  $('verifReasonTextarea').value = '';
+  $('adminSellerVerifModal').classList.remove('hidden');
+}
+
+async function submitSellerVerificationDecision() {
+  const sellerId = $('verifModalSellerId').value;
+  const decision = $('verifDecisionSelect').value;
+  const reason = $('verifReasonTextarea').value.trim();
+
+  if (decision === 'rejected' && (!reason || reason.length < 5)) {
+    notify('A reason (minimum 5 characters) is required when rejecting verification.', 'error');
+    return;
+  }
+
+  const token = AuthService.getToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch(`/api/admin/sellers/${sellerId}/verification`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: decision, reason })
+    }).then(r => r.json());
+
+    if (res.error) throw new Error(res.error);
+
+    notify(`Seller verification updated to '${decision}' successfully.`, 'success');
+    $('adminSellerVerifModal').classList.add('hidden');
+    loadAdminSellers();
+  } catch (err) {
+    notify('Failed to update verification: ' + err.message, 'error');
+  }
+}
+
+function loadAdminSettings() {
+  // Static configuration view is rendered in adminTabContentSettings
 }
 
 async function executeAdminGlobalSearch() {
@@ -3901,7 +4085,7 @@ async function handleUrlHashRouting() {
   const validTabs = [
     'analytics', 'users', 'sellers', 'customers', 'products', 
     'orders', 'payments', 'live', 'loginHistory', 'feedback', 
-    'reviews', 'audit', 'finance', 'database', 'health', 'settings'
+    'reviews', 'audit', 'finance', 'mandi', 'database', 'health', 'settings'
   ];
   const isHashAdmin = rawHash === 'admin' || validTabs.includes(rawHash);
 

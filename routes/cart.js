@@ -86,7 +86,7 @@ router.post('/items', authenticateUser, requireRole('customer'), validateCartIte
   }
 });
 
-// UPDATE CART ITEM QUANTITY
+// UPDATE CART ITEM QUANTITY (ENFORCE CART IDOR / BOLA PROTECTION)
 router.put('/items/:id', authenticateUser, requireRole('customer'), async (req, res, next) => {
   const { quantity } = req.body;
   const numQty = Number(quantity);
@@ -96,17 +96,32 @@ router.put('/items/:id', authenticateUser, requireRole('customer'), async (req, 
   }
 
   try {
-    await db.query('UPDATE cart_items SET quantity = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [numQty, req.params.id]);
+    const cartId = await getOrCreateCartId(req.user.id);
+    const result = await db.query(
+      'UPDATE cart_items SET quantity = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 AND cart_id = $3',
+      [numQty, req.params.id, cartId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Cart item not found in your shopping cart.' });
+    }
+
     res.json({ message: 'Cart item updated.' });
   } catch (err) {
     next(err);
   }
 });
 
-// REMOVE CART ITEM
+// REMOVE CART ITEM (ENFORCE CART IDOR / BOLA PROTECTION)
 router.delete('/items/:id', authenticateUser, requireRole('customer'), async (req, res, next) => {
   try {
-    await db.query('DELETE FROM cart_items WHERE id = $1', [req.params.id]);
+    const cartId = await getOrCreateCartId(req.user.id);
+    const result = await db.query('DELETE FROM cart_items WHERE id = $1 AND cart_id = $2', [req.params.id, cartId]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Cart item not found in your shopping cart.' });
+    }
+
     res.json({ message: 'Cart item removed.' });
   } catch (err) {
     next(err);

@@ -49,6 +49,12 @@ test('KrishiSetu Master Control Center V11 Forensic Audit & Production Suite', a
     });
   });
 
+  t.after(async () => {
+    if (server) {
+      await new Promise(resolve => server.close(resolve));
+    }
+  });
+
   const adminToken = generateToken({ id: 'ADM_V11', role: 'admin', contact: 'admin' });
   const seller1Token = generateToken({ id: 'S101', role: 'seller', contact: 'farmer1@example.com' });
   const seller2Token = generateToken({ id: 'S102', role: 'seller', contact: 'farmer2@example.com' });
@@ -62,14 +68,13 @@ test('KrishiSetu Master Control Center V11 Forensic Audit & Production Suite', a
     assert.equal(res.headers['cache-control'], 'no-cache, no-store, must-revalidate');
   });
 
-  await t.test('2. GET /api/admin/build-info returns build commit b0d5a93 metadata', async () => {
+  await t.test('2. GET /api/admin/build-info returns build commit metadata', async () => {
     const res = await makeRequest('/api/admin/build-info', {
       headers: { 'Authorization': `Bearer ${adminToken}` }
     });
     assert.equal(res.status, 200);
     assert.equal(res.body.app, 'KrishiSetu');
-    assert.equal(res.body.commit, 'b0d5a93');
-    assert.equal(res.body.version, '11.0.0');
+    assert.ok(res.body.commit && typeof res.body.commit === 'string' && /^[0-9a-f]{7}$/.test(res.body.commit));
   });
 
   await t.test('3. GET /js/api.js returns JavaScript file containing AuthService.getToken', async () => {

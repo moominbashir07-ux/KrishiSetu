@@ -20,17 +20,28 @@ const otpLimiter = rateLimit({
   message: { error: 'Too many OTP attempts from this IP, please try again after 15 minutes.' }
 });
 
+// Dedicated rate limiter for login/auth endpoints to protect against credential brute-forcing
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // limit each IP to 30 authentication attempts per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many authentication attempts from this IP. Please try again after 15 minutes.' }
+});
+
 // Configure standard security headers
 const securityHeaders = helmet({
-  contentSecurityPolicy: false, // allow inline scripts for static frontend PoC compatibility
-  crossOriginEmbedderPolicy: false
+  contentSecurityPolicy: false, // PoC compatibility with inline script application
+  crossOriginEmbedderPolicy: false,
+  frameguard: { action: 'sameorigin' }
 });
 
 // Configure CORS
 const corsOptions = cors({
-  origin: '*', // can be restricted to specific domain in production
+  origin: true,
+  credentials: false,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token']
 });
 
 // Global centralized error handler
@@ -54,6 +65,7 @@ function errorHandler(err, req, res, next) {
 module.exports = {
   apiLimiter,
   otpLimiter,
+  authLimiter,
   securityHeaders,
   corsOptions,
   errorHandler
