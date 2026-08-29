@@ -967,6 +967,14 @@ async function initDb() {
       const client = await pool.connect();
       const schemaSql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
       await client.query(schemaSql);
+      await client.query(`
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS platform_fee NUMERIC(10,2) DEFAULT 0;
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS buyer_contact VARCHAR(255);
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) DEFAULT 'cod';
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status VARCHAR(50) DEFAULT 'pending';
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_id VARCHAR(100);
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS step INTEGER DEFAULT 1;
+      `).catch(e => console.warn('Schema migration warning:', e.message));
       client.release();
       isPgConnected = true;
       console.log('Successfully connected to PostgreSQL production database.');
