@@ -240,27 +240,6 @@ router.post('/', authenticateUser, requireRole('customer'), async (req, res, nex
         });
       }
 
-      if (delivery_address || delivery_pincode) {
-        try {
-          await client.query(
-            `INSERT INTO customer_profiles (user_id, address, city, state, pincode)
-             VALUES ($1, $2, $3, $4, $5)
-             ON CONFLICT (user_id) DO UPDATE
-             SET address = COALESCE(EXCLUDED.address, customer_profiles.address),
-                 city = COALESCE(EXCLUDED.city, customer_profiles.city),
-                 state = COALESCE(EXCLUDED.state, customer_profiles.state),
-                 pincode = COALESCE(EXCLUDED.pincode, customer_profiles.pincode)`,
-            [customerId, delivery_address || '', delivery_city || '', delivery_state || '', delivery_pincode || '']
-          );
-        } catch (profErr) {}
-      }
-
-      if (customer_phone) {
-        try {
-          await client.query('UPDATE users SET phone = $1 WHERE id = $2', [customer_phone, customerId]);
-        } catch (phoneErr) {}
-      }
-
       if (!productId) {
         const cartRes = await client.query('SELECT id FROM carts WHERE customer_id = $1', [customerId]);
         if (cartRes.rows.length) {
@@ -275,6 +254,24 @@ router.post('/', authenticateUser, requireRole('customer'), async (req, res, nex
       message: 'Order placed successfully.',
       orders: createdOrders
     });
+
+    // Asynchronously sync customer profile and contact phone outside transaction block
+    if (delivery_address || delivery_pincode) {
+      db.query(
+        `INSERT INTO customer_profiles (id, user_id, address, city, state, pincode)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         ON CONFLICT (user_id) DO UPDATE
+         SET address = COALESCE(EXCLUDED.address, customer_profiles.address),
+             city = COALESCE(EXCLUDED.city, customer_profiles.city),
+             state = COALESCE(EXCLUDED.state, customer_profiles.state),
+             pincode = COALESCE(EXCLUDED.pincode, customer_profiles.pincode)`,
+        ['CP_' + customerId, customerId, delivery_address || '', delivery_city || '', delivery_state || '', delivery_pincode || '']
+      ).catch(() => {});
+    }
+
+    if (customer_phone) {
+      db.query('UPDATE users SET phone = $1 WHERE id = $2', [customer_phone, customerId]).catch(() => {});
+    }
   } catch (err) {
     next(err);
   }
@@ -303,7 +300,7 @@ router.get('/', authenticateUser, async (req, res, next) => {
       queryText = `
         SELECT ${fields}
         FROM orders o
-        JOIN users su ON o.seller_id = su.id
+        LEFT JOIN users su ON o.seller_id = su.id
         LEFT JOIN seller_profiles sp ON o.seller_id = sp.user_id
         LEFT JOIN users cu ON o.customer_id = cu.id
         LEFT JOIN customer_profiles cp ON o.customer_id = cp.user_id
@@ -314,7 +311,7 @@ router.get('/', authenticateUser, async (req, res, next) => {
       queryText = `
         SELECT ${fields}
         FROM orders o
-        JOIN users su ON o.seller_id = su.id
+        LEFT JOIN users su ON o.seller_id = su.id
         LEFT JOIN seller_profiles sp ON o.seller_id = sp.user_id
         LEFT JOIN users cu ON o.customer_id = cu.id
         LEFT JOIN customer_profiles cp ON o.customer_id = cp.user_id
@@ -326,7 +323,7 @@ router.get('/', authenticateUser, async (req, res, next) => {
       queryText = `
         SELECT ${fields}
         FROM orders o
-        JOIN users su ON o.seller_id = su.id
+        LEFT JOIN users su ON o.seller_id = su.id
         LEFT JOIN seller_profiles sp ON o.seller_id = sp.user_id
         LEFT JOIN users cu ON o.customer_id = cu.id
         LEFT JOIN customer_profiles cp ON o.customer_id = cp.user_id

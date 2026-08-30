@@ -993,6 +993,7 @@ async function initDb() {
       const schemaSql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
       await client.query(schemaSql);
       await client.query(`
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(50);
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS platform_fee NUMERIC(10,2) DEFAULT 0;
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS buyer_contact VARCHAR(255);
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) DEFAULT 'cod';
