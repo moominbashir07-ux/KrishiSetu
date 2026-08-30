@@ -259,4 +259,44 @@ test('KrishiSetu E2E Payment Proof, UPI Flow & Cash on Delivery Master Suite', a
     assert.strictEqual(resubmitRes.body.paymentStatus, 'submitted');
     assert.strictEqual(resubmitRes.body.transactionId, freshUtr2);
   });
+
+  await t.test('8. Indian Delivery Address checkout retains full coordinates for seller verification', async () => {
+    const addrPayload = {
+      productId: testProduct.id,
+      quantity: 1,
+      payment_method: 'cod',
+      payment_status: 'cod',
+      delivery_address: 'Flat 402, Shivam Heights, MG Road, Hadapsar, Pune, Maharashtra - 411028',
+      customer_name: 'Ananya Sharma',
+      customer_phone: '9876543210',
+      delivery_city: 'Pune',
+      delivery_state: 'Maharashtra',
+      delivery_pincode: '411028',
+      delivery_instructions: 'Deliver morning between 8-11 AM, call gate'
+    };
+
+    const res = await request('/api/orders', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${tokenCustA}` },
+      body: JSON.stringify(addrPayload)
+    });
+
+    assert.strictEqual(res.status, 201);
+    const createdOrder = res.body.orders[0];
+    assert.strictEqual(createdOrder.deliveryAddress, addrPayload.delivery_address);
+    assert.strictEqual(createdOrder.deliveryPincode, '411028');
+
+    // Seller fetches orders and sees customer coordinates
+    const sellerRes = await request('/api/orders', {
+      headers: { Authorization: `Bearer ${tokenSellerA}` }
+    });
+    assert.strictEqual(sellerRes.status, 200);
+    const found = sellerRes.body.orders.find(o => o.id === createdOrder.id || o.dbId === createdOrder.id);
+    assert.ok(found);
+    assert.strictEqual(found.deliveryAddress, addrPayload.delivery_address);
+    assert.strictEqual(found.deliveryPincode, '411028');
+    assert.strictEqual(found.deliveryCity, 'Pune');
+    assert.strictEqual(found.deliveryState, 'Maharashtra');
+    assert.strictEqual(found.deliveryInstructions, addrPayload.delivery_instructions);
+  });
 });

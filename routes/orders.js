@@ -34,7 +34,21 @@ const STATUS_TO_STEP = {
 
 // CREATE ORDER (DIRECT OR CART CHECKOUT)
 router.post('/', authenticateUser, requireRole('customer'), async (req, res, next) => {
-  const { productId, quantity, payment_method = 'cod', payment_status, transaction_id, transactionId } = req.body;
+  const {
+    productId,
+    quantity,
+    payment_method = 'cod',
+    payment_status,
+    transaction_id,
+    transactionId,
+    delivery_address,
+    customer_name,
+    customer_phone,
+    delivery_city,
+    delivery_state,
+    delivery_pincode,
+    delivery_instructions
+  } = req.body;
   const customerId = req.user.id;
   const buyerContact = req.user.contact;
 
@@ -149,9 +163,9 @@ router.post('/', authenticateUser, requireRole('customer'), async (req, res, nex
         const sellerTotal = Math.round((sellerSubtotal + platformFee) * 100) / 100;
 
         await client.query(
-          `INSERT INTO orders (id, order_number, customer_id, seller_id, status, total_amount, platform_fee, buyer_contact, step, payment_method, payment_status, transaction_id)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-          [orderId, orderNumber, customerId, sellerId, 'Order Placed', sellerTotal, platformFee, buyerContact, 1, payment_method, validPayStatus, cleanTxnId]
+          `INSERT INTO orders (id, order_number, customer_id, seller_id, status, total_amount, platform_fee, buyer_contact, step, payment_method, payment_status, transaction_id, delivery_address, delivery_city, delivery_state, delivery_pincode, delivery_instructions)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
+          [orderId, orderNumber, customerId, sellerId, 'Order Placed', sellerTotal, platformFee, buyerContact, 1, payment_method, validPayStatus, cleanTxnId, delivery_address || null, delivery_city || null, delivery_state || null, delivery_pincode || null, delivery_instructions || null]
         );
 
         // Record initial status history log
@@ -210,6 +224,11 @@ router.post('/', authenticateUser, requireRole('customer'), async (req, res, nex
           payment_status: validPayStatus,
           transaction_id: cleanTxnId,
           transactionId: cleanTxnId,
+          deliveryAddress: delivery_address || 'Standard Delivery',
+          deliveryCity: delivery_city || '',
+          deliveryState: delivery_state || '',
+          deliveryPincode: delivery_pincode || '',
+          deliveryInstructions: delivery_instructions || '',
           product: items[0].product.name,
           qty: items[0].requestedQty,
           price: items[0].unitPrice,
@@ -219,6 +238,27 @@ router.post('/', authenticateUser, requireRole('customer'), async (req, res, nex
           sellerLocation: 'Location pending',
           createdAt: new Date().toLocaleString()
         });
+      }
+
+      if (delivery_address || delivery_pincode) {
+        try {
+          await client.query(
+            `INSERT INTO customer_profiles (user_id, address, city, state, pincode)
+             VALUES ($1, $2, $3, $4, $5)
+             ON CONFLICT (user_id) DO UPDATE
+             SET address = COALESCE(EXCLUDED.address, customer_profiles.address),
+                 city = COALESCE(EXCLUDED.city, customer_profiles.city),
+                 state = COALESCE(EXCLUDED.state, customer_profiles.state),
+                 pincode = COALESCE(EXCLUDED.pincode, customer_profiles.pincode)`,
+            [customerId, delivery_address || '', delivery_city || '', delivery_state || '', delivery_pincode || '']
+          );
+        } catch (profErr) {}
+      }
+
+      if (customer_phone) {
+        try {
+          await client.query('UPDATE users SET phone = $1 WHERE id = $2', [customer_phone, customerId]);
+        } catch (phoneErr) {}
       }
 
       if (!productId) {
@@ -252,6 +292,8 @@ router.get('/', authenticateUser, async (req, res, next) => {
     const fields = `
       o.id, o.order_number, o.status, o.step, o.total_amount as total, o.buyer_contact, o.created_at, o.customer_id, o.seller_id,
       o.payment_method, o.payment_status, o.transaction_id,
+      o.delivery_address as "orderDeliveryAddress", o.delivery_city as "orderDeliveryCity", o.delivery_state as "orderDeliveryState",
+      o.delivery_pincode as "orderDeliveryPincode", o.delivery_instructions as "orderDeliveryInstructions",
       su.name as "sellerName", su.contact as "sellerContact", COALESCE(sp.verification_status, 'pending') as "sellerVerificationStatus",
       cu.name as "customerName", cu.contact as "customerEmail", cu.phone as "customerPhone",
       cp.address as "customerAddress", cp.city as "customerCity", cp.state as "customerState", cp.pincode as "customerPincode"
@@ -314,10 +356,13 @@ router.get('/', authenticateUser, async (req, res, next) => {
       const totalAmount = Number(orderRow.total || 0);
       const platformFee = Math.max(0, Math.round((totalAmount - subtotalSum) * 100) / 100);
 
-      let deliveryAddr = orderRow.customerAddress;
-      if (orderRow.customerCity) deliveryAddr += `, ${orderRow.customerCity}`;
-      if (orderRow.customerState) deliveryAddr += `, ${orderRow.customerState}`;
-      if (orderRow.customerPincode) deliveryAddr += ` - ${orderRow.customerPincode}`;
+      let deliveryAddr = orderRow.orderDeliveryAddress;
+      if (!deliveryAddr) {
+        deliveryAddr = orderRow.customerAddress;
+        if (orderRow.customerCity) deliveryAddr += `, ${orderRow.customerCity}`;
+        if (orderRow.customerState) deliveryAddr += `, ${orderRow.customerState}`;
+        if (orderRow.customerPincode) deliveryAddr += ` - ${orderRow.customerPincode}`;
+      }
       if (!deliveryAddr) deliveryAddr = orderRow.buyer_contact || 'Delivery address provided at checkout';
 
       orders.push({
@@ -330,6 +375,10 @@ router.get('/', authenticateUser, async (req, res, next) => {
         customerEmail: orderRow.customerEmail || 'Contact not provided',
         customerPhone: orderRow.customerPhone || orderRow.customerEmail || 'Contact not provided',
         deliveryAddress: deliveryAddr,
+        deliveryCity: orderRow.orderDeliveryCity || orderRow.customerCity || '',
+        deliveryState: orderRow.orderDeliveryState || orderRow.customerState || '',
+        deliveryPincode: orderRow.orderDeliveryPincode || orderRow.customerPincode || '',
+        deliveryInstructions: orderRow.orderDeliveryInstructions || '',
         items,
         product: firstItem.name || 'Product',
         qty: firstItem.quantity || 1,

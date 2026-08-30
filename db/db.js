@@ -540,12 +540,23 @@ class LocalFallbackDB {
     // 8. ORDERS
     if (q.startsWith('INSERT INTO orders')) {
       let order = {};
-      if (q.includes('platform_fee')) {
+      if (params.length >= 17) {
         order = {
           id: params[0], order_number: params[1], customer_id: params[2], seller_id: params[3],
           status: params[4] || 'Order Placed', total_amount: Number(params[5]), platform_fee: Number(params[6] || 0),
           buyer_contact: params[7] || '', step: Number(params[8] || 1), payment_method: params[9] || 'cod',
           payment_status: params[10] || 'cod', transaction_id: params[11] || null,
+          delivery_address: params[12] || null, delivery_city: params[13] || null, delivery_state: params[14] || null,
+          delivery_pincode: params[15] || null, delivery_instructions: params[16] || null,
+          created_at: new Date().toISOString(), updated_at: new Date().toISOString()
+        };
+      } else if (params.length >= 12) {
+        order = {
+          id: params[0], order_number: params[1], customer_id: params[2], seller_id: params[3],
+          status: params[4] || 'Order Placed', total_amount: Number(params[5]), platform_fee: Number(params[6] || 0),
+          buyer_contact: params[7] || '', step: Number(params[8] || 1), payment_method: params[9] || 'cod',
+          payment_status: params[10] || 'cod', transaction_id: params[11] || null,
+          delivery_address: null, delivery_city: null, delivery_state: null, delivery_pincode: null, delivery_instructions: null,
           created_at: new Date().toISOString(), updated_at: new Date().toISOString()
         };
       } else if (params.length >= 10) {
@@ -554,6 +565,7 @@ class LocalFallbackDB {
           status: params[4] || 'Order Placed', total_amount: Number(params[5]), platform_fee: Math.round(Number(params[5]) * 0.02 * 100) / 100,
           buyer_contact: params[6] || '', step: Number(params[7] || 1), payment_method: params[8] || 'cod', payment_status: params[9] || 'cod',
           transaction_id: params[10] || null,
+          delivery_address: null, delivery_city: null, delivery_state: null, delivery_pincode: null, delivery_instructions: null,
           created_at: new Date().toISOString(), updated_at: new Date().toISOString()
         };
       } else {
@@ -562,6 +574,7 @@ class LocalFallbackDB {
           status: params[4] || 'Order Placed', total_amount: Number(params[5]), platform_fee: Math.round(Number(params[5]) * 0.02 * 100) / 100,
           buyer_contact: '', step: 1, payment_method: params[6] || 'cod', payment_status: params[7] || 'cod',
           transaction_id: null,
+          delivery_address: null, delivery_city: null, delivery_state: null, delivery_pincode: null, delivery_instructions: null,
           created_at: new Date().toISOString(), updated_at: new Date().toISOString()
         };
       }
@@ -596,7 +609,7 @@ class LocalFallbackDB {
         const cp = this.tables.customer_profiles.find(x => x.user_id === o.customer_id) || {};
         const sp = this.tables.seller_profiles.find(x => x.user_id === o.seller_id) || {};
         const firstItem = items[0] || {};
-        const customerAddr = cp.address ? `${cp.address}, ${cp.city || ''}, ${cp.state || ''}` : (o.buyer_contact || 'Standard Delivery');
+        const customerAddr = o.delivery_address || (cp.address ? `${cp.address}, ${cp.city || ''}, ${cp.state || ''}` : (o.buyer_contact || 'Standard Delivery'));
 
         return {
           ...o, items, product: firstItem.product_name_snapshot || 'Produce', qty: firstItem.quantity || 1,
@@ -608,9 +621,14 @@ class LocalFallbackDB {
           customerEmail: customer.contact || '',
           customerPhone: customer.phone || customer.contact || '',
           customerAddress: customerAddr,
-          customerCity: cp.city || '',
-          customerState: cp.state || '',
-          customerPincode: cp.pincode || ''
+          customerCity: o.delivery_city || cp.city || '',
+          customerState: o.delivery_state || cp.state || '',
+          customerPincode: o.delivery_pincode || cp.pincode || '',
+          orderDeliveryAddress: o.delivery_address || customerAddr,
+          orderDeliveryCity: o.delivery_city || cp.city || '',
+          orderDeliveryState: o.delivery_state || cp.state || '',
+          orderDeliveryPincode: o.delivery_pincode || cp.pincode || '',
+          orderDeliveryInstructions: o.delivery_instructions || ''
         };
       });
       return { rows: enriched };
@@ -981,6 +999,11 @@ async function initDb() {
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status VARCHAR(50) DEFAULT 'pending';
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_id VARCHAR(100);
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS step INTEGER DEFAULT 1;
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_address TEXT;
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_city VARCHAR(100);
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_state VARCHAR(100);
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_pincode VARCHAR(20);
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_instructions TEXT;
       `).catch(e => console.warn('Schema migration warning:', e.message));
       client.release();
       isPgConnected = true;

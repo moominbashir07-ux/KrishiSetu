@@ -264,20 +264,24 @@
     <!-- Value Propositions Section -->
     <div class="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-12">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-        <div class="bg-white p-8 rounded-2xl border border-border-subtle shadow-sm">
-          <div class="w-16 h-16 bg-surface text-primary rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">👨‍🌾</div>
-          <h3 class="text-headline-md font-bold text-primary mb-2">Direct Farmer Profits</h3>
+        <div class="bg-white p-8 rounded-2xl border border-border-subtle shadow-sm flex flex-col items-center">
+          <div class="w-16 h-16 rounded-2xl overflow-hidden shadow-sm mb-4 border border-primary/20 bg-surface flex items-center justify-center">
+            <img src="images/farmer.png" alt="Direct Farmer Profit" class="w-full h-full object-cover rounded-2xl" onerror="this.src='images/logo.png'">
+          </div>
+          <h3 class="text-headline-md font-bold text-primary mb-2">Direct Farmer Profit</h3>
           <p class="text-body-sm text-soil-brown">Farmers set their own pricing and sell directly to nearby consumers without middleman commissions.</p>
         </div>
-        <div class="bg-white p-8 rounded-2xl border border-border-subtle shadow-sm">
-          <div class="w-16 h-16 bg-surface text-primary rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">📈</div>
-          <h3 class="text-headline-md font-bold text-primary mb-2">AGMARKNET Mandi Rates</h3>
+        <div class="bg-white p-8 rounded-2xl border border-border-subtle shadow-sm flex flex-col items-center">
+          <div class="w-16 h-16 rounded-2xl overflow-hidden shadow-sm mb-4 border border-primary/20 bg-surface flex items-center justify-center">
+            <img src="images/graph.png" alt="Mandi Rates" class="w-full h-full object-cover rounded-2xl" onerror="this.src='images/logo.png'">
+          </div>
+          <h3 class="text-headline-md font-bold text-primary mb-2">Mandi Rates</h3>
           <p class="text-body-sm text-soil-brown">Live Government mandi arrival data, historical price trends, and APMC comparison charts.</p>
         </div>
-        <div class="bg-white p-8 rounded-2xl border border-border-subtle shadow-sm">
-          <div class="w-16 h-16 bg-surface text-primary rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">🚚</div>
-          <h3 class="text-headline-md font-bold text-primary mb-2">Transparent Low Fees</h3>
-          <p class="text-body-sm text-soil-brown">Clear platform fee structure (0.5% for bulk orders, 2% for standard purchases) calculated server-side.</p>
+        <div class="bg-white p-8 rounded-2xl border border-border-subtle shadow-sm flex flex-col items-center">
+          <div class="w-16 h-16 bg-surface text-primary rounded-2xl flex items-center justify-center text-3xl mb-4 border border-primary/20 shadow-sm">⚖️</div>
+          <h3 class="text-headline-md font-bold text-primary mb-2">Real-Time Price Discovery</h3>
+          <p class="text-body-sm text-soil-brown">Compare current market prices and make smarter buying and selling decisions.</p>
         </div>
       </div>
     </div>
@@ -1341,12 +1345,158 @@
   </div>
 </div>
 
-<!-- REAL PAYMENT SELECTION MODAL (SCANNER & PAY ON DELIVERY) -->
+<!-- STEP 1: AMAZON-STYLE INDIAN DELIVERY ADDRESS MODAL -->
+<div id="deliveryAddressModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-white rounded-2xl max-w-lg w-[94vw] p-6 shadow-xl relative max-h-[92vh] overflow-y-auto" id="deliveryAddressModalContent">
+    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" onclick="closeDeliveryAddressModal()" type="button">✕</button>
+    
+    <div class="flex items-center gap-2 text-xs font-bold text-success-emerald uppercase tracking-wider mb-1">
+      <span class="bg-success-emerald/10 px-2 py-0.5 rounded-full border border-success-emerald/20">Step 1 of 2</span>
+      <span>Delivery Address (India 🇮🇳)</span>
+    </div>
+    <h3 class="text-xl font-bold text-primary mb-1">Select Delivery Address</h3>
+    <p class="text-xs text-soil-brown mb-4">Enter your full Indian delivery address so the farmer can evaluate transit time and coordinate delivery.</p>
+
+    <form id="deliveryAddressForm" onsubmit="event.preventDefault(); submitDeliveryAddressAndProceed();" class="space-y-3">
+      <!-- Full Name -->
+      <div>
+        <label for="addrFullName" class="block text-[11px] font-bold text-soil-brown uppercase mb-1">Full Name (First & Last Name) *</label>
+        <input id="addrFullName" type="text" placeholder="e.g. Ramesh Kumar" class="w-full p-2.5 border border-border-subtle rounded-xl text-xs bg-surface outline-none focus:border-primary" required>
+      </div>
+
+      <!-- Mobile Number -->
+      <div>
+        <label for="addrPhone" class="block text-[11px] font-bold text-soil-brown uppercase mb-1">Mobile Number (10 Digits) *</label>
+        <div class="flex gap-2">
+          <span class="inline-flex items-center px-3 text-xs font-bold bg-surface-muted border border-border-subtle rounded-xl text-primary font-mono">+91</span>
+          <input id="addrPhone" type="tel" maxlength="10" placeholder="e.g. 9876543210" class="w-full p-2.5 border border-border-subtle rounded-xl text-xs bg-surface outline-none focus:border-primary font-mono" required>
+        </div>
+        <p class="text-[10px] text-soil-brown mt-0.5">Used by the farmer to communicate dispatch & delivery arrival.</p>
+      </div>
+
+      <!-- Flat, House no., Building -->
+      <div>
+        <label for="addrLine1" class="block text-[11px] font-bold text-soil-brown uppercase mb-1">Flat, House no., Building, Apartment *</label>
+        <input id="addrLine1" type="text" placeholder="e.g. Flat 402, Shivam Heights, Plot 12" class="w-full p-2.5 border border-border-subtle rounded-xl text-xs bg-surface outline-none focus:border-primary" required>
+      </div>
+
+      <!-- Area, Street, Sector, Village -->
+      <div>
+        <label for="addrLine2" class="block text-[11px] font-bold text-soil-brown uppercase mb-1">Area, Street, Sector, Village *</label>
+        <input id="addrLine2" type="text" placeholder="e.g. MG Road, Near Market Yard" class="w-full p-2.5 border border-border-subtle rounded-xl text-xs bg-surface outline-none focus:border-primary" required>
+      </div>
+
+      <!-- Landmark -->
+      <div>
+        <label for="addrLandmark" class="block text-[11px] font-bold text-soil-brown uppercase mb-1">Landmark (Optional)</label>
+        <input id="addrLandmark" type="text" placeholder="e.g. Opp. City Post Office or Near Primary School" class="w-full p-2.5 border border-border-subtle rounded-xl text-xs bg-surface outline-none focus:border-primary">
+      </div>
+
+      <!-- City, State, PIN Code Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <!-- Town / City -->
+        <div>
+          <label for="addrCity" class="block text-[11px] font-bold text-soil-brown uppercase mb-1">Town / City *</label>
+          <input id="addrCity" type="text" placeholder="e.g. Pune" class="w-full p-2.5 border border-border-subtle rounded-xl text-xs bg-surface outline-none focus:border-primary" required>
+        </div>
+
+        <!-- State Dropdown -->
+        <div>
+          <label for="addrState" class="block text-[11px] font-bold text-soil-brown uppercase mb-1">State / UT *</label>
+          <select id="addrState" class="w-full p-2.5 border border-border-subtle rounded-xl text-xs bg-surface outline-none focus:border-primary font-medium" required>
+            <option value="">Select State</option>
+            <option value="Andhra Pradesh">Andhra Pradesh</option>
+            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+            <option value="Assam">Assam</option>
+            <option value="Bihar">Bihar</option>
+            <option value="Chhattisgarh">Chhattisgarh</option>
+            <option value="Goa">Goa</option>
+            <option value="Gujarat">Gujarat</option>
+            <option value="Haryana">Haryana</option>
+            <option value="Himachal Pradesh">Himachal Pradesh</option>
+            <option value="Jharkhand">Jharkhand</option>
+            <option value="Karnataka">Karnataka</option>
+            <option value="Kerala">Kerala</option>
+            <option value="Madhya Pradesh">Madhya Pradesh</option>
+            <option value="Maharashtra" selected>Maharashtra</option>
+            <option value="Manipur">Manipur</option>
+            <option value="Meghalaya">Meghalaya</option>
+            <option value="Mizoram">Mizoram</option>
+            <option value="Nagaland">Nagaland</option>
+            <option value="Odisha">Odisha</option>
+            <option value="Punjab">Punjab</option>
+            <option value="Rajasthan">Rajasthan</option>
+            <option value="Sikkim">Sikkim</option>
+            <option value="Tamil Nadu">Tamil Nadu</option>
+            <option value="Telangana">Telangana</option>
+            <option value="Tripura">Tripura</option>
+            <option value="Uttar Pradesh">Uttar Pradesh</option>
+            <option value="Uttarakhand">Uttarakhand</option>
+            <option value="West Bengal">West Bengal</option>
+            <option value="Andaman and Nicobar Islands">Andaman & Nicobar</option>
+            <option value="Chandigarh">Chandigarh</option>
+            <option value="Dadra and Nagar Haveli and Daman and Diu">DNHDD</option>
+            <option value="Delhi">Delhi NCR</option>
+            <option value="Jammu and Kashmir">Jammu & Kashmir</option>
+            <option value="Ladakh">Ladakh</option>
+            <option value="Lakshadweep">Lakshadweep</option>
+            <option value="Puducherry">Puducherry</option>
+          </select>
+        </div>
+
+        <!-- 6-digit Pincode -->
+        <div>
+          <label for="addrPincode" class="block text-[11px] font-bold text-soil-brown uppercase mb-1">6-Digit PIN *</label>
+          <input id="addrPincode" type="text" maxlength="6" placeholder="e.g. 411001" class="w-full p-2.5 border border-border-subtle rounded-xl text-xs bg-surface outline-none focus:border-primary font-mono" required>
+        </div>
+      </div>
+
+      <!-- Delivery Instructions / Notes for Farmer -->
+      <div>
+        <label for="addrInstructions" class="block text-[11px] font-bold text-soil-brown uppercase mb-1">Instructions for Farmer / Dispatch Note (Optional)</label>
+        <input id="addrInstructions" type="text" placeholder="e.g. Morning delivery preferred, call 10 mins before arrival" class="w-full p-2.5 border border-border-subtle rounded-xl text-xs bg-surface outline-none focus:border-primary">
+      </div>
+
+      <!-- Serviceability Notice -->
+      <div class="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-800 text-[11px] text-soil-brown flex items-start gap-2">
+        <span class="text-sm">🌾</span>
+        <span><b>Direct Farm Dispatch:</b> The farmer will review this delivery location and PIN code to estimate delivery timeline or confirm serviceability.</span>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-2 pt-2">
+        <button type="button" onclick="closeDeliveryAddressModal()" class="flex-1 py-3 border border-border-subtle rounded-xl font-bold text-xs text-soil-brown hover:bg-surface transition-colors">Cancel</button>
+        <button type="submit" id="btnDeliverToAddress" class="w-2/3 bg-primary text-white py-3 rounded-xl font-bold text-xs hover:bg-primary-container transition-colors shadow-md flex items-center justify-center gap-1.5">
+          <span>Deliver to this Address ➔</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- STEP 2: REAL PAYMENT SELECTION MODAL (SCANNER & PAY ON DELIVERY) -->
 <div id="paymentCheckoutModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
   <div class="bg-white rounded-2xl max-w-lg w-[92vw] p-6 shadow-xl relative max-h-[90vh] overflow-y-auto" id="paymentModalContent">
     <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" onclick="closePaymentCheckoutModal()" type="button">✕</button>
+    
+    <div class="flex items-center gap-2 text-xs font-bold text-success-emerald uppercase tracking-wider mb-1">
+      <span class="bg-success-emerald/10 px-2 py-0.5 rounded-full border border-success-emerald/20">Step 2 of 2</span>
+      <span>Payment & Final Order Confirmation</span>
+    </div>
     <h3 class="text-xl font-bold text-primary mb-1">Payment & Order Confirmation</h3>
-    <p class="text-xs text-soil-brown mb-4">Choose your preferred payment method to place order.</p>
+    <p class="text-xs text-soil-brown mb-3">Choose your preferred payment method to place order.</p>
+
+    <!-- Delivery Address Summary Banner -->
+    <div class="bg-surface p-3.5 rounded-xl border border-primary/20 mb-4 flex justify-between items-start text-xs">
+      <div>
+        <div class="flex items-center gap-1.5 font-bold text-primary text-xs mb-1">
+          <span>📍</span> <span>Delivering to:</span> <span id="checkoutSelectedName" class="text-on-surface"></span> (<span id="checkoutSelectedPhone" class="font-mono"></span>)
+        </div>
+        <p id="checkoutSelectedAddress" class="text-soil-brown text-[11px] leading-relaxed"></p>
+        <p id="checkoutSelectedInstructions" class="text-[10px] text-primary/80 italic mt-0.5 hidden"></p>
+      </div>
+      <button type="button" onclick="reopenDeliveryAddressModal()" class="text-primary font-bold text-[11px] underline hover:text-primary-container shrink-0 ml-2">Change</button>
+    </div>
 
     <!-- Order Summary Container -->
     <div class="bg-input-bg p-4 rounded-xl border border-border-subtle mb-4" id="checkoutOrderSummary">
@@ -2126,6 +2276,102 @@ async function removeCartItem(itemId) {
   }
 }
 
+let currentCheckoutCartData = null;
+let currentDeliveryAddress = null;
+
+function openDeliveryAddressModal() {
+  const modal = $('deliveryAddressModal');
+  if (!modal) return;
+
+  let saved = null;
+  try {
+    saved = JSON.parse(localStorage.getItem('krishisetu_saved_delivery_address') || 'null');
+  } catch (e) {}
+
+  let currentUser = {};
+  try {
+    currentUser = JSON.parse(localStorage.getItem('krishisetu_current_user') || '{}');
+  } catch (e) {}
+
+  if ($('addrFullName')) $('addrFullName').value = saved?.fullName || currentUser.name || '';
+  if ($('addrPhone')) $('addrPhone').value = saved?.phone || (currentUser.phone ? currentUser.phone.replace('+91', '').trim() : '') || (currentUser.contact && /^\d{10}$/.test(currentUser.contact) ? currentUser.contact : '');
+  if ($('addrLine1')) $('addrLine1').value = saved?.flatHouse || '';
+  if ($('addrLine2')) $('addrLine2').value = saved?.areaStreet || '';
+  if ($('addrLandmark')) $('addrLandmark').value = saved?.landmark || '';
+  if ($('addrCity')) $('addrCity').value = saved?.city || '';
+  if ($('addrState')) $('addrState').value = saved?.state || 'Maharashtra';
+  if ($('addrPincode')) $('addrPincode').value = saved?.pincode || '';
+  if ($('addrInstructions')) $('addrInstructions').value = saved?.instructions || '';
+
+  modal.classList.remove('hidden');
+}
+
+function closeDeliveryAddressModal() {
+  const modal = $('deliveryAddressModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function reopenDeliveryAddressModal() {
+  closePaymentCheckoutModal();
+  openDeliveryAddressModal();
+}
+
+function submitDeliveryAddressAndProceed() {
+  const fullName = ($('addrFullName')?.value || '').trim();
+  const phone = ($('addrPhone')?.value || '').trim().replace(/\D/g, '');
+  const flatHouse = ($('addrLine1')?.value || '').trim();
+  const areaStreet = ($('addrLine2')?.value || '').trim();
+  const landmark = ($('addrLandmark')?.value || '').trim();
+  const city = ($('addrCity')?.value || '').trim();
+  const state = ($('addrState')?.value || '').trim();
+  const pincode = ($('addrPincode')?.value || '').trim().replace(/\D/g, '');
+  const instructions = ($('addrInstructions')?.value || '').trim();
+
+  if (!fullName || fullName.length < 2) {
+    return notify('Please enter your full name for delivery.', 'error');
+  }
+  if (!phone || phone.length !== 10 || !/^[6-9]\d{9}$/.test(phone)) {
+    return notify('Please enter a valid 10-digit Indian mobile number (+91).', 'error');
+  }
+  if (!flatHouse) {
+    return notify('Please enter your flat, house number, or building details.', 'error');
+  }
+  if (!areaStreet) {
+    return notify('Please enter your street, area, sector, or village.', 'error');
+  }
+  if (!city) {
+    return notify('Please enter your town or city.', 'error');
+  }
+  if (!state) {
+    return notify('Please select your Indian State or Union Territory.', 'error');
+  }
+  if (!pincode || pincode.length !== 6 || !/^[1-9]\d{5}$/.test(pincode)) {
+    return notify('Please enter a valid 6-digit Indian PIN code (e.g. 411001).', 'error');
+  }
+
+  const formattedAddress = `${flatHouse}, ${areaStreet}${landmark ? ', Near ' + landmark : ''}, ${city}, ${state} - ${pincode}`;
+
+  currentDeliveryAddress = {
+    fullName,
+    phone,
+    flatHouse,
+    areaStreet,
+    landmark,
+    city,
+    state,
+    pincode,
+    instructions,
+    formattedAddress
+  };
+
+  try {
+    localStorage.setItem('krishisetu_saved_delivery_address', JSON.stringify(currentDeliveryAddress));
+  } catch (e) {}
+
+  closeDeliveryAddressModal();
+  openPaymentCheckoutModal(currentCheckoutCartData);
+}
+
 // REAL PAYMENT SELECTION & CHECKOUT MODAL LOGIC
 async function checkoutCart() {
   const userStr = localStorage.getItem('krishisetu_current_user');
@@ -2136,21 +2382,44 @@ async function checkoutCart() {
     const items = res.items || [];
     if (!items.length) return notify('Your cart is empty.', 'error');
 
-    openPaymentCheckoutModal(res);
+    currentCheckoutCartData = res;
+    openDeliveryAddressModal();
   } catch (err) {
     notify('Checkout error: ' + err.message, 'error');
   }
 }
-
-let currentCheckoutCartData = null;
 
 function openPaymentCheckoutModal(cartData) {
   const modal = $('paymentCheckoutModal');
   if (!modal) return;
 
   currentCheckoutCartData = cartData;
-  const items = cartData.items || [];
-  const total = cartData.totalAmount || 0;
+  const items = cartData ? (cartData.items || []) : [];
+  const total = cartData ? (cartData.totalAmount || 0) : 0;
+
+  if (!currentDeliveryAddress) {
+    try {
+      currentDeliveryAddress = JSON.parse(localStorage.getItem('krishisetu_saved_delivery_address') || 'null');
+    } catch (e) {}
+  }
+
+  if (!currentDeliveryAddress || !currentDeliveryAddress.formattedAddress) {
+    closePaymentCheckoutModal();
+    return openDeliveryAddressModal();
+  }
+
+  // Populate delivery address banner
+  if ($('checkoutSelectedName')) $('checkoutSelectedName').textContent = currentDeliveryAddress.fullName || 'Customer';
+  if ($('checkoutSelectedPhone')) $('checkoutSelectedPhone').textContent = `+91 ${currentDeliveryAddress.phone || ''}`;
+  if ($('checkoutSelectedAddress')) $('checkoutSelectedAddress').textContent = currentDeliveryAddress.formattedAddress || 'Standard Delivery';
+  if ($('checkoutSelectedInstructions')) {
+    if (currentDeliveryAddress.instructions) {
+      $('checkoutSelectedInstructions').textContent = `Note for farmer: "${currentDeliveryAddress.instructions}"`;
+      $('checkoutSelectedInstructions').classList.remove('hidden');
+    } else {
+      $('checkoutSelectedInstructions').classList.add('hidden');
+    }
+  }
 
   $('checkoutSummaryRows').innerHTML = items.map(i => `
     <div class="flex justify-between items-center text-soil-brown">
@@ -2187,8 +2456,9 @@ async function sharePaymentProofAction() {
   const txnInput = $('upiTransactionIdInput');
   const txnId = txnInput ? txnInput.value.trim() : '';
   const totalText = $('checkoutTotalPayable') ? $('checkoutTotalPayable').textContent : '₹0';
+  const deliveryText = currentDeliveryAddress ? `\n• Delivery PIN: ${currentDeliveryAddress.pincode} (${currentDeliveryAddress.city}, ${currentDeliveryAddress.state})` : '';
   
-  const proofText = `🧾 KrishiSetu Payment Proof\n• Amount: ${totalText}\n• UPI ID: moomin02@ptyes\n• UTR / Ref: ${txnId || 'Pending'}\n• Timestamp: ${new Date().toLocaleString()}\nVerified on KrishiSetu Direct Marketplace.`;
+  const proofText = `🧾 KrishiSetu Payment Proof\n• Amount: ${totalText}\n• UPI ID: moomin02@ptyes\n• UTR / Ref: ${txnId || 'Pending'}${deliveryText}\n• Timestamp: ${new Date().toLocaleString()}\nVerified on KrishiSetu Direct Marketplace.`;
 
   if (navigator.share) {
     try {
@@ -2253,7 +2523,17 @@ async function confirmPaymentAndPlaceOrder(method) {
   }
 
   const payStatus = method === 'upi_qr' ? 'submitted' : 'cod';
-  const payload = { payment_method: method, payment_status: payStatus };
+  const payload = {
+    payment_method: method,
+    payment_status: payStatus,
+    delivery_address: currentDeliveryAddress ? currentDeliveryAddress.formattedAddress : undefined,
+    customer_name: currentDeliveryAddress ? currentDeliveryAddress.fullName : undefined,
+    customer_phone: currentDeliveryAddress ? currentDeliveryAddress.phone : undefined,
+    delivery_city: currentDeliveryAddress ? currentDeliveryAddress.city : undefined,
+    delivery_state: currentDeliveryAddress ? currentDeliveryAddress.state : undefined,
+    delivery_pincode: currentDeliveryAddress ? currentDeliveryAddress.pincode : undefined,
+    delivery_instructions: currentDeliveryAddress ? currentDeliveryAddress.instructions : undefined
+  };
   if (txnId) payload.transaction_id = txnId;
 
   try {
@@ -2771,20 +3051,31 @@ async function renderOrders() {
       : `<div class="flex justify-between py-1 border-b border-border-subtle/50"><span>${escapeHtml(o.product)} — ${o.qty} kg</span><span class="font-bold">₹${o.total}</span></div>`;
 
     const customerDetailsHtml = isSellerView ? `
-      <div class="p-3 bg-surface rounded-xl border border-primary/20 mb-3 text-xs">
-        <h5 class="font-bold text-primary mb-1 uppercase text-[10px]">Customer Contact & Delivery Info</h5>
+      <div class="p-3.5 bg-surface rounded-xl border border-primary/20 mb-3 text-xs">
+        <div class="flex justify-between items-center mb-2">
+          <h5 class="font-bold text-primary uppercase text-[10px]">Customer Delivery Coordinates (India 🇮🇳)</h5>
+          ${o.deliveryPincode ? `<span class="bg-primary/10 text-primary font-mono font-bold text-[10px] px-2 py-0.5 rounded border border-primary/20">PIN: ${escapeHtml(o.deliveryPincode)}</span>` : ''}
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-soil-brown">
           <div>👤 <b>Customer Name:</b> <span class="text-on-surface font-semibold">${escapeHtml(o.customerName || 'Customer')}</span></div>
-          <div>📧 <b>Email:</b> <span class="text-on-surface">${escapeHtml(o.customerEmail || 'Not provided')}</span></div>
-          <div>📞 <b>Phone:</b> <span class="text-on-surface font-bold text-primary">${escapeHtml(o.customerPhone || 'Not provided')}</span></div>
-          <div>📍 <b>Delivery Address:</b> <span class="text-on-surface">${escapeHtml(o.deliveryAddress || 'Standard Delivery')}</span></div>
+          <div>📞 <b>Phone:</b> <span class="text-on-surface font-bold text-primary font-mono">${escapeHtml(o.customerPhone || o.customerEmail || 'Not provided')}</span></div>
+          <div class="col-span-full">📍 <b>Full Delivery Address:</b> <span class="text-on-surface font-medium">${escapeHtml(o.deliveryAddress || 'Standard Delivery')}</span></div>
+          ${(o.deliveryCity || o.deliveryState) ? `<div>🏙️ <b>City / State:</b> <span class="text-on-surface">${escapeHtml(o.deliveryCity || '')}${o.deliveryCity && o.deliveryState ? ', ' : ''}${escapeHtml(o.deliveryState || '')}</span></div>` : ''}
+          ${o.deliveryInstructions ? `<div class="col-span-full p-2 bg-amber-50 dark:bg-amber-950/40 rounded-lg border border-amber-200 dark:border-amber-800 text-[11px] text-soil-brown">📝 <b>Delivery Instructions:</b> <span class="text-on-surface font-medium">${escapeHtml(o.deliveryInstructions)}</span></div>` : ''}
+        </div>
+        <div class="mt-2.5 pt-2 border-t border-border-subtle/60 text-[10px] text-soil-brown flex items-center justify-between">
+          <span>🚚 <b>Dispatch Feasibility:</b> Review transit distance to PIN <b>${escapeHtml(o.deliveryPincode || 'local')}</b> before dispatch.</span>
         </div>
       </div>
     ` : `
       <div class="p-3 bg-surface rounded-xl border border-primary/20 mb-3 text-xs">
-        <h5 class="font-bold text-primary mb-1 uppercase text-[10px]">Seller / Producer Info</h5>
+        <div class="flex justify-between items-center mb-1">
+          <h5 class="font-bold text-primary uppercase text-[10px]">Seller & Delivery Details</h5>
+          ${o.deliveryPincode ? `<span class="text-[10px] font-mono text-soil-brown">PIN: <b>${escapeHtml(o.deliveryPincode)}</b></span>` : ''}
+        </div>
         <div class="text-soil-brown">
-          👨‍🌾 <b>Farmer / Seller:</b> <span class="text-on-surface font-semibold">${escapeHtml(o.sellerName || 'Local Farmer')}</span> (${o.sellerVerificationStatus === 'verified' ? '✓ Verified' : 'Pending'})
+          <div>👨‍🌾 <b>Farmer / Seller:</b> <span class="text-on-surface font-semibold">${escapeHtml(o.sellerName || 'Local Farmer')}</span> (${o.sellerVerificationStatus === 'verified' ? '✓ Verified' : 'Pending'})</div>
+          <div class="mt-1">📍 <b>Delivering To:</b> <span class="text-on-surface font-medium">${escapeHtml(o.deliveryAddress || 'Delivery address')}</span></div>
         </div>
       </div>
     `;
