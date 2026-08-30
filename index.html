@@ -1371,8 +1371,21 @@
         <img src="images/scanner.png" class="w-48 h-48 mx-auto object-contain" alt="UPI Payment Scanner" onerror="this.src='images/logo.png'">
       </div>
       <div class="text-xs font-bold text-success-emerald">Scan & Pay <span id="scannerPayAmount">₹0</span></div>
-      <p class="text-[10px] text-soil-brown">After completing payment on your UPI app, click below to submit order for verification.</p>
-      <button class="w-full bg-success-emerald text-white py-3 rounded-xl font-bold text-sm hover:bg-primary transition-colors shadow-md" onclick="confirmPaymentAndPlaceOrder('upi_qr')" type="button">I Have Paid (Submit Verification) ✓</button>
+      
+      <div class="text-left space-y-1 pt-1">
+        <label for="upiTransactionIdInput" class="block text-[11px] font-bold text-soil-brown uppercase">UPI Reference / UTR Number *</label>
+        <input id="upiTransactionIdInput" type="text" placeholder="e.g. 202612345678 or 12-digit UTR" class="w-full px-3 py-2 text-xs border border-border-subtle rounded-xl focus:outline-none focus:border-primary font-mono bg-surface" maxlength="100">
+        <p class="text-[10px] text-soil-brown">Enter the 12-digit UPI reference / UTR number from your payment confirmation screen.</p>
+      </div>
+
+      <div class="flex flex-col gap-2 pt-2">
+        <button id="shareProofBtn" class="w-full bg-surface text-primary border border-primary/30 py-2.5 rounded-xl font-bold text-xs hover:bg-primary/5 transition-colors flex items-center justify-center gap-2" onclick="sharePaymentProofAction()" type="button">
+          <span>📤 Share Payment Proof</span>
+        </button>
+        <button id="btnSubmitUpiPayment" class="w-full bg-success-emerald text-white py-3 rounded-xl font-bold text-sm hover:bg-primary transition-colors shadow-md flex items-center justify-center gap-2" onclick="confirmPaymentAndPlaceOrder('upi_qr')" type="button">
+          <span>Submit Order & Payment Proof ✓</span>
+        </button>
+      </div>
     </div>
 
     <!-- Option 2: Pay on Delivery -->
@@ -1383,7 +1396,9 @@
         </div>
         <p class="text-xs text-soil-brown">Pay the farmer directly in cash or UPI when your produce is delivered to your address.</p>
       </div>
-      <button class="w-full bg-primary text-white py-3 rounded-xl font-bold text-sm hover:bg-primary-container transition-colors shadow-md" onclick="confirmPaymentAndPlaceOrder('cod')" type="button">Place Order with Pay on Delivery →</button>
+      <button id="btnSubmitCodPayment" class="w-full bg-primary text-white py-3 rounded-xl font-bold text-sm hover:bg-primary-container transition-colors shadow-md flex items-center justify-center gap-2" onclick="confirmPaymentAndPlaceOrder('cod')" type="button">
+        <span>Place Order with Pay on Delivery →</span>
+      </button>
     </div>
   </div>
 </div>
@@ -2127,22 +2142,26 @@ async function checkoutCart() {
   }
 }
 
+let currentCheckoutCartData = null;
+
 function openPaymentCheckoutModal(cartData) {
   const modal = $('paymentCheckoutModal');
   if (!modal) return;
 
+  currentCheckoutCartData = cartData;
   const items = cartData.items || [];
   const total = cartData.totalAmount || 0;
 
   $('checkoutSummaryRows').innerHTML = items.map(i => `
     <div class="flex justify-between items-center text-soil-brown">
-      <span><b>${i.product_name}</b> (${i.quantity} kg)</span>
+      <span><b>${escapeHtml(i.product_name)}</b> (${i.quantity} kg)</span>
       <span class="font-bold text-on-surface">₹${i.subtotal.toLocaleString()}</span>
     </div>
   `).join('');
 
   if ($('checkoutTotalPayable')) $('checkoutTotalPayable').textContent = `₹${total.toLocaleString()}`;
   if ($('scannerPayAmount')) $('scannerPayAmount').textContent = `₹${total.toLocaleString()}`;
+  if ($('upiTransactionIdInput')) $('upiTransactionIdInput').value = '';
 
   switchPaymentMethod('upi_qr');
   modal.classList.remove('hidden');
@@ -2164,28 +2183,103 @@ function switchPaymentMethod(method) {
   $('payViewCod').classList.toggle('hidden', isQr);
 }
 
+async function sharePaymentProofAction() {
+  const txnInput = $('upiTransactionIdInput');
+  const txnId = txnInput ? txnInput.value.trim() : '';
+  const totalText = $('checkoutTotalPayable') ? $('checkoutTotalPayable').textContent : '₹0';
+  
+  const proofText = `🧾 KrishiSetu Payment Proof\n• Amount: ${totalText}\n• UPI ID: moomin02@ptyes\n• UTR / Ref: ${txnId || 'Pending'}\n• Timestamp: ${new Date().toLocaleString()}\nVerified on KrishiSetu Direct Marketplace.`;
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: 'KrishiSetu Payment Proof',
+        text: proofText
+      });
+      notify('Payment proof shared successfully!', 'success');
+      return;
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.warn('Navigator share error, falling back to clipboard:', err.message);
+      } else {
+        return;
+      }
+    }
+  }
+
+  // Graceful clipboard fallback
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(proofText);
+    } else {
+      const textarea = document.createElement('textarea');
+      textarea.value = proofText;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
+    notify('✓ Payment proof details copied to clipboard!', 'success');
+  } catch (clipErr) {
+    notify('Proof details: ' + proofText.replace(/\n/g, ' | '), 'info');
+  }
+}
+
 async function confirmPaymentAndPlaceOrder(method) {
   const token = AuthService.getToken();
-  if (!token) return openAuthModal();
+  if (!token) {
+    closePaymentCheckoutModal();
+    openAuthModal();
+    notify('Please sign in or create an account to place your order.', 'warning');
+    return;
+  }
+
+  let txnId = null;
+  if (method === 'upi_qr') {
+    const txnInput = $('upiTransactionIdInput');
+    txnId = txnInput ? txnInput.value.trim() : '';
+    if (!txnId || txnId.length < 5) {
+      notify('Please enter your 12-digit UPI Reference / UTR Number from your payment receipt.', 'error');
+      if (txnInput) txnInput.focus();
+      return;
+    }
+  }
+
+  const btn = method === 'upi_qr' ? $('btnSubmitUpiPayment') : $('btnSubmitCodPayment');
+  const originalHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<span>Processing Order... ⏳</span>`;
+  }
 
   const payStatus = method === 'upi_qr' ? 'submitted' : 'cod';
+  const payload = { payment_method: method, payment_status: payStatus };
+  if (txnId) payload.transaction_id = txnId;
 
   try {
     const res = await fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ payment_method: method, payment_status: payStatus })
+      body: JSON.stringify(payload)
     });
 
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to place order.');
 
     closePaymentCheckoutModal();
-    notify('🎉 Order placed successfully! The farmer has been notified.', 'success');
+    const successMsg = method === 'upi_qr'
+      ? '🎉 Order placed & payment proof submitted! The farmer will verify your payment.'
+      : '🎉 Order placed with Pay on Delivery! The farmer has been notified.';
+    notify(successMsg, 'success');
     updateCartBadge();
     showScreen('orders');
   } catch (err) {
     notify('Order error: ' + err.message, 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
   }
 }
 
@@ -2559,39 +2653,138 @@ async function renderOrders() {
 
   container.innerHTML = orders.map(o => {
     let actionBtn = '';
-    if (currentRole === 'seller' || currentRole === 'admin') {
+    const isSellerView = currentRole === 'seller' || currentRole === 'admin';
+    const isUpi = o.payment_method === 'upi_qr';
+    const isCod = o.payment_method === 'cod';
+
+    let paymentWorkflowHtml = '';
+
+    if (isSellerView) {
+      if (isUpi) {
+        if (o.payment_status === 'submitted') {
+          paymentWorkflowHtml = `
+            <div class="mt-3 p-3.5 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-800 text-xs">
+              <div class="flex justify-between items-center mb-1.5">
+                <span class="font-bold text-amber-800 dark:text-amber-300">💳 UPI Payment Verification Required</span>
+                <span class="font-mono text-[11px] font-bold bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-amber-300">UTR: ${escapeHtml(o.transaction_id || 'Submitted')}</span>
+              </div>
+              <p class="text-soil-brown text-[11px] mb-2.5">Confirm receipt of <b class="text-primary">₹${o.total}</b> in your UPI app with reference <b>${escapeHtml(o.transaction_id || 'N/A')}</b>.</p>
+              <div class="flex gap-2">
+                <button class="bg-success-emerald text-white text-xs font-bold px-3 py-2 rounded-xl hover:bg-primary transition-colors flex-1" onclick="handleSellerPaymentVerification('${o.dbId || o.id}', 'approve', this)" type="button">Payment Received ✓</button>
+                <button class="bg-error text-white text-xs font-bold px-3 py-2 rounded-xl hover:opacity-90 transition-colors flex-1" onclick="handleSellerPaymentVerification('${o.dbId || o.id}', 'reject', this)" type="button">Payment Not Received ✕</button>
+              </div>
+            </div>
+          `;
+        } else if (o.payment_status === 'verified') {
+          paymentWorkflowHtml = `
+            <div class="mt-2.5 p-2 bg-success-emerald/10 border border-success-emerald/20 rounded-xl text-xs text-success-emerald font-bold flex items-center justify-between">
+              <span>✓ Payment Verified & Approved</span>
+              <span class="font-mono text-[10px] text-soil-brown">UTR: ${escapeHtml(o.transaction_id || 'Verified')}</span>
+            </div>
+          `;
+        } else if (o.payment_status === 'rejected') {
+          paymentWorkflowHtml = `
+            <div class="mt-2.5 p-2 bg-error/10 border border-error/20 rounded-xl text-xs text-error font-bold flex items-center justify-between">
+              <span>✕ Payment Rejected by You</span>
+              <span class="font-mono text-[10px] text-soil-brown">UTR: ${escapeHtml(o.transaction_id || 'Rejected')}</span>
+            </div>
+          `;
+        }
+      } else if (isCod) {
+        paymentWorkflowHtml = `
+          <div class="mt-2.5 p-2 bg-primary/5 border border-primary/15 rounded-xl text-xs text-soil-brown flex justify-between items-center">
+            <span>💵 Pay on Delivery — Collect payment upon delivery</span>
+            <span class="font-bold text-primary">₹${o.total}</span>
+          </div>
+        `;
+      }
+
+      // Seller fulfillment progression
       if (o.status === 'Order Placed') {
-        actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" onclick="advanceOrderStatus('${o.id}', 'Farmer Confirmed', this)">Accept Order</button>`;
+        if (isCod) {
+          actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" onclick="advanceOrderStatus('${o.id}', 'Farmer Confirmed', this)">Accept Order (COD)</button>`;
+        } else if (o.payment_status === 'verified') {
+          actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" onclick="advanceOrderStatus('${o.id}', 'Farmer Confirmed', this)">Confirm Order</button>`;
+        }
       } else if (o.status === 'Farmer Confirmed') {
         actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" onclick="advanceOrderStatus('${o.id}', 'Preparing', this)">Start Preparing</button>`;
       } else if (o.status === 'Preparing') {
         actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" onclick="advanceOrderStatus('${o.id}', 'Ready', this)">Mark Ready</button>`;
       } else if (o.status === 'Ready') {
-        actionBtn = `<button class="bg-success-emerald text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" onclick="advanceOrderStatus('${o.id}', 'Completed', this)">Mark Completed</button>`;
+        actionBtn = `<button class="bg-success-emerald text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary transition-colors mt-3" onclick="advanceOrderStatus('${o.id}', 'Completed', this)">Mark Completed ${isCod ? '(Payment Collected)' : ''}</button>`;
+      }
+    } else {
+      // Buyer view
+      if (isUpi) {
+        if (o.payment_status === 'submitted') {
+          paymentWorkflowHtml = `
+            <div class="mt-3 p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-800 text-xs flex flex-wrap justify-between items-center gap-2">
+              <div>
+                <span class="font-bold text-amber-800 dark:text-amber-300 block">⏳ Payment Submitted — Awaiting Farmer Confirmation</span>
+                <span class="text-[11px] text-soil-brown font-mono">UTR: <b>${escapeHtml(o.transaction_id || 'Submitted')}</b></span>
+              </div>
+              <button class="bg-surface text-primary border border-primary/30 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary/5 transition-colors flex items-center gap-1" onclick="shareOrderProof('${escapeHtml(o.id)}', '${escapeHtml(o.transaction_id || '')}', ${o.total})" type="button">
+                <span>📤 Share Proof</span>
+              </button>
+            </div>
+          `;
+        } else if (o.payment_status === 'verified') {
+          paymentWorkflowHtml = `
+            <div class="mt-2.5 p-2.5 bg-success-emerald/10 border border-success-emerald/20 rounded-xl text-xs flex justify-between items-center text-success-emerald font-bold">
+              <span>✓ Payment Verified & Confirmed by Farmer</span>
+              <button class="text-primary underline text-[11px] font-semibold" onclick="shareOrderProof('${escapeHtml(o.id)}', '${escapeHtml(o.transaction_id || '')}', ${o.total})" type="button">Share Receipt</button>
+            </div>
+          `;
+        } else if (o.payment_status === 'rejected') {
+          paymentWorkflowHtml = `
+            <div class="mt-3 p-3 bg-red-50 dark:bg-red-950/40 rounded-xl border border-red-200 dark:border-red-800 text-xs">
+              <div class="text-error font-bold mb-1">✕ Payment was not confirmed by farmer. Please re-enter your 12-digit UTR:</div>
+              <div class="flex gap-2 mt-1.5">
+                <input id="resubmitTxnInput_${o.dbId || o.id}" type="text" placeholder="Enter correct 12-digit UTR" class="flex-1 px-3 py-1.5 border border-border-subtle rounded-lg text-xs font-mono bg-white" maxlength="100">
+                <button class="bg-primary text-white font-bold px-3.5 py-1.5 rounded-lg text-xs hover:bg-primary-container" onclick="resubmitPaymentProof('${o.dbId || o.id}')" type="button">Submit UTR</button>
+              </div>
+            </div>
+          `;
+        } else {
+          paymentWorkflowHtml = `
+            <div class="mt-3 p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-800 text-xs">
+              <div class="text-amber-800 font-bold mb-1">⚠️ Payment Proof Pending: Enter your 12-digit UTR below:</div>
+              <div class="flex gap-2 mt-1.5">
+                <input id="resubmitTxnInput_${o.dbId || o.id}" type="text" placeholder="Enter 12-digit UTR" class="flex-1 px-3 py-1.5 border border-border-subtle rounded-lg text-xs font-mono bg-white" maxlength="100">
+                <button class="bg-primary text-white font-bold px-3.5 py-1.5 rounded-lg text-xs hover:bg-primary-container" onclick="resubmitPaymentProof('${o.dbId || o.id}')" type="button">Submit UTR</button>
+              </div>
+            </div>
+          `;
+        }
+      } else if (isCod) {
+        paymentWorkflowHtml = `
+          <div class="mt-2.5 p-2 bg-primary/5 border border-primary/15 rounded-xl text-xs text-soil-brown flex justify-between items-center">
+            <span>💵 Pay on Delivery — Cash or UPI to farmer on arrival</span>
+            <span class="font-bold text-primary">₹${o.total}</span>
+          </div>
+        `;
       }
     }
 
     const itemsListHtml = (o.items && o.items.length)
-      ? o.items.map(i => `<div class="flex justify-between py-1 border-b border-border-subtle/50"><span>${i.name} — ${i.quantity} kg</span><span class="font-bold">₹${i.subtotal}</span></div>`).join('')
-      : `<div class="flex justify-between py-1 border-b border-border-subtle/50"><span>${o.product} — ${o.qty} kg</span><span class="font-bold">₹${o.total}</span></div>`;
-
-    const isSellerView = currentRole === 'seller' || currentRole === 'admin';
+      ? o.items.map(i => `<div class="flex justify-between py-1 border-b border-border-subtle/50"><span>${escapeHtml(i.name)} — ${i.quantity} kg</span><span class="font-bold">₹${i.subtotal}</span></div>`).join('')
+      : `<div class="flex justify-between py-1 border-b border-border-subtle/50"><span>${escapeHtml(o.product)} — ${o.qty} kg</span><span class="font-bold">₹${o.total}</span></div>`;
 
     const customerDetailsHtml = isSellerView ? `
       <div class="p-3 bg-surface rounded-xl border border-primary/20 mb-3 text-xs">
         <h5 class="font-bold text-primary mb-1 uppercase text-[10px]">Customer Contact & Delivery Info</h5>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-soil-brown">
-          <div>👤 <b>Customer Name:</b> <span class="text-on-surface font-semibold">${o.customerName || 'Customer'}</span></div>
-          <div>📧 <b>Email:</b> <span class="text-on-surface">${o.customerEmail || 'Not provided'}</span></div>
-          <div>📞 <b>Phone:</b> <span class="text-on-surface font-bold text-primary">${o.customerPhone || 'Not provided'}</span></div>
-          <div>📍 <b>Delivery Address:</b> <span class="text-on-surface">${o.deliveryAddress || 'Standard Delivery'}</span></div>
+          <div>👤 <b>Customer Name:</b> <span class="text-on-surface font-semibold">${escapeHtml(o.customerName || 'Customer')}</span></div>
+          <div>📧 <b>Email:</b> <span class="text-on-surface">${escapeHtml(o.customerEmail || 'Not provided')}</span></div>
+          <div>📞 <b>Phone:</b> <span class="text-on-surface font-bold text-primary">${escapeHtml(o.customerPhone || 'Not provided')}</span></div>
+          <div>📍 <b>Delivery Address:</b> <span class="text-on-surface">${escapeHtml(o.deliveryAddress || 'Standard Delivery')}</span></div>
         </div>
       </div>
     ` : `
       <div class="p-3 bg-surface rounded-xl border border-primary/20 mb-3 text-xs">
         <h5 class="font-bold text-primary mb-1 uppercase text-[10px]">Seller / Producer Info</h5>
         <div class="text-soil-brown">
-          👨‍🌾 <b>Farmer / Seller:</b> <span class="text-on-surface font-semibold">${o.sellerName || 'Local Farmer'}</span> (${o.sellerVerificationStatus === 'verified' ? '✓ Verified' : 'Pending'})
+          👨‍🌾 <b>Farmer / Seller:</b> <span class="text-on-surface font-semibold">${escapeHtml(o.sellerName || 'Local Farmer')}</span> (${o.sellerVerificationStatus === 'verified' ? '✓ Verified' : 'Pending'})
         </div>
       </div>
     `;
@@ -2601,10 +2794,10 @@ async function renderOrders() {
         <div>
           <div class="flex justify-between items-start mb-3 pb-3 border-b border-border-subtle">
             <div>
-              <h4 class="font-bold text-primary text-base">ORDER #${o.id}</h4>
-              <span class="text-xs text-soil-brown">Placed on ${o.createdAt || new Date().toLocaleDateString()}</span>
+              <h4 class="font-bold text-primary text-base">ORDER #${escapeHtml(o.id)}</h4>
+              <span class="text-xs text-soil-brown">Placed on ${escapeHtml(o.createdAt || new Date().toLocaleDateString())}</span>
             </div>
-            <span class="bg-surface text-success-emerald text-xs font-bold px-3 py-1 rounded-full border border-success-emerald/20">${o.status}</span>
+            <span class="bg-surface text-success-emerald text-xs font-bold px-3 py-1 rounded-full border border-success-emerald/20">${escapeHtml(o.status)}</span>
           </div>
 
           ${customerDetailsHtml}
@@ -2627,8 +2820,10 @@ async function renderOrders() {
 
           <div class="mt-3 text-[11px] text-soil-brown flex flex-wrap justify-between items-center bg-input-bg p-2.5 rounded-lg border border-border-subtle">
             <span>💳 <b>Payment Method:</b> <span class="uppercase font-bold">${o.payment_method === 'upi_qr' ? 'UPI Scanner' : 'Pay on Delivery'}</span></span>
-            <span>Status: <b class="capitalize text-primary">${o.payment_status || 'pending'}</b></span>
+            <span>Status: <b class="capitalize text-primary">${escapeHtml(o.payment_status || 'pending')}</b></span>
           </div>
+
+          ${paymentWorkflowHtml}
         </div>
 
         <div>
@@ -2637,6 +2832,84 @@ async function renderOrders() {
       </div>
     `;
   }).join('');
+}
+
+async function handleSellerPaymentVerification(orderId, action, btnElement) {
+  const originalText = btnElement ? btnElement.innerHTML : '';
+  let reason = '';
+  if (action === 'reject') {
+    reason = window.prompt('Please provide reason for payment rejection (optional):') || 'Payment not credited';
+  }
+
+  if (btnElement) {
+    btnElement.disabled = true;
+    btnElement.innerHTML = 'Verifying...';
+  }
+
+  try {
+    await OrderService.sellerVerifyPayment(orderId, action, reason);
+    notify(action === 'approve' ? '✓ Payment verified and order confirmed!' : 'Payment marked as rejected.', action === 'approve' ? 'success' : 'info');
+    setTimeout(() => renderOrders(), 400);
+  } catch (err) {
+    if (btnElement) {
+      btnElement.disabled = false;
+      btnElement.innerHTML = originalText;
+    }
+    notify('Payment verification error: ' + err.message, 'error');
+  }
+}
+
+async function shareOrderProof(orderNumber, transactionId, total) {
+  const proofText = `🧾 KrishiSetu Order Receipt\n• Order ID: #${orderNumber}\n• Amount: ₹${total}\n• Payment Method: UPI Scanner\n• UTR / Ref: ${transactionId || 'Submitted'}\n• Platform: KrishiSetu Direct Marketplace`;
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: `KrishiSetu Order #${orderNumber}`,
+        text: proofText
+      });
+      notify('Order receipt shared successfully!', 'success');
+      return;
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.warn('Share error:', err.message);
+      } else {
+        return;
+      }
+    }
+  }
+
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(proofText);
+    } else {
+      const textarea = document.createElement('textarea');
+      textarea.value = proofText;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
+    notify('✓ Order receipt copied to clipboard!', 'success');
+  } catch (clipErr) {
+    notify('Receipt: ' + proofText.replace(/\n/g, ' | '), 'info');
+  }
+}
+
+async function resubmitPaymentProof(orderId) {
+  const input = $('resubmitTxnInput_' + orderId);
+  const txnId = input ? input.value.trim() : '';
+  if (!txnId || txnId.length < 5) {
+    return notify('Please enter a valid UPI Reference / UTR Number (at least 5 characters).', 'error');
+  }
+
+  try {
+    await OrderService.submitPaymentVerification(orderId, txnId);
+    notify('✓ Payment proof submitted! Waiting for farmer verification.', 'success');
+    setTimeout(() => renderOrders(), 400);
+  } catch (err) {
+    notify('Failed to submit proof: ' + err.message, 'error');
+  }
 }
 
 function detectMyLocation() {

@@ -213,6 +213,20 @@ const OrderService = {
       method: 'PUT',
       body: JSON.stringify(body)
     });
+  },
+
+  async submitPaymentVerification(orderId, transactionId) {
+    return ApiService.request(`/api/orders/${orderId}/verify-payment`, {
+      method: 'POST',
+      body: JSON.stringify({ transactionId })
+    });
+  },
+
+  async sellerVerifyPayment(orderId, action, reason) {
+    return ApiService.request(`/api/orders/${orderId}/seller-verify-payment`, {
+      method: 'PUT',
+      body: JSON.stringify({ action, reason })
+    });
   }
 };
 

@@ -545,13 +545,15 @@ class LocalFallbackDB {
           id: params[0], order_number: params[1], customer_id: params[2], seller_id: params[3],
           status: params[4] || 'Order Placed', total_amount: Number(params[5]), platform_fee: Number(params[6] || 0),
           buyer_contact: params[7] || '', step: Number(params[8] || 1), payment_method: params[9] || 'cod',
-          payment_status: params[10] || 'cod', created_at: new Date().toISOString(), updated_at: new Date().toISOString()
+          payment_status: params[10] || 'cod', transaction_id: params[11] || null,
+          created_at: new Date().toISOString(), updated_at: new Date().toISOString()
         };
       } else if (params.length >= 10) {
         order = {
           id: params[0], order_number: params[1], customer_id: params[2], seller_id: params[3],
           status: params[4] || 'Order Placed', total_amount: Number(params[5]), platform_fee: Math.round(Number(params[5]) * 0.02 * 100) / 100,
           buyer_contact: params[6] || '', step: Number(params[7] || 1), payment_method: params[8] || 'cod', payment_status: params[9] || 'cod',
+          transaction_id: params[10] || null,
           created_at: new Date().toISOString(), updated_at: new Date().toISOString()
         };
       } else {
@@ -559,6 +561,7 @@ class LocalFallbackDB {
           id: params[0], order_number: params[1], customer_id: params[2], seller_id: params[3],
           status: params[4] || 'Order Placed', total_amount: Number(params[5]), platform_fee: Math.round(Number(params[5]) * 0.02 * 100) / 100,
           buyer_contact: '', step: 1, payment_method: params[6] || 'cod', payment_status: params[7] || 'cod',
+          transaction_id: null,
           created_at: new Date().toISOString(), updated_at: new Date().toISOString()
         };
       }
@@ -568,10 +571,14 @@ class LocalFallbackDB {
     if (q.includes('FROM orders')) {
       const userId = params[0];
       let found = [];
-      if (q.includes('transaction_id') && params.length >= 2) {
+      if (q.includes('WHERE LOWER(transaction_id)') || q.includes('WHERE transaction_id') || q.includes('transaction_id = $')) {
         const txnId = String(params[0] || '').toLowerCase();
         const excludeId = params[1];
-        found = this.tables.orders.filter(o => String(o.transaction_id || '').toLowerCase() === txnId && o.id !== excludeId && o.payment_status !== 'rejected');
+        found = this.tables.orders.filter(o => 
+          String(o.transaction_id || '').toLowerCase() === txnId && 
+          (!excludeId || o.id !== excludeId) && 
+          o.payment_status !== 'rejected'
+        );
       } else if (q.includes('seller_id = $1')) {
         found = this.tables.orders.filter(o => o.seller_id === userId);
       } else if (q.includes('customer_id = $1')) {

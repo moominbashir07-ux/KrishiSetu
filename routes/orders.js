@@ -34,9 +34,26 @@ const STATUS_TO_STEP = {
 
 // CREATE ORDER (DIRECT OR CART CHECKOUT)
 router.post('/', authenticateUser, requireRole('customer'), async (req, res, next) => {
-  const { productId, quantity, payment_method = 'cod', payment_status } = req.body;
+  const { productId, quantity, payment_method = 'cod', payment_status, transaction_id, transactionId } = req.body;
   const customerId = req.user.id;
   const buyerContact = req.user.contact;
+
+  const cleanTxnId = (transaction_id || transactionId || '').trim() || null;
+  if (cleanTxnId) {
+    if (cleanTxnId.length < 5 || cleanTxnId.length > 100) {
+      return res.status(400).json({ error: 'A valid Transaction ID (between 5 and 100 characters) is required.' });
+    }
+
+    const dupCheck = await db.query(
+      "SELECT id, order_number FROM orders WHERE LOWER(transaction_id) = LOWER($1) AND payment_status != 'rejected'",
+      [cleanTxnId]
+    );
+    if (dupCheck.rows.length > 0) {
+      return res.status(409).json({
+        error: `This Transaction ID has already been submitted for Order #${dupCheck.rows[0].order_number || dupCheck.rows[0].id}. Each payment requires a unique Transaction ID.`
+      });
+    }
+  }
 
   const validPayStatus = payment_status || (payment_method === 'upi_qr' ? 'submitted' : 'cod');
 
@@ -132,9 +149,9 @@ router.post('/', authenticateUser, requireRole('customer'), async (req, res, nex
         const sellerTotal = Math.round((sellerSubtotal + platformFee) * 100) / 100;
 
         await client.query(
-          `INSERT INTO orders (id, order_number, customer_id, seller_id, status, total_amount, platform_fee, buyer_contact, step, payment_method, payment_status)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-          [orderId, orderNumber, customerId, sellerId, 'Order Placed', sellerTotal, platformFee, buyerContact, 1, payment_method, validPayStatus]
+          `INSERT INTO orders (id, order_number, customer_id, seller_id, status, total_amount, platform_fee, buyer_contact, step, payment_method, payment_status, transaction_id)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+          [orderId, orderNumber, customerId, sellerId, 'Order Placed', sellerTotal, platformFee, buyerContact, 1, payment_method, validPayStatus, cleanTxnId]
         );
 
         // Record initial status history log
@@ -191,6 +208,8 @@ router.post('/', authenticateUser, requireRole('customer'), async (req, res, nex
           total: sellerTotal,
           payment_method: payment_method,
           payment_status: validPayStatus,
+          transaction_id: cleanTxnId,
+          transactionId: cleanTxnId,
           product: items[0].product.name,
           qty: items[0].requestedQty,
           price: items[0].unitPrice,
@@ -232,7 +251,7 @@ router.get('/', authenticateUser, async (req, res, next) => {
 
     const fields = `
       o.id, o.order_number, o.status, o.step, o.total_amount as total, o.buyer_contact, o.created_at, o.customer_id, o.seller_id,
-      o.payment_method, o.payment_status,
+      o.payment_method, o.payment_status, o.transaction_id,
       su.name as "sellerName", su.contact as "sellerContact", COALESCE(sp.verification_status, 'pending') as "sellerVerificationStatus",
       cu.name as "customerName", cu.contact as "customerEmail", cu.phone as "customerPhone",
       cp.address as "customerAddress", cp.city as "customerCity", cp.state as "customerState", cp.pincode as "customerPincode"
@@ -320,6 +339,8 @@ router.get('/', authenticateUser, async (req, res, next) => {
         total: totalAmount,
         payment_method: orderRow.payment_method || 'cod',
         payment_status: orderRow.payment_status || 'pending',
+        transaction_id: orderRow.transaction_id || null,
+        transactionId: orderRow.transaction_id || null,
         status: orderRow.status,
         step: Number(orderRow.step || 1),
         sellerName: orderRow.sellerName || 'Local Farmer',
