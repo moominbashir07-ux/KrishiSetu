@@ -1,0 +1,66 @@
+{
+  "family": "krishisetu-backend",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/krishisetu-ecs-execution-role",
+  "taskRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/krishisetu-ecs-task-role",
+  "containerDefinitions": [
+    {
+      "name": "krishisetu-app",
+      "image": "<ECR_IMAGE_URI>:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "NODE_ENV", "value": "production" },
+        { "name": "PORT", "value": "3000" },
+        { "name": "AWS_REGION", "value": "ap-south-1" },
+        { "name": "BEDROCK_REGION", "value": "ap-south-1" },
+        { "name": "BEDROCK_PROVIDER", "value": "aws" },
+        { "name": "STORAGE_PROVIDER", "value": "s3" },
+        { "name": "MARKET_DATA_PROVIDER", "value": "datagov" },
+        { "name": "AWS_S3_MEDIA_BUCKET", "value": "krishisetu-media-prod" }
+      ],
+      "secrets": [
+        {
+          "name": "DATABASE_URL",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:<ACCOUNT_ID>:secret:krishisetu/prod/DATABASE_URL"
+        },
+        {
+          "name": "JWT_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:<ACCOUNT_ID>:secret:krishisetu/prod/JWT_SECRET"
+        },
+        {
+          "name": "ADMIN_BOOTSTRAP_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:<ACCOUNT_ID>:secret:krishisetu/prod/ADMIN_BOOTSTRAP_KEY"
+        },
+        {
+          "name": "DATA_GOV_IN_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:<ACCOUNT_ID>:secret:krishisetu/prod/DATA_GOV_IN_API_KEY"
+        }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "node -e \"fetch('http://localhost:3000/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))\""],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 15
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/krishisetu-backend",
+          "awslogs-region": "ap-south-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}

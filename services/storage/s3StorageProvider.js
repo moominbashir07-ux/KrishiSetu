@@ -18,8 +18,10 @@ class S3StorageProvider extends StorageProvider {
     }
 
     const clientConfig = { region: this.region };
-    // If running with explicit access keys in development, wire them
-    if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+    // If explicit credentials passed in options or environment, configure them
+    if (options.credentials) {
+      clientConfig.credentials = options.credentials;
+    } else if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
       clientConfig.credentials = {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,

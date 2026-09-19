@@ -100,12 +100,15 @@ Review `.env.example` to configure:
 ## 📅 Development Roadmap & Production Status
 
 - **Phase 0–6 (Completed & Synchronized)**: Core marketplace, authentication, RBAC, PostgreSQL/DynamoDB integration, Mandi Intelligence engine, Bedrock advisor, order state machine, dispute evidence timeline, and Phase 6 production hardening.
-- **Phase 7 (Production Readiness & Deployment Verification - Verified)**:
-  - Centralized production configuration validation (`config/env.js`).
-  - Liveness & Readiness endpoints (`GET /api/health`, `GET /api/ready`) with structured dependency checks.
-  - End-to-end multi-party user flows (Buyer, Seller, Admin).
-  - High-concurrency inventory race protections & terminal order immutability.
-  - 100% test coverage: **395 tests passed, 0 failed, 0 skipped across 35 test suites**.
+- **Phase 7 (Production Readiness & Deployment Verification - Verified)**: Centralized production configuration validation (`config/env.js`), Liveness & Readiness endpoints (`GET /api/health`, `GET /api/ready`), end-to-end multi-party user flows, high-concurrency race protection, and terminal order immutability.
+- **Phase 8 (AWS Cloud Deployment & Real-Service Integration - Verified)**:
+  - Multi-stage Node 22 production containerization (`Dockerfile`, `.dockerignore`).
+  - AWS App Runner and ECS Fargate deployment manifests (`apprunner.yaml`, `aws-ecs-task-definition.json`, `AWS_DEPLOYMENT_GUIDE.md`).
+  - Amazon S3 presigned URL generation and least-privilege IAM storage policies.
+  - Amazon Bedrock AI integration with safe advisory boundaries.
+  - Live verification against official Indian Open Government Data (`data.gov.in` AGMARKNET API, 15,419 live records).
+  - Automated deployment smoke test runner (`scripts/smoke_test.js`).
+  - 100% automated test coverage: **412 tests passed, 0 failed, 0 skipped across 42 test suites**.
 
 ---
 

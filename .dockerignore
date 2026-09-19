@@ -1,0 +1,16 @@
+# KrishiSetu 2.0 — Production Docker Ignore
+.env
+.env.*
+.git
+.gitignore
+node_modules
+npm-debug.log
+scratch
+*.log
+*.pem
+*.key
+.DS_Store
+Thumbs.db
+tests
+.coverage
+.nyc_output

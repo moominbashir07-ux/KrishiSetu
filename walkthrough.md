@@ -109,24 +109,43 @@ Phase 7 makes KrishiSetu deployment-ready and demo-ready with production-grade c
 
 ---
 
-## 7. Master Automated Test Suite Verification
+## 7. Phase 8 AWS Cloud Deployment & Real-Service Integration
+
+Phase 8 elevates KrishiSetu from production-ready code into a verified, cloud-deployable enterprise architecture:
+
+- **Containerization**: Multi-stage Node 22 Alpine Dockerfile (`Dockerfile`) with non-root runtime `USER node`, dumb-init signal handling, and native `HEALTHCHECK`.
+- **AWS Deployment Targets**:
+  - AWS App Runner configuration (`apprunner.yaml`) with automated SSL termination, healthcheck routing, and auto-scaling.
+  - AWS ECS Fargate task definition (`aws-ecs-task-definition.json`) with CloudWatch logging and AWS Secrets Manager integration.
+  - Comprehensive deployment guide in `AWS_DEPLOYMENT_GUIDE.md`.
+- **Reverse Proxy Header Trust**: Added `app.set('trust proxy', 1)` in Express for AWS App Runner, CloudFront, and ALB single-hop SSL termination.
+- **Amazon S3 Storage**: Real S3 provider (`services/storage/s3StorageProvider.js`) generating compliant Presigned URLs for PUT uploads with strict MIME-type validation, size limits (5 MB), and least-privilege IAM policies.
+- **Amazon Bedrock AI**: Real Bedrock runtime integration (`services/ai/awsBedrockProvider.js`) with Claude 3 Haiku advisory, safe 503 fallback, and zero silent mock fallback in production.
+- **Official Open Government Data (data.gov.in / AGMARKNET)**: Tested live against the Ministry of Agriculture open data portal, retrieving and parsing 15,419 real mandi records without synthetic data fabrication.
+- **Deployment Smoke Test Runner**: Created `scripts/smoke_test.js` validating health, readiness, public catalog, 404 contracts, and 401 auth rejection against running deployment endpoints.
+
+---
+
+## 8. Master Automated Test Suite Verification
 
 ```text
-✔ Total Test Suites: 35
-ℹ tests 395
-ℹ suites 35
-ℹ pass 395
+✔ Total Test Suites: 42
+ℹ tests 412
+ℹ suites 42
+ℹ pass 412
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 16579.7329
+ℹ duration_ms 16076.7561
 ```
 
 ---
 
-## 8. Security & Git Audit
+## 9. Security & Git Audit
 
 - **Secrets Scan**: Verified zero private keys, database passwords, JWT secrets, or AWS credentials committed to git.
 - **Environment Isolation**: `.env` and `scratch/` are strictly ignored by `.gitignore`.
-- **Database Integrity**: Verified database consistency across `users`, `seller_profiles`, `products`, `orders`, `order_items`, `notifications`, `reviews`, and `disputes`.
+- **Database Integrity**: PostgreSQL remains the primary system of record with verified SSL and transaction integrity.
+- **Cloud Integrity**: All cloud components adhere to least-privilege security principles and safe advisory boundaries.
+

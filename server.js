@@ -20,6 +20,8 @@ const { disputesRouter } = require('./routes/disputes');
 const { aiRouter } = require('./routes/ai');
 
 const app = express();
+// Enable single-hop reverse proxy trust for AWS App Runner, CloudFront, and ALB
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 const API_KEY = process.env.DATA_GOV_IN_API_KEY || '';
 const RESOURCE_ID = '9ef84268-d588-465a-a308-a864a43d0070';
