@@ -447,7 +447,10 @@ router.get('/:id', authenticateUser, async (req, res, next) => {
     );
 
     if (!orderRes.rows.length) {
-      return res.status(404).json({ error: 'Order not found.' });
+      const err = new Error('Order not found.');
+      err.status = 404;
+      err.code = 'ORDER_NOT_FOUND';
+      return next(err);
     }
 
     const order = orderRes.rows[0];
@@ -484,7 +487,10 @@ const handleOrderStatusUpdate = async (req, res, next) => {
     );
 
     if (!orderRes.rows.length) {
-      return res.status(404).json({ error: 'Order not found.' });
+      const err = new Error('Order not found.');
+      err.status = 404;
+      err.code = 'ORDER_NOT_FOUND';
+      return next(err);
     }
 
     const order = orderRes.rows[0];

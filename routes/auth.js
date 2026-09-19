@@ -12,7 +12,7 @@ const router = express.Router();
 const TOKEN_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 // SIGN UP / REGISTER ROUTE
-router.post(['/signup', '/register'], validateAuthInput, async (req, res, next) => {
+router.post(['/signup', '/register'], authLimiter, validateAuthInput, async (req, res, next) => {
   const { name, contact, password, role = 'seller' } = req.body;
   const normalizedContact = contact.trim().toLowerCase();
 
@@ -202,7 +202,7 @@ router.post('/send-otp', otpLimiter, async (req, res, next) => {
 });
 
 // VERIFY OTP ROUTE
-router.post('/verify-otp', async (req, res, next) => {
+router.post('/verify-otp', otpLimiter, async (req, res, next) => {
   const { contact, purpose = 'email_verification', otp } = req.body;
 
   if (!contact || !otp) {
@@ -247,7 +247,7 @@ router.post('/forgot-password', otpLimiter, async (req, res, next) => {
 });
 
 // RESET PASSWORD WITH VERIFIED OTP
-router.post('/reset-password', async (req, res, next) => {
+router.post('/reset-password', authLimiter, async (req, res, next) => {
   const { contact, otp, newPassword } = req.body;
 
   if (!contact || !otp || !newPassword) {

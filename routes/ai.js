@@ -5,9 +5,11 @@
 
 const express = require('express');
 const { authenticateUser } = require('../middleware/auth');
+const { aiLimiter } = require('../middleware/security');
 const { BedrockAdvisorService } = require('../services/ai/bedrockAdvisorService');
 
 const router = express.Router();
+router.use(aiLimiter);
 const defaultBedrockService = new BedrockAdvisorService();
 
 function handleAiError(err, res, next) {

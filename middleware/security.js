@@ -29,6 +29,43 @@ const authLimiter = rateLimit({
   message: { error: 'Too many authentication attempts from this IP. Please try again after 15 minutes.' }
 });
 
+// Dedicated rate limiter for AI advisory endpoints
+const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 45, // limit each IP to 45 AI advisory requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many AI advisory requests from this IP. Please try again after 15 minutes.', code: 'RATE_LIMIT_EXCEEDED' }
+});
+
+// Request correlation ID middleware
+function requestIdMiddleware(req, res, next) {
+  const incomingId = req.headers['x-request-id'];
+  const reqId = (incomingId && typeof incomingId === 'string' && incomingId.trim())
+    ? incomingId.trim()
+    : 'REQ_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+  req.id = reqId;
+  res.setHeader('x-request-id', reqId);
+  next();
+}
+
+// Structured request logging middleware
+function requestLogger(req, res, next) {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    const rawUrl = req.originalUrl || req.url;
+    const safeUrl = rawUrl.replace(/(token|password|otp|secret)=[^&]+/gi, '$1=****');
+    const userTag = req.user ? `[user=${req.user.id}]` : '[anon]';
+    if (!safeUrl.startsWith('/images') && !safeUrl.endsWith('.png') && !safeUrl.endsWith('.ico')) {
+      if (process.env.NODE_ENV !== 'test') {
+        console.log(`[HTTP] ${req.method} ${safeUrl} ${res.statusCode} ${duration}ms [reqId=${req.id || 'N/A'}] ${userTag}`);
+      }
+    }
+  });
+  next();
+}
+
 // Configure environment-driven CORS allowlist
 function getAllowedOrigins() {
   const configured = (process.env.APP_ALLOWED_ORIGINS || '')
@@ -125,10 +162,15 @@ const securityHeaders = helmet({
 
 // Global centralized error handler
 function errorHandler(err, req, res, next) {
+  const reqId = (req && req.id) ? req.id : null;
   // Sanitize stack/message before logging to ensure secrets/passwords are not logged
   const rawMsg = err.stack || err.message || String(err);
-  const sanitizedLog = rawMsg.replace(/password(=|:\s*)[^\s&]+/gi, 'password=****');
-  console.error('[SERVER ERROR]', sanitizedLog);
+  const sanitizedLog = rawMsg
+    .replace(/password(=|:\s*)[^\s&]+/gi, 'password=****')
+    .replace(/bearer\s+[a-zA-Z0-9\-_.]+/gi, 'Bearer ****')
+    .replace(/otp(=|:\s*)[^\s&]+/gi, 'otp=****');
+
+  console.error(`[SERVER ERROR] [reqId=${reqId || 'N/A'}]`, sanitizedLog);
   
   const statusCode = err.statusCode || err.status || 500;
   let publicMessage = err.message || 'Error processing request.';
@@ -155,9 +197,14 @@ function errorHandler(err, req, res, next) {
     publicMessage = 'Database operation failed';
   }
 
+  if (reqId) {
+    res.setHeader('x-request-id', reqId);
+  }
+
   res.status(statusCode).json({
     error: publicMessage,
-    code: err.code || (isDbError ? 'DB_OPERATION_FAILED' : 'SERVER_ERROR')
+    code: err.code || (isDbError ? 'DB_OPERATION_FAILED' : 'SERVER_ERROR'),
+    requestId: reqId
   });
 }
 
@@ -165,6 +212,9 @@ module.exports = {
   apiLimiter,
   otpLimiter,
   authLimiter,
+  aiLimiter,
+  requestIdMiddleware,
+  requestLogger,
   securityHeaders,
   corsOptions,
   errorHandler

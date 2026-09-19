@@ -25,6 +25,11 @@ class DisputeStateMachine {
     return ALLOWED_DISPUTE_REASONS.has(String(reason).trim().toUpperCase());
   }
 
+  static isTerminal(status) {
+    const s = String(status).trim().toUpperCase();
+    return Boolean(DISPUTE_TRANSITIONS[s] && DISPUTE_TRANSITIONS[s].size === 0);
+  }
+
   static canTransition(currentStatus, nextStatus) {
     const from = String(currentStatus).trim().toUpperCase();
     const to = String(nextStatus).trim().toUpperCase();

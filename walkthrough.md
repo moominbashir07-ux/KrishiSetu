@@ -74,13 +74,30 @@ Phase 5 ("Reliability, Real-Time UX, Seller Profile, Orders, Notifications & AI 
 
 ---
 
-## 3. Automated Test Suite Results
+---
+
+## 5. Phase 6 Production Hardening, Observability & Final Trust Layer
+
+Phase 6 hardens all core systems for production deployment with end-to-end observability, abuse protection, and trust guarantees:
+
+- **Correlation Tracing**: `requestIdMiddleware` generates or preserves `x-request-id` on every request.
+- **Centralized Safe Error Handling**: All API error responses emit `{ error, code, requestId }` and sanitize stack traces, stripping tokens, passwords, and SQL details.
+- **Abuse Protection & Rate Limiting**: Added `aiLimiter` (45 req / 15 min) to AI endpoints; mounted `authLimiter` on `/signup`, `/register`, and `/reset-password`; mounted `otpLimiter` on `/verify-otp`.
+- **Insecure JWT Guard**: Strict check blocking known placeholder secrets (`change-this-in-production`, `secret`, `jwt_secret`) in production.
+- **Account Status Guard**: Frozen or suspended accounts are rejected with 403 Forbidden.
+- **Order State Machine Terminal Immutability**: Orders in `Completed`, `Cancelled`, or `Rejected` cannot transition to any other status.
+- **Dispute System Role Shield**: Only administrators can resolve or reject disputes. Dispute transitions follow formal state machine rules.
+- **Market Data Freshness**: Strict temporal classification (`LIVE` <=24h, `RECENT` <=48h, `STALE` >48h, `UNAVAILABLE`).
+
+---
+
+## 6. Final Automated Test Suite Verification
 
 ```text
-✔ Phase 5: Reliability, Real-Time UX, Seller Profile & Orders Suite (20 suites)
-ℹ tests 363
-ℹ suites 20
-ℹ pass 363
+✔ Total Test Suites: 27
+ℹ tests 375
+ℹ suites 27
+ℹ pass 375
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
@@ -89,8 +106,8 @@ Phase 5 ("Reliability, Real-Time UX, Seller Profile, Orders, Notifications & AI 
 
 ---
 
-## 4. Security & Audit Verification
+## 7. Security & Audit Verification
 
 - **Secrets Scan**: Verified zero private keys, database passwords, JWT secrets, or AWS credentials committed to git.
 - **Environment Isolation**: `.env` and `scratch/` are strictly ignored by `.gitignore`.
-- **Database Integrity**: Live database state verified across `users`, `seller_profiles`, `products`, `orders`, `order_items`, `notifications`, and `reviews`.
+- **Database Integrity**: Live database state verified across `users`, `seller_profiles`, `products`, `orders`, `order_items`, `notifications`, `reviews`, and `disputes`.

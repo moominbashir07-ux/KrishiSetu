@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const db = require('./db/db');
 const { initDb } = db;
-const { apiLimiter, securityHeaders, corsOptions, errorHandler } = require('./middleware/security');
+const { apiLimiter, securityHeaders, corsOptions, errorHandler, requestIdMiddleware, requestLogger } = require('./middleware/security');
 
 const authRouter = require('./routes/auth');
 const productsRouter = require('./routes/products');
@@ -25,7 +25,9 @@ const API_KEY = process.env.DATA_GOV_IN_API_KEY || '';
 const RESOURCE_ID = '9ef84268-d588-465a-a308-a864a43d0070';
 const API_BASE = `https://api.data.gov.in/resource/${RESOURCE_ID}`;
 
-// Apply security middleware & parsers
+// Apply security middleware, correlation ID, logging & parsers
+app.use(requestIdMiddleware);
+app.use(requestLogger);
 app.use(securityHeaders);
 app.use(corsOptions);
 app.use(express.json({ limit: '10mb' }));
@@ -542,6 +544,14 @@ app.get('*', (req, res, next) => {
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
   res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// 404 handler for unmatched API endpoints
+app.use('/api/*', (req, res, next) => {
+  const err = new Error(`API endpoint not found: ${req.method} ${req.originalUrl}`);
+  err.status = 404;
+  err.code = 'ENDPOINT_NOT_FOUND';
+  next(err);
 });
 
 // Centralized safe error handler

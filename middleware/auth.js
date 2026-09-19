@@ -7,14 +7,19 @@ const KNOWN_JWT_PLACEHOLDERS = [
   'your-secret-key',
   'secret',
   'jwt_secret_key',
-  'change_this_secret'
+  'change_this_secret',
+  'replace_with_a_secure_random_string_in_production',
+  'your_super_secret_jwt_key_here'
 ];
 
 function getJwtSecret() {
   const secret = process.env.JWT_SECRET || 'krishisetu_jwt_super_secret_key_2026_change_in_production';
   if (process.env.NODE_ENV === 'production') {
     if (!process.env.JWT_SECRET || KNOWN_JWT_PLACEHOLDERS.includes(process.env.JWT_SECRET.trim())) {
-      throw new Error('FATAL: Production rejects default/example JWT placeholder. A real configured secret is required.');
+      const err = new Error('FATAL: Production rejects default/example JWT placeholder. A real configured secret is required.');
+      err.code = 'INSECURE_JWT_SECRET';
+      err.statusCode = 500;
+      throw err;
     }
   }
   return secret;
@@ -37,7 +42,8 @@ async function authenticateUser(req, res, next) {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const secret = getJwtSecret();
+    const decoded = jwt.verify(token, secret);
     const result = await db.query(
       'SELECT id, name, contact, role, account_status, email_verified, phone, phone_verified, show_phone, profile_photo FROM users WHERE id = $1',
       [decoded.id]
@@ -128,7 +134,7 @@ async function requireProductOwnership(req, res, next) {
 }
 
 function generateToken(payload, expiresIn = (process.env.JWT_EXPIRES_IN || '7d')) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn });
+  return jwt.sign(payload, getJwtSecret(), { expiresIn });
 }
 
 function toSafeUser(user) {
