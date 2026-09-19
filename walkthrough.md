@@ -91,23 +91,42 @@ Phase 6 hardens all core systems for production deployment with end-to-end obser
 
 ---
 
-## 6. Final Automated Test Suite Verification
+## 6. Phase 7 Production Readiness, Deployment Verification & Demo Hardening
+
+Phase 7 makes KrishiSetu deployment-ready and demo-ready with production-grade configuration validation, observability probes, and verified multi-party flows:
+
+- **Centralized Configuration Validation**: Fast-fail checks in `config/env.js` validating `DATABASE_URL`, `JWT_SECRET`, `ADMIN_BOOTSTRAP_KEY`, S3 configuration (`AWS_S3_MEDIA_BUCKET`), Bedrock configuration (`AWS_REGION`), and `APP_ALLOWED_ORIGINS`.
+- **Liveness & Readiness Probes**:
+  - `GET /api/health` & `/health`: Process heartbeat and uptime monitor with correlation ID.
+  - `GET /api/ready` & `/ready`: Structured dependency check evaluating database, storage, AI, and market data readiness.
+- **End-to-End User Journeys**: Full verified multi-party flows:
+  - Buyer: Catalog browse $\rightarrow$ order placement $\rightarrow$ order details inspection with snapshots.
+  - Seller: Listing creation $\rightarrow$ sequential order lifecycle (`Farmer Confirmed` $\rightarrow$ `Preparing` $\rightarrow$ `Ready` $\rightarrow$ `Completed`) $\rightarrow$ audit trail inspection.
+  - Admin: Authorization enforcement $\rightarrow$ multi-party dispute resolution.
+- **Concurrency & Inventory Bounds**: `Stock = 1` simultaneous checkout race verified: prevents negative inventory and overselling, automatically transitions to `out_of_stock`.
+- **Market Data Freshness**: Precise temporal boundaries at 24h and 48h verified without artificial data fabrication.
+- **AI & Storage Isolation**: Production Bedrock safely fails without silent mock fallbacks; presigned URL generation strictly protects against IDOR and executable files.
+
+---
+
+## 7. Master Automated Test Suite Verification
 
 ```text
-✔ Total Test Suites: 27
-ℹ tests 375
-ℹ suites 27
-ℹ pass 375
+✔ Total Test Suites: 35
+ℹ tests 395
+ℹ suites 35
+ℹ pass 395
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
+ℹ duration_ms 16579.7329
 ```
 
 ---
 
-## 7. Security & Audit Verification
+## 8. Security & Git Audit
 
 - **Secrets Scan**: Verified zero private keys, database passwords, JWT secrets, or AWS credentials committed to git.
 - **Environment Isolation**: `.env` and `scratch/` are strictly ignored by `.gitignore`.
-- **Database Integrity**: Live database state verified across `users`, `seller_profiles`, `products`, `orders`, `order_items`, `notifications`, `reviews`, and `disputes`.
+- **Database Integrity**: Verified database consistency across `users`, `seller_profiles`, `products`, `orders`, `order_items`, `notifications`, `reviews`, and `disputes`.

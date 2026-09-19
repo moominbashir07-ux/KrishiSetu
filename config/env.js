@@ -75,13 +75,30 @@ function validateEnv(options = {}) {
 
     // Validate required provider configuration if specified
     const storageProvider = (env.STORAGE_PROVIDER || '').toLowerCase();
-    if (storageProvider === 's3' && !env.AWS_S3_MEDIA_BUCKET) {
-      missingCritical.push('Production storage provider "s3" requires AWS_S3_MEDIA_BUCKET.');
+    if (storageProvider === 's3') {
+      if (!env.AWS_S3_MEDIA_BUCKET) {
+        missingCritical.push('Production storage provider "s3" requires AWS_S3_MEDIA_BUCKET.');
+      }
+      if (!env.AWS_REGION && !env.AWS_DEFAULT_REGION) {
+        missingCritical.push('Production storage provider "s3" requires AWS_REGION or AWS_DEFAULT_REGION.');
+      }
     }
 
     const bedrockProvider = (env.BEDROCK_PROVIDER || '').toLowerCase();
-    if (bedrockProvider === 'aws' && !env.AWS_REGION && !env.BEDROCK_REGION) {
-      missingCritical.push('Production AI provider "aws" requires AWS_REGION or BEDROCK_REGION.');
+    if (bedrockProvider === 'aws') {
+      if (!env.AWS_REGION && !env.BEDROCK_REGION && !env.AWS_DEFAULT_REGION) {
+        missingCritical.push('Production AI provider "aws" requires AWS_REGION, BEDROCK_REGION, or AWS_DEFAULT_REGION.');
+      }
+    }
+
+    // Validate CORS origins in production if specified
+    if (env.APP_ALLOWED_ORIGINS) {
+      const origins = env.APP_ALLOWED_ORIGINS.split(',').map(o => o.trim());
+      for (const origin of origins) {
+        if (origin !== '*' && !/^https?:\/\//i.test(origin)) {
+          missingCritical.push(`Invalid APP_ALLOWED_ORIGINS entry "${origin}": Must include protocol (http:// or https://).`);
+        }
+      }
     }
   }
 

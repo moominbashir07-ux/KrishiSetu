@@ -1132,6 +1132,8 @@ async function getClient() {
   };
 }
 
+let fallbackTransactionLock = Promise.resolve();
+
 async function withTransaction(callback) {
   if (isPgConnected && pool) {
     const client = await pool.connect();
@@ -1147,7 +1149,16 @@ async function withTransaction(callback) {
       client.release();
     }
   } else {
-    return callback(fallbackDb);
+    // Queue transactions sequentially in fallback mode to model true row-level lock isolation
+    const currentLock = fallbackTransactionLock;
+    let releaseLock;
+    fallbackTransactionLock = new Promise(resolve => { releaseLock = resolve; });
+    try {
+      await currentLock;
+      return await callback(fallbackDb);
+    } finally {
+      releaseLock();
+    }
   }
 }
 

@@ -65,34 +65,115 @@ if (process.env.NODE_ENV === 'production' && !envStatus.valid) {
   process.exit(1);
 }
 
-// Production Health Check Endpoint (Phase 2 Hardened)
-app.get('/api/health', async (req, res) => {
+// Production Health Check Endpoint (Liveness Probe)
+app.get(['/api/health', '/health'], async (req, res) => {
   try {
     const isConnected = db.isPgConnected();
-    let dbStatus = isConnected ? 'connected' : (process.env.DATABASE_URL ? 'disconnected' : 'fallback');
+    const isProduction = process.env.NODE_ENV === 'production';
+    let dbStatus = isConnected ? 'connected' : (isProduction ? 'disconnected' : 'connected (fallback)');
 
     if (isConnected) {
       const ping = await db.pingDb();
       if (!ping.connected) {
-        dbStatus = 'disconnected';
+        dbStatus = isProduction ? 'disconnected' : 'connected (fallback)';
       }
     }
 
-    const isDegraded = dbStatus === 'disconnected';
+    const isDegraded = isProduction && dbStatus === 'disconnected';
     const statusCode = isDegraded ? 503 : 200;
 
     res.status(statusCode).json({
       status: isDegraded ? 'degraded' : 'ok',
-      database: dbStatus === 'connected' ? 'connected' : (dbStatus === 'fallback' ? 'connected (fallback)' : 'disconnected'),
+      database: dbStatus,
+      uptime: Math.round(process.uptime()),
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development'
+      environment: process.env.NODE_ENV || 'development',
+      requestId: req.id || req.headers['x-request-id'] || null
     });
   } catch (e) {
     res.status(503).json({
       status: 'degraded',
       database: 'disconnected',
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development'
+      environment: process.env.NODE_ENV || 'development',
+      requestId: req.id || req.headers['x-request-id'] || null
+    });
+  }
+});
+
+// Production Readiness Endpoint (Readiness Probe with Dependency Checks)
+app.get(['/api/ready', '/ready'], async (req, res) => {
+  try {
+    const isConnected = db.isPgConnected();
+    const isProduction = process.env.NODE_ENV === 'production';
+    let dbStatus = isConnected ? 'ok' : (isProduction ? 'disconnected' : 'ok (fallback)');
+    if (isConnected) {
+      const ping = await db.pingDb();
+      if (!ping.connected) {
+        dbStatus = isProduction ? 'disconnected' : 'ok (fallback)';
+      }
+    }
+
+    // Storage check
+    const storageProvider = (process.env.STORAGE_PROVIDER || '').toLowerCase();
+    const storageStatus = storageProvider === 's3'
+      ? (process.env.AWS_S3_MEDIA_BUCKET ? 'ok' : 'unconfigured')
+      : 'ok';
+
+    // AI advisor check
+    let aiStatus = 'configured';
+    try {
+      const { BedrockAdvisorService } = require('./services/ai/bedrockAdvisorService');
+      const aiService = new BedrockAdvisorService();
+      const status = aiService.getProviderStatus();
+      if (status.activeProvider === 'aws' && !status.available) {
+        aiStatus = 'degraded';
+      } else if (status.activeProvider === 'unavailable') {
+        aiStatus = 'unconfigured';
+      }
+    } catch {
+      aiStatus = 'unconfigured';
+    }
+
+    // Market data check
+    let marketDataStatus = 'available';
+    try {
+      const { MandiIntelligenceService } = require('./services/market/mandiIntelligenceService');
+      const mandiService = new MandiIntelligenceService();
+      const status = mandiService.getProviderStatus();
+      marketDataStatus = status.activeProvider ? 'available' : 'unavailable';
+    } catch {
+      marketDataStatus = 'unavailable';
+    }
+
+    const checks = {
+      database: dbStatus,
+      storage: storageStatus,
+      ai: aiStatus,
+      marketData: marketDataStatus
+    };
+
+    const isNotReady = isProduction && dbStatus === 'disconnected';
+    const statusCode = isNotReady ? 503 : 200;
+
+    res.status(statusCode).json({
+      status: isNotReady ? 'not_ready' : 'ready',
+      checks,
+      timestamp: new Date().toISOString(),
+      requestId: req.id || req.headers['x-request-id'] || null
+    });
+  } catch (err) {
+    res.status(503).json({
+      status: 'not_ready',
+      checks: {
+        database: 'error',
+        storage: 'unknown',
+        ai: 'unknown',
+        marketData: 'unknown'
+      },
+      error: 'Readiness probe failed',
+      timestamp: new Date().toISOString(),
+      requestId: req.id || req.headers['x-request-id'] || null
     });
   }
 });
