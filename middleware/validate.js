@@ -54,8 +54,12 @@ function validateAuthInput(req, res, next) {
     return res.status(400).json({ error: 'Phone or email contact is required.' });
   }
 
-  const isSignup = req.path && req.path.includes('signup');
+  const isSignup = req.path && (req.path.includes('signup') || req.path.includes('register'));
   if (isSignup) {
+    const { confirmPassword } = req.body;
+    if (confirmPassword !== undefined && confirmPassword !== null && confirmPassword !== password) {
+      return res.status(400).json({ error: 'Passwords do not match. Please verify both fields.' });
+    }
     if (!isStrongPassword(password)) {
       return res.status(400).json({
         error: 'Your password is too weak. Use at least 8 characters with uppercase, lowercase, numbers, and a special character.'

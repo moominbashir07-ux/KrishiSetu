@@ -25,3 +25,12 @@ Thumbs.db
 # Logs & temp
 logs
 *.log
+
+# AWS credentials & secrets
+.aws/
+credentials
+*.pem
+*.key
+*.cert
+*.secret
+scratch/

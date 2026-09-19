@@ -29,36 +29,135 @@ const authLimiter = rateLimit({
   message: { error: 'Too many authentication attempts from this IP. Please try again after 15 minutes.' }
 });
 
-// Configure standard security headers
+// Configure environment-driven CORS allowlist
+function getAllowedOrigins() {
+  const configured = (process.env.APP_ALLOWED_ORIGINS || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  if (process.env.APP_URL && !configured.includes(process.env.APP_URL.trim())) {
+    configured.push(process.env.APP_URL.trim());
+  }
+
+  // Local development origins
+  if (process.env.NODE_ENV !== 'production') {
+    if (!configured.includes('http://localhost:3000')) configured.push('http://localhost:3000');
+    if (!configured.includes('http://127.0.0.1:3000')) configured.push('http://127.0.0.1:3000');
+  }
+
+  return configured;
+}
+
+function isOriginAllowed(origin) {
+  if (!origin) return true; // Allow non-browser requests (curl, server-to-server, mobile)
+  const allowed = getAllowedOrigins();
+  if (allowed.length === 0 && process.env.NODE_ENV !== 'production') return true;
+
+  return allowed.some(allowedOrigin => {
+    if (allowedOrigin === origin) return true;
+    // Allow localhost with any port in development
+    if (process.env.NODE_ENV !== 'production' && (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:'))) {
+      return true;
+    }
+    return false;
+  });
+}
+
+const corsOptions = cors({
+  origin: (origin, callback) => {
+    if (isOriginAllowed(origin)) {
+      callback(null, true);
+    } else {
+      const err = new Error(`CORS blocked for origin: ${origin}`);
+      err.status = 403;
+      err.code = 'CORS_FORBIDDEN';
+      callback(err);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token', 'x-request-id']
+});
+
+// Configure tailored Content Security Policy compatible with legacy index.html
 const securityHeaders = helmet({
-  contentSecurityPolicy: false, // PoC compatibility with inline script application
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: [
+        "'self'",
+        "'unsafe-inline'", // Required for embedded Tailwind config and client scripts in legacy index.html
+        "https://cdn.tailwindcss.com",
+        "https://cdn.jsdelivr.net"
+      ],
+      styleSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "https://fonts.googleapis.com",
+        "https://cdn.jsdelivr.net"
+      ],
+      fontSrc: [
+        "'self'",
+        "https://fonts.gstatic.com",
+        "data:"
+      ],
+      imgSrc: [
+        "'self'",
+        "data:",
+        "blob:",
+        "https:" // Required for remote produce photos and S3 presigned asset display
+      ],
+      connectSrc: [
+        "'self'",
+        "https:", // Required for remote S3 PUT uploads and data.gov.in
+        "http://localhost:*",
+        "http://127.0.0.1:*"
+      ],
+      frameAncestors: ["'self'"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"]
+    }
+  },
   crossOriginEmbedderPolicy: false,
   frameguard: { action: 'sameorigin' }
 });
 
-// Configure CORS
-const corsOptions = cors({
-  origin: true,
-  credentials: false,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token']
-});
-
 // Global centralized error handler
 function errorHandler(err, req, res, next) {
-  console.error('[SERVER ERROR]', err.stack || err.message || err);
+  // Sanitize stack/message before logging to ensure secrets/passwords are not logged
+  const rawMsg = err.stack || err.message || String(err);
+  const sanitizedLog = rawMsg.replace(/password(=|:\s*)[^\s&]+/gi, 'password=****');
+  console.error('[SERVER ERROR]', sanitizedLog);
   
   const statusCode = err.statusCode || err.status || 500;
   let publicMessage = err.message || 'Error processing request.';
 
-  // Mask database connection/internal crash details safely if 500
-  if (statusCode === 500 && (publicMessage.includes('ECONNREFUSED') || publicMessage.includes('ENOTFOUND') || publicMessage.includes('FATAL') || publicMessage.includes('SELECT') || publicMessage.includes('INSERT') || publicMessage.includes('UPDATE') || publicMessage.includes('DELETE') || publicMessage.includes('PG error'))) {
-    publicMessage = 'An internal database error occurred. Please try again.';
+  // Mask database connection/internal crash details safely if 500 or database-related
+  const isDbError = (
+    publicMessage.includes('ECONNREFUSED') ||
+    publicMessage.includes('ENOTFOUND') ||
+    publicMessage.includes('FATAL') ||
+    publicMessage.includes('SELECT') ||
+    publicMessage.includes('INSERT') ||
+    publicMessage.includes('UPDATE') ||
+    publicMessage.includes('DELETE') ||
+    publicMessage.includes('PG error') ||
+    publicMessage.includes('syntax error at') ||
+    publicMessage.includes('relation ') ||
+    publicMessage.includes('column ') ||
+    publicMessage.includes('null value in column') ||
+    publicMessage.includes('password authentication failed') ||
+    publicMessage.includes('supabase')
+  );
+
+  if (statusCode === 500 && isDbError) {
+    publicMessage = 'Database operation failed';
   }
 
   res.status(statusCode).json({
     error: publicMessage,
-    code: err.code || 'SERVER_ERROR'
+    code: err.code || (isDbError ? 'DB_OPERATION_FAILED' : 'SERVER_ERROR')
   });
 }
 

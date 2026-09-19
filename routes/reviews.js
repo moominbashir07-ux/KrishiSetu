@@ -4,6 +4,54 @@ const { authenticateUser, requireRole } = require('../middleware/auth');
 
 const router = express.Router();
 
+// GET REVIEWS FOR SELLER'S PRODUCTS (SELLER OR ADMIN ONLY, STRICT IDOR PROTECTION)
+router.get('/seller', authenticateUser, async (req, res, next) => {
+  try {
+    if (req.user.role !== 'seller' && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden. Seller credentials required to view seller reviews.' });
+    }
+
+    const sellerId = req.user.id;
+    const result = await db.query(
+      `SELECT r.id, r.product_id, r.buyer_id, r.order_id, r.rating, r.comment, r.created_at,
+              p.name as "productName", p.category as "productCategory",
+              u.name as "buyerName"
+       FROM reviews r
+       JOIN products p ON r.product_id = p.id
+       JOIN users u ON r.buyer_id = u.id
+       WHERE p.seller_id = $1
+       ORDER BY r.created_at DESC`,
+      [sellerId]
+    );
+
+    const reviews = result.rows.map(r => ({
+      id: r.id,
+      productId: r.product_id,
+      productName: r.productName,
+      productCategory: r.productCategory,
+      buyerName: r.buyerName || 'Verified Customer',
+      rating: Number(r.rating),
+      comment: r.comment,
+      orderId: r.order_id,
+      createdAt: r.created_at,
+      verifiedPurchase: true
+    }));
+
+    const avgRating = reviews.length > 0 
+      ? Math.round((reviews.reduce((sum, r) => sum + Number(r.rating), 0) / reviews.length) * 10) / 10 
+      : 5.0;
+
+    res.json({
+      sellerId,
+      reviews,
+      count: reviews.length,
+      averageRating: avgRating
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET REVIEWS FOR A PRODUCT
 router.get('/products/:productId', async (req, res, next) => {
   try {
@@ -38,7 +86,12 @@ router.get('/products/:productId', async (req, res, next) => {
 
 // SUBMIT VERIFIED PURCHASE REVIEW (CUSTOMER ONLY)
 router.post('/', authenticateUser, requireRole('customer'), async (req, res, next) => {
-  const { productId, rating, comment } = req.body;
+  const productId = req.body.productId || req.body.product_id;
+  const { rating, comment } = req.body;
+
+  if (!productId) {
+    return res.status(400).json({ error: 'Product ID is required to submit a review.' });
+  }
 
   const numRating = Number(rating);
   if (!Number.isInteger(numRating) || numRating < 1 || numRating > 5) {

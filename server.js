@@ -15,6 +15,9 @@ const adminRouter = require('./routes/admin');
 const reviewsRouter = require('./routes/reviews');
 const feedbackRouter = require('./routes/feedback');
 const notificationsRouter = require('./routes/notifications');
+const { storageRouter } = require('./routes/storage');
+const { disputesRouter } = require('./routes/disputes');
+const { aiRouter } = require('./routes/ai');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,6 +34,20 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // Apply rate limiter to API routes
 app.use('/api', apiLimiter);
 
+// Protect against serving sensitive backend files and directories
+const SENSITIVE_STATIC_PATTERNS = [
+  /^\/(db|routes|middleware|config|services|tests|scratch|\.git|node_modules)(\/|$)/i,
+  /^\/(server\.js|package\.json|package-lock\.json|tsconfig\.json)$/i,
+  /\.(sql|env|env\..*|json|ts|md|log)$/i
+];
+
+app.use((req, res, next) => {
+  if (SENSITIVE_STATIC_PATTERNS.some(pattern => pattern.test(req.path))) {
+    return res.status(404).send('Not Found');
+  }
+  next();
+});
+
 // Serve static frontend files
 app.use(express.static(path.join(__dirname)));
 
@@ -38,18 +55,52 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Production Health Check Endpoint (Task 15)
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'production',
-    database: db.isPgConnected() ? 'connected (postgresql)' : 'connected (fallback)'
-  });
+const { validateEnv } = require('./config/env');
+const envStatus = validateEnv({ silent: process.env.NODE_ENV === 'test' });
+if (process.env.NODE_ENV === 'production' && !envStatus.valid) {
+  console.error('[FATAL STARTUP ERROR] Production environment validation failed:');
+  envStatus.missing.forEach(m => console.error(`  - ${m}`));
+  process.exit(1);
+}
+
+// Production Health Check Endpoint (Phase 2 Hardened)
+app.get('/api/health', async (req, res) => {
+  try {
+    const isConnected = db.isPgConnected();
+    let dbStatus = isConnected ? 'connected' : (process.env.DATABASE_URL ? 'disconnected' : 'fallback');
+
+    if (isConnected) {
+      const ping = await db.pingDb();
+      if (!ping.connected) {
+        dbStatus = 'disconnected';
+      }
+    }
+
+    const isDegraded = dbStatus === 'disconnected';
+    const statusCode = isDegraded ? 503 : 200;
+
+    res.status(statusCode).json({
+      status: isDegraded ? 'degraded' : 'ok',
+      database: dbStatus === 'connected' ? 'connected' : (dbStatus === 'fallback' ? 'connected (fallback)' : 'disconnected'),
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development'
+    });
+  } catch (e) {
+    res.status(503).json({
+      status: 'degraded',
+      database: 'disconnected',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development'
+    });
+  }
 });
 
 // Register production backend API routes
 app.use('/api/auth', authRouter);
+app.get('/api/sellers/:id', (req, res, next) => {
+  req.url = '/sellers/' + req.params.id;
+  authRouter(req, res, next);
+});
 app.use('/api/products', productsRouter);
 app.use('/api/cart', cartRouter);
 app.use('/api/orders', ordersRouter);
@@ -58,6 +109,9 @@ app.use('/api/admin', adminRouter);
 app.use('/api/reviews', reviewsRouter);
 app.use('/api/feedback', feedbackRouter);
 app.use('/api/notifications', notificationsRouter);
+app.use('/api/storage', storageRouter);
+app.use('/api/disputes', disputesRouter);
+app.use('/api/ai', aiRouter);
 
 // Helper functions for Mandi price and date normalization
 function parseMandiPrice(val) {
@@ -329,8 +383,23 @@ app.get('/api/market-prices', async (req, res) => {
     console.warn('[DB ARCHIVE FALLBACK ERROR]', err.message);
   }
 
-  // Realistic Demo Engine
-  const fallbackRecords = getDemoMarketRecords(commodity, state, district);
+  // Realistic Demo Engine (STRICTLY ISOLATED IN-MEMORY — NO DB CONTAMINATION)
+  const fallbackRecords = getDemoMarketRecords(commodity, state, district).map(r => {
+    const now = new Date();
+    const obs = new Date(r.arrival_date || now);
+    const diffHours = (now.getTime() - obs.getTime()) / (1000 * 60 * 60);
+    const freshnessStatus = diffHours <= 24 ? 'LIVE' : (diffHours <= 48 ? 'RECENT' : 'STALE');
+    return {
+      ...r,
+      mandi: r.market,
+      source: 'MOCK DATA — DEVELOPMENT ONLY',
+      sourceResourceId: 'DEV_MOCK_ADAPTER',
+      fetchedAt: now.toISOString(),
+      freshnessStatus,
+      dataFreshness: freshnessStatus,
+      isMock: true
+    };
+  });
 
   if (!fallbackRecords.length) {
     return res.json({
@@ -341,30 +410,26 @@ app.get('/api/market-prices', async (req, res) => {
       message: district 
         ? `No mandi price data available for ${district} district in ${state}.`
         : `No mandi price data available for ${state}.`,
-      source: 'KrishiSetu Market Engine'
+      source: 'MOCK DATA — DEVELOPMENT ONLY',
+      isMock: true
     });
   }
 
-  for (const r of fallbackRecords) {
-    const snapId = `SNAP_${r.state}_${r.market}_${r.commodity}_${r.arrival_date}`;
-    db.query(
-      `INSERT INTO market_price_snapshots (id, state, district, market, commodity, variety, grade, arrival_date, min_price, max_price, modal_price, unit)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-      [snapId, r.state, r.district, r.market, r.commodity, r.variety, r.grade, r.arrival_date, r.min_price, r.max_price, r.modal_price, r.unit]
-    ).catch(() => {});
-  }
+  // NOTE: CONTAMINATION FIX — mock data is NEVER inserted into market_price_snapshots
 
   return res.json({
     records: fallbackRecords,
     total: fallbackRecords.length,
     sourceUpdatedAt: new Date().toISOString(),
     fetchedAt: new Date().toISOString(),
-    source: 'KrishiSetu Market Engine (Development Fallback)'
+    source: 'MOCK DATA — DEVELOPMENT ONLY',
+    isMock: true,
+    warning: 'DEVELOPMENT MOCK DATA — NOT VERIFIED BY GOVERNMENT MANDI'
   });
 });
 
 // HISTORICAL PRICE TIME-SERIES ENDPOINT
-app.get('/api/market-prices/history', async (req, res) => {
+app.get('/api/market-prices/history', async (req, res, next) => {
   const { commodity = 'Onion', market, state = 'Maharashtra', district } = req.query;
 
   try {
@@ -400,45 +465,63 @@ app.get('/api/market-prices/history', async (req, res) => {
       snapshots: rows
     });
   } catch (e) {
-    res.status(500).json({ error: 'Failed to retrieve historical snapshots', detail: e.message });
+    next(e);
   }
 });
 
 // MULTI-MANDI COMPARISON ENDPOINT
-app.get('/api/market-prices/compare', async (req, res) => {
+app.get('/api/market-prices/compare', async (req, res, next) => {
   const { commodity = 'Onion', state = 'Maharashtra', district } = req.query;
 
   try {
-    let sql = 'SELECT * FROM market_price_snapshots WHERE LOWER(commodity) = LOWER($1) AND LOWER(state) = LOWER($2)';
-    const params = [commodity, state];
-    if (district) {
-      params.push(district);
-      sql += ` AND LOWER(district) = LOWER($${params.length})`;
-    }
-    sql += ' ORDER BY arrival_date DESC';
-
-    const result = await db.query(sql, params);
-    let rows = result.rows || [];
-
-    if (!rows.length) {
-      rows = getDemoMarketRecords(commodity, state, district);
-    }
-
-    const marketMap = {};
-    for (const r of rows) {
-      if (!marketMap[r.market]) {
-        marketMap[r.market] = r;
-      }
-    }
-
-    res.json({
+    const { MandiIntelligenceService } = require('./services/market/mandiIntelligenceService');
+    const mandiService = new MandiIntelligenceService();
+    const compResult = await mandiService.compareMandis({
       commodity,
       state,
       district: district || null,
-      comparison: Object.values(marketMap)
+      dbClient: db
+    });
+
+    res.json({
+      commodity: compResult.commodity,
+      state: compResult.state,
+      district: compResult.district,
+      markets: compResult.markets,
+      comparison: compResult.markets,
+      summary: compResult.summary,
+      status: compResult.status,
+      message: compResult.message
     });
   } catch (e) {
-    res.status(500).json({ error: 'Failed to retrieve mandi comparison data', detail: e.message });
+    if (e.statusCode) {
+      return res.status(e.statusCode).json({ error: { code: e.code, message: e.message } });
+    }
+    next(e);
+  }
+});
+
+// HISTORICAL TREND ANALYSIS ENDPOINT (1D, 7D, 1M, 1Y)
+app.get('/api/market-prices/trend', async (req, res, next) => {
+  const { commodity = 'Onion', state = 'Maharashtra', market, period = '7D' } = req.query;
+
+  try {
+    const { MandiIntelligenceService } = require('./services/market/mandiIntelligenceService');
+    const mandiService = new MandiIntelligenceService();
+    const trendResult = await mandiService.getTrendAnalysis({
+      commodity,
+      state,
+      market: market || null,
+      period,
+      dbClient: db
+    });
+
+    res.json(trendResult);
+  } catch (e) {
+    if (e.statusCode) {
+      return res.status(e.statusCode).json({ error: { code: e.code, message: e.message } });
+    }
+    next(e);
   }
 });
 
@@ -472,7 +555,11 @@ if (require.main === module) {
       console.log(`KrishiSetu Secure Server running at http://localhost:${PORT}`);
     });
   }).catch(err => {
-    console.error('Failed to initialize database:', err);
+    console.error('Failed to initialize database:', err.message);
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[FATAL STARTUP ERROR] Production database initialization failed.');
+      process.exit(1);
+    }
     app.listen(PORT, () => {
       console.log(`KrishiSetu Server running with fallback at http://localhost:${PORT}`);
     });

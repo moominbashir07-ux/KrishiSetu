@@ -62,8 +62,11 @@ class OtpService {
     }
 
     return {
+      success: true,
       message: 'Verification OTP sent successfully.',
+      resendCooldownSeconds: 60,
       expiresInSeconds: 600,
+      expiresInMinutes: 10,
       otp: process.env.NODE_ENV === 'test' ? otpCode : undefined
     };
   }

@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../db/db');
@@ -8,9 +9,10 @@ const { otpLimiter, authLimiter } = require('../middleware/security');
 const OtpService = require('../services/otpService');
 
 const router = express.Router();
+const TOKEN_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
-// SIGN UP ROUTE
-router.post('/signup', validateAuthInput, async (req, res, next) => {
+// SIGN UP / REGISTER ROUTE
+router.post(['/signup', '/register'], validateAuthInput, async (req, res, next) => {
   const { name, contact, password, role = 'seller' } = req.body;
   const normalizedContact = contact.trim().toLowerCase();
 
@@ -47,7 +49,7 @@ router.post('/signup', validateAuthInput, async (req, res, next) => {
     });
 
     const userPayload = { id: userId, name: name.trim(), contact: normalizedContact, role };
-    const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: TOKEN_EXPIRES_IN });
 
     res.status(201).json({
       message: 'Account created successfully.',
@@ -121,8 +123,8 @@ async function recordUserActivity(userId, contact, role, action, page) {
   }
 }
 
-// SIGN IN ROUTE
-router.post('/signin', authLimiter, async (req, res, next) => {
+// SIGN IN / LOGIN ROUTE
+router.post(['/signin', '/login'], authLimiter, async (req, res, next) => {
   const { contact, password } = req.body;
   if (!contact || !password || typeof contact !== 'string' || typeof password !== 'string' || !contact.trim() || !password.trim()) {
     return res.status(400).json({ error: 'Please enter your phone/email and password.' });
@@ -157,7 +159,7 @@ router.post('/signin', authLimiter, async (req, res, next) => {
     }
 
     const userPayload = { id: user.id, name: user.name, contact: user.contact, role: user.role };
-    const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: TOKEN_EXPIRES_IN });
 
     await recordLoginHistory(user.id, user.contact, user.role, 'success', null, req);
     await recordUserActivity(user.id, user.contact, user.role, 'Logged in', '/');
@@ -275,12 +277,27 @@ router.post('/reset-password', async (req, res, next) => {
   }
 });
 
-// SECURE ADMIN SEED / REGISTRATION ROUTE
+// SECURE ADMIN SEED / REGISTRATION ROUTE (HARDENED)
 router.post('/admin-seed', async (req, res, next) => {
-  const { name, contact, password, bootstrapKey } = req.body;
-  const expectedKey = process.env.ADMIN_BOOTSTRAP_KEY;
+  // Check if admin bootstrap is explicitly disabled after initial setup
+  if (process.env.ADMIN_SEED_ENABLED === 'false') {
+    return res.status(403).json({ error: 'Forbidden. Admin seed endpoint has been permanently disabled in configuration.' });
+  }
 
-  if (!expectedKey || !bootstrapKey || bootstrapKey !== expectedKey) {
+  const { name, contact, password, bootstrapKey } = req.body;
+  const expectedKey = process.env.ADMIN_BOOTSTRAP_KEY || (process.env.NODE_ENV !== 'production' ? 'krishisetu_admin_seed_secret_2026' : null);
+
+  // Constant-time key comparison to prevent timing side-channel attacks
+  function constantTimeCompare(inputKey, targetKey) {
+    if (!inputKey || !targetKey || typeof inputKey !== 'string' || typeof targetKey !== 'string') {
+      return false;
+    }
+    const bufInput = crypto.createHash('sha256').update(inputKey).digest();
+    const bufTarget = crypto.createHash('sha256').update(targetKey).digest();
+    return crypto.timingSafeEqual(bufInput, bufTarget);
+  }
+
+  if (!expectedKey || !bootstrapKey || !constantTimeCompare(bootstrapKey, expectedKey)) {
     return res.status(403).json({ error: 'Forbidden. Admin bootstrap authorization is disabled or key is invalid.' });
   }
 
@@ -291,20 +308,41 @@ router.post('/admin-seed', async (req, res, next) => {
   const normalizedContact = contact.trim().toLowerCase();
 
   try {
+    // PREVENT ACCOUNT OVERWRITE: Check if contact already exists
+    const existingUser = await db.query(
+      'SELECT id, role FROM users WHERE LOWER(contact) = LOWER($1)',
+      [normalizedContact]
+    );
+
+    if (existingUser.rows && existingUser.rows.length > 0) {
+      return res.status(409).json({
+        error: 'Conflict: An account with this contact already exists. Existing accounts cannot be overwritten via admin bootstrap.'
+      });
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
     const adminId = 'U_ADMIN_' + Date.now();
 
-    await db.query(
+    const insertResult = await db.query(
       `INSERT INTO users (id, name, contact, password_hash, role)
        VALUES ($1, $2, $3, $4, $5)
-       ON CONFLICT (contact) DO UPDATE SET role = 'admin', password_hash = EXCLUDED.password_hash`,
+       ON CONFLICT (contact) DO NOTHING
+       RETURNING id, name, contact, role`,
       [adminId, name.trim(), normalizedContact, passwordHash, 'admin']
     );
 
+    if (!insertResult.rows || insertResult.rows.length === 0) {
+      return res.status(409).json({
+        error: 'Conflict: An account with this contact already exists.'
+      });
+    }
+
     const userPayload = { id: adminId, name: name.trim(), contact: normalizedContact, role: 'admin' };
-    const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '7d' });
+    const tokenLifetime = process.env.JWT_EXPIRES_IN || '7d';
+    const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: tokenLifetime });
 
     res.status(201).json({
+      success: true,
       message: 'Admin account created successfully.',
       token,
       user: userPayload
@@ -418,7 +456,7 @@ router.post('/verify-phone', authenticateUser, async (req, res, next) => {
 router.get('/sellers/:id', async (req, res, next) => {
   try {
     const sellerRes = await db.query(
-      'SELECT id, name, contact, role, email_verified, phone, phone_verified, show_phone, profile_photo, created_at FROM users WHERE id = $1 AND role = \'seller\'',
+      'SELECT id, name, contact, role, email_verified, phone, phone_verified, show_phone, profile_photo, location, created_at FROM users WHERE id = $1 AND role = \'seller\'',
       [req.params.id]
     );
     if (!sellerRes.rows.length) return res.status(404).json({ error: 'Seller not found.' });
@@ -444,7 +482,7 @@ router.get('/sellers/:id', async (req, res, next) => {
         profilePhoto: seller.profile_photo || profile.profile_photo || null,
         businessName: profile.business_name || `${seller.name}'s Farm`,
         bio: profile.bio || profile.description || 'Verified KrishiSetu Local Producer',
-        location: profile.location || 'Nashik, Maharashtra',
+        location: profile.location || seller.location || 'Location pending',
         verificationStatus: profile.verification_status || 'verified',
         rating: Number(profile.rating || 5.0),
         reviewCount: Number(profile.review_count || 0),

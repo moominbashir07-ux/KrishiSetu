@@ -2,8 +2,10 @@ const express = require('express');
 const db = require('../db/db');
 const { authenticateUser, requireRole, requireProductOwnership } = require('../middleware/auth');
 const { validateProductInput } = require('../middleware/validate');
+const { ProductQualityService } = require('../services/quality/productQualityService');
 
 const router = express.Router();
+const qualityService = new ProductQualityService();
 
 // GET ALL ACTIVE PRODUCTS (Optional filtering by category, sellerId, or excludeSellerId)
 router.get('/', async (req, res, next) => {
@@ -32,7 +34,8 @@ router.get('/', async (req, res, next) => {
     sql += ' ORDER BY p.created_at DESC';
 
     const result = await db.query(sql, params);
-    res.json({ products: result.rows });
+    const enrichedProducts = (result.rows || []).map(p => qualityService.formatProductWithQuality(p));
+    res.json({ products: enrichedProducts });
   } catch (err) {
     next(err);
   }
@@ -54,7 +57,7 @@ router.get('/:id', async (req, res, next) => {
       return res.status(404).json({ error: 'Product not found.' });
     }
 
-    res.json({ product: result.rows[0] });
+    res.json({ product: qualityService.formatProductWithQuality(result.rows[0]) });
   } catch (err) {
     next(err);
   }
@@ -64,14 +67,34 @@ router.get('/:id', async (req, res, next) => {
 router.post('/', authenticateUser, requireRole('seller'), validateProductInput, async (req, res, next) => {
   const { 
     name, category = 'Vegetables', description = '', price, price_unit = 'kg', 
-    quantity, quantity_unit = 'kg', grade = 'Standard', available_date, location, latitude, longitude, image_url 
+    quantity, quantity_unit = 'kg', grade = 'Standard', available_date, location, latitude, longitude, image_url,
+    sellerDeclaredGrade, gradeCriteria, qualityEvidence, verificationType, certificationDocKey
   } = req.body;
+
+  let qualityMeta = null;
+  if (sellerDeclaredGrade || qualityEvidence || verificationType || ['Grade A', 'Grade B', 'Grade C', 'Ungraded'].includes(grade)) {
+    try {
+      qualityMeta = qualityService.validateQualityDeclaration({
+        sellerDeclaredGrade: sellerDeclaredGrade || grade,
+        gradeCriteria,
+        qualityEvidence: (qualityEvidence && (Array.isArray(qualityEvidence) ? qualityEvidence.length > 0 : true)) ? qualityEvidence : (image_url ? [image_url] : []),
+        verificationType,
+        certificationDocKey
+      });
+    } catch (err) {
+      if (err.statusCode) {
+        return res.status(err.statusCode).json({ error: err.message, code: err.code });
+      }
+      return next(err);
+    }
+  }
 
   const id = 'P' + Date.now();
   const numPrice = Number(price);
   const numQty = Number(quantity);
   const status = numQty > 0 ? 'active' : 'out_of_stock';
   const locStr = location || 'Location pending';
+  const effectiveGrade = qualityMeta ? qualityMeta.declaredGrade : grade;
 
   try {
     const result = await db.query(
@@ -79,17 +102,28 @@ router.post('/', authenticateUser, requireRole('seller'), validateProductInput, 
       (id, seller_id, name, category, description, price, price_unit, quantity, quantity_unit, grade, status, available_date, location, latitude, longitude, image_url)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
       RETURNING *`,
-      [id, req.user.id, name.trim(), category, description.trim(), numPrice, price_unit, numQty, quantity_unit, grade, status, available_date || null, locStr, latitude || null, longitude || null, image_url || null]
+      [id, req.user.id, name.trim(), category, description.trim(), numPrice, price_unit, numQty, quantity_unit, effectiveGrade, status, available_date || null, locStr, latitude || null, longitude || null, image_url || null]
     );
 
     const product = result.rows[0];
+    if (qualityMeta) {
+      product.seller_declared_grade = qualityMeta.declaredGrade;
+      product.grade_criteria = qualityMeta.gradeCriteria;
+      product.quality_evidence = qualityMeta.qualityEvidence;
+      product.verification_type = qualityMeta.verificationType;
+      product.verification_status = qualityMeta.verificationStatus;
+      product.is_certified = qualityMeta.isCertified;
+    }
+
+    const formattedProduct = qualityService.formatProductWithQuality({
+      ...product,
+      sellerName: req.user.name,
+      sellerContact: req.user.contact
+    });
+
     res.status(201).json({
       message: 'Product published successfully.',
-      product: {
-        ...product,
-        sellerName: req.user.name,
-        sellerContact: req.user.contact
-      }
+      product: formattedProduct
     });
   } catch (err) {
     next(err);

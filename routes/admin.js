@@ -199,15 +199,17 @@ router.put('/sellers/:id/verification', async (req, res, next) => {
       return res.status(404).json({ error: 'Seller profile not found.' });
     }
 
-    await db.query(
-      'UPDATE seller_profiles SET verification_status = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2',
-      [status, sellerId]
-    );
+    await db.withTransaction(async (client) => {
+      await client.query(
+        'UPDATE seller_profiles SET verification_status = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2',
+        [status, sellerId]
+      );
 
-    await db.query(
-      'UPDATE seller_verifications SET status = $1 WHERE seller_id = $2',
-      [status, sellerId]
-    ).catch(() => {});
+      await client.query(
+        'UPDATE seller_verifications SET status = $1, admin_id = $2, rejection_reason = $3, reviewed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE seller_id = $4',
+        [status, req.user.id, reason || null, sellerId]
+      );
+    });
 
     const action = status === 'verified' ? 'SELLER_VERIFICATION_APPROVED' : 'SELLER_VERIFICATION_REJECTED';
     const detail = `Seller '${sellerId}' verification status set to '${status}'`;
@@ -233,7 +235,11 @@ router.put('/sellers/:id/verification', async (req, res, next) => {
       reason: reason || null
     });
   } catch (err) {
-    next(err);
+    console.error('[ADMIN SELLER VERIFICATION UPDATE ERROR]', err.message);
+    if (err.statusCode) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+    return res.status(500).json({ error: 'Failed to update seller verification: ' + err.message });
   }
 });
 
@@ -779,6 +785,7 @@ router.get('/database/tables/:tableName', async (req, res, next) => {
     const maskedRows = result.rows.map(row => {
       const clone = { ...row };
       if (clone.password_hash) clone.password_hash = '[MASKED_HASH]';
+      if (clone.otp_hash) clone.otp_hash = '[MASKED_HASH]';
       if (clone.otp_code) clone.otp_code = '[MASKED_OTP]';
       if (clone.jwt_secret) clone.jwt_secret = '[MASKED_SECRET]';
       return clone;
@@ -988,6 +995,133 @@ router.get('/mandi-health', async (req, res, next) => {
         recordsCount: records.length,
         cacheStatus: 'Active (30 mins TTL)',
         sanitizedSample: records.slice(0, 3)
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PLATFORM TRUST & INTEGRITY METRICS (ADMIN ONLY)
+router.get('/trust-metrics', async (req, res, next) => {
+  try {
+    // 1. Dispute metrics
+    let openDisputes = 0;
+    let resolvedDisputes = 0;
+    let totalDisputes = 0;
+
+    try {
+      const dRes = await db.query('SELECT status, COUNT(*) as count FROM disputes GROUP BY status');
+      if (dRes && dRes.rows) {
+        for (const r of dRes.rows) {
+          const count = parseInt(r.count, 10) || 0;
+          totalDisputes += count;
+          const status = String(r.status).toUpperCase();
+          if (status === 'RESOLVED' || status === 'REJECTED') {
+            resolvedDisputes += count;
+          } else {
+            openDisputes += count;
+          }
+        }
+      }
+    } catch (e) {
+      // safe fallback if table empty or simulated
+    }
+
+    // 2. Product quality tier distribution
+    const productsByTier = {
+      SELLER_DECLARED: 0,
+      AI_ASSISTED_ESTIMATE: 0,
+      CERTIFIED_AGMARK: 0,
+      UNGRADED: 0
+    };
+
+    try {
+      const pRes = await db.query(
+        'SELECT verification_type, is_certified, seller_declared_grade, COUNT(*) as count FROM products GROUP BY verification_type, is_certified, seller_declared_grade'
+      );
+      if (pRes && pRes.rows) {
+        for (const r of pRes.rows) {
+          const count = parseInt(r.count, 10) || 0;
+          if (r.is_certified === true || r.verification_type === 'CERTIFIED' || r.verification_type === 'CERTIFIED_AGMARK') {
+            productsByTier.CERTIFIED_AGMARK += count;
+          } else if (r.verification_type === 'AI_ASSISTED_ESTIMATE' || r.verification_type === 'AI_ASSISTED') {
+            productsByTier.AI_ASSISTED_ESTIMATE += count;
+          } else if (!r.seller_declared_grade || r.seller_declared_grade === 'Ungraded') {
+            productsByTier.UNGRADED += count;
+          } else {
+            productsByTier.SELLER_DECLARED += count;
+          }
+        }
+      }
+    } catch (e) {}
+
+    // 3. Mandi snapshots & freshness metrics
+    const snapshotMetrics = {
+      totalSnapshots: 0,
+      liveSnapshots: 0,
+      recentSnapshots: 0,
+      staleSnapshots: 0,
+      lastSyncTime: null
+    };
+
+    try {
+      const snapRes = await db.query('SELECT arrival_date, fetched_at FROM market_price_snapshots ORDER BY fetched_at DESC');
+      if (snapRes && snapRes.rows) {
+        const rows = snapRes.rows;
+        snapshotMetrics.totalSnapshots = rows.length;
+        if (rows.length > 0) {
+          snapshotMetrics.lastSyncTime = rows[0].fetched_at || rows[0].arrival_date;
+        }
+        const now = Date.now();
+        for (const row of rows) {
+          const dateStr = row.arrival_date || row.fetched_at;
+          if (dateStr) {
+            const diffHours = (now - new Date(dateStr).getTime()) / (1000 * 60 * 60);
+            if (diffHours <= 24) snapshotMetrics.liveSnapshots++;
+            else if (diffHours <= 48) snapshotMetrics.recentSnapshots++;
+            else snapshotMetrics.staleSnapshots++;
+          } else {
+            snapshotMetrics.staleSnapshots++;
+          }
+        }
+      }
+    } catch (e) {}
+
+    // 4. Seller verification metrics
+    const sellerVerifications = {
+      pending: 0,
+      approved: 0,
+      rejected: 0
+    };
+
+    try {
+      const vRes = await db.query('SELECT status, COUNT(*) as count FROM seller_verifications GROUP BY status');
+      if (vRes && vRes.rows) {
+        for (const r of vRes.rows) {
+          const count = parseInt(r.count, 10) || 0;
+          const s = String(r.status).toLowerCase();
+          if (s === 'approved') sellerVerifications.approved += count;
+          else if (s === 'rejected') sellerVerifications.rejected += count;
+          else sellerVerifications.pending += count;
+        }
+      }
+    } catch (e) {}
+
+    const disputeResolutionRate = totalDisputes > 0 ? Math.round((resolvedDisputes / totalDisputes) * 100) : 100;
+
+    res.json({
+      trustMetrics: {
+        disputes: {
+          totalDisputes,
+          openDisputes,
+          resolvedDisputes,
+          disputeResolutionRate
+        },
+        productsByTier,
+        mandiSnapshots: snapshotMetrics,
+        sellerVerifications,
+        evaluatedAt: new Date().toISOString()
       }
     });
   } catch (err) {

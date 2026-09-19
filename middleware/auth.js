@@ -1,6 +1,25 @@
 const jwt = require('jsonwebtoken');
 const db = require('../db/db');
 
+const KNOWN_JWT_PLACEHOLDERS = [
+  'krishisetu_jwt_super_secret_key_2026_change_in_production',
+  'your_jwt_secret',
+  'your-secret-key',
+  'secret',
+  'jwt_secret_key',
+  'change_this_secret'
+];
+
+function getJwtSecret() {
+  const secret = process.env.JWT_SECRET || 'krishisetu_jwt_super_secret_key_2026_change_in_production';
+  if (process.env.NODE_ENV === 'production') {
+    if (!process.env.JWT_SECRET || KNOWN_JWT_PLACEHOLDERS.includes(process.env.JWT_SECRET.trim())) {
+      throw new Error('FATAL: Production rejects default/example JWT placeholder. A real configured secret is required.');
+    }
+  }
+  return secret;
+}
+
 const JWT_SECRET = process.env.JWT_SECRET || 'krishisetu_jwt_super_secret_key_2026_change_in_production';
 
 async function authenticateUser(req, res, next) {
@@ -108,8 +127,14 @@ async function requireProductOwnership(req, res, next) {
   }
 }
 
-function generateToken(payload, expiresIn = '7d') {
+function generateToken(payload, expiresIn = (process.env.JWT_EXPIRES_IN || '7d')) {
   return jwt.sign(payload, JWT_SECRET, { expiresIn });
+}
+
+function toSafeUser(user) {
+  if (!user || typeof user !== 'object') return null;
+  const { password_hash, otp_hash, otp_code, jwt_secret, ...safeUser } = user;
+  return safeUser;
 }
 
 module.exports = {
@@ -118,5 +143,8 @@ module.exports = {
   requireAnyRole,
   requireProductOwnership,
   generateToken,
-  JWT_SECRET
+  toSafeUser,
+  JWT_SECRET,
+  getJwtSecret,
+  KNOWN_JWT_PLACEHOLDERS
 };

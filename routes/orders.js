@@ -73,13 +73,28 @@ router.post('/', authenticateUser, requireRole('customer'), async (req, res, nex
 
   try {
     let orderItemsToProcess = [];
+    const directProductId = productId || req.body.product_id;
 
-    if (productId) {
-      const numQty = Number(quantity || 1);
+    if (directProductId) {
+      const rawQty = (quantity !== undefined && quantity !== null) ? quantity : req.body.quantity;
+      const numQty = rawQty !== undefined ? Number(rawQty) : 1;
       if (!Number.isFinite(numQty) || numQty <= 0) {
         return res.status(400).json({ error: 'Order quantity must be a positive number.' });
       }
-      orderItemsToProcess.push({ productId, quantity: numQty });
+      orderItemsToProcess.push({ productId: directProductId, quantity: numQty });
+    } else if (req.body.items && Array.isArray(req.body.items) && req.body.items.length > 0) {
+      for (const item of req.body.items) {
+        const itemPid = item.productId || item.product_id;
+        const rawItemQty = (item.quantity !== undefined && item.quantity !== null) ? item.quantity : (item.qty !== undefined ? item.qty : 1);
+        const itemQty = Number(rawItemQty);
+        if (!itemPid) {
+          return res.status(400).json({ error: 'Product ID is required for order items.' });
+        }
+        if (!Number.isFinite(itemQty) || itemQty <= 0) {
+          return res.status(400).json({ error: 'Order quantity must be a positive number.' });
+        }
+        orderItemsToProcess.push({ productId: itemPid, quantity: itemQty });
+      }
     } else {
       const cartResult = await db.query('SELECT id FROM carts WHERE customer_id = $1', [customerId]);
       if (!cartResult.rows.length) {
@@ -189,6 +204,19 @@ router.post('/', authenticateUser, requireRole('customer'), async (req, res, nex
           ]
         );
 
+        // Send notification to Buyer
+        const buyerNotifId = 'NOTIF_' + (Date.now() + 1) + Math.random().toString(36).substring(2, 6);
+        await client.query(
+          `INSERT INTO notifications (id, user_id, type, title, message, read, order_id)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [
+            buyerNotifId, customerId, 'order_placed',
+            `🔔 Order Placed Successfully #${orderNumber}`,
+            `Your order for ${items[0].product.name} (${items[0].requestedQty} kg) has been placed. Total: ₹${sellerTotal}`,
+            false, orderId
+          ]
+        );
+
         for (const item of items) {
           const orderItemId = 'OI_' + Date.now() + Math.random().toString(36).substring(2, 6);
           await client.query(
@@ -252,7 +280,8 @@ router.post('/', authenticateUser, requireRole('customer'), async (req, res, nex
 
     res.status(201).json({
       message: 'Order placed successfully.',
-      orders: createdOrders
+      orders: createdOrders,
+      order: createdOrders[0]
     });
 
     // Asynchronously sync customer profile and contact phone outside transaction block
@@ -444,7 +473,7 @@ router.get('/:id', authenticateUser, async (req, res, next) => {
 });
 
 // UPDATE ORDER STATUS (HARDENED STATE MACHINE & IDOR PROTECTION)
-router.put('/:id/status', authenticateUser, requireAnyRole('seller', 'admin'), async (req, res, next) => {
+const handleOrderStatusUpdate = async (req, res, next) => {
   const { status, step } = req.body;
   const orderIdentifier = req.params.id;
 
@@ -528,6 +557,9 @@ router.put('/:id/status', authenticateUser, requireAnyRole('seller', 'admin'), a
         } else if (targetStatus === 'Delivered' || targetStatus === 'Completed') {
           notifTitle = `🎉 Order Delivered #${order.order_number || order.id}`;
           notifMsg = `Your order #${order.order_number || order.id} has been delivered.`;
+        } else if (targetStatus === 'Cancelled') {
+          notifTitle = `❌ Order Cancelled #${order.order_number || order.id}`;
+          notifMsg = `Your order #${order.order_number || order.id} has been cancelled.`;
         }
 
         await client.query(
@@ -550,7 +582,9 @@ router.put('/:id/status', authenticateUser, requireAnyRole('seller', 'admin'), a
   } catch (err) {
     next(err);
   }
-});
+};
+router.put('/:id/status', authenticateUser, requireAnyRole('seller', 'admin'), handleOrderStatusUpdate);
+router.patch('/:id/status', authenticateUser, requireAnyRole('seller', 'admin'), handleOrderStatusUpdate);
 
 // CUSTOMER SUBMIT ONLINE PAYMENT VERIFICATION (REQUIRES MANDATORY TRANSACTION ID & REPLAY PROTECTION)
 router.post('/:id/verify-payment', authenticateUser, requireRole('customer'), async (req, res, next) => {

@@ -158,6 +158,10 @@ const AdminService = {
 
   async getMetrics() {
     return ApiService.request('/api/admin/metrics');
+  },
+
+  async getTrustMetrics() {
+    return ApiService.request('/api/admin/trust-metrics');
   }
 };
 
@@ -278,5 +282,107 @@ const MarketIntelligenceService = {
     const params = new URLSearchParams({ commodity, state });
     if (district) params.append('district', district);
     return ApiService.request(`/api/market-prices/compare?${params.toString()}`);
+  },
+
+  async getTrend({ commodity = 'Onion', state = 'Maharashtra', market, period = '7D' } = {}) {
+    const params = new URLSearchParams({ commodity, state, period });
+    if (market) params.append('market', market);
+    return ApiService.request(`/api/market-prices/trend?${params.toString()}`);
   }
 };
+
+const DisputeService = {
+  async getDispute(id) {
+    return ApiService.request(`/api/disputes/${id}`);
+  },
+
+  async createDispute(payload) {
+    return ApiService.request('/api/disputes', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  },
+
+  async attachEvidence(id, payload) {
+    return ApiService.request(`/api/disputes/${id}/evidence`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  },
+
+  async respond(id, payload) {
+    return ApiService.request(`/api/disputes/${id}/respond`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  },
+
+  async resolve(id, payload) {
+    return ApiService.request(`/api/disputes/${id}/resolve`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  },
+
+  async getAiSummary(id) {
+    return ApiService.request(`/api/disputes/${id}/ai-summary`, {
+      method: 'POST'
+    });
+  }
+};
+
+const AiService = {
+  async getFarmerAdvisor(payload) {
+    return ApiService.request('/api/ai/advisor', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  },
+
+  async assessQuality(payload) {
+    return ApiService.request('/api/ai/quality-assessment', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  },
+
+  async draftListing(notes) {
+    return ApiService.request('/api/ai/draft-listing', {
+      method: 'POST',
+      body: JSON.stringify({ notes })
+    });
+  },
+
+  async summarizeDispute(payload) {
+    return ApiService.request('/api/ai/summarize-dispute', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  }
+};
+
+const NotificationService = {
+  async getNotifications() {
+    return ApiService.request('/api/notifications');
+  },
+
+  async markAsRead(id) {
+    return ApiService.request(`/api/notifications/${id}/read`, {
+      method: 'PUT'
+    });
+  },
+
+  async markAllAsRead() {
+    return ApiService.request('/api/notifications/read-all', {
+      method: 'PUT'
+    });
+  },
+
+  async sendTestNotification(title, message, type = 'alert') {
+    return ApiService.request('/api/notifications/test', {
+      method: 'POST',
+      body: JSON.stringify({ title, message, type })
+    });
+  }
+};
+

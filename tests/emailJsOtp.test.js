@@ -9,9 +9,9 @@ test('EmailJS OTP Integration & Password Reset Flow', async (t) => {
 
   process.env.NODE_ENV = 'test';
   process.env.EMAIL_OTP_PROVIDER = 'emailjs';
-  process.env.EMAILJS_PUBLIC_KEY = 'czyv3jAfR0Ie75oKe';
-  process.env.EMAILJS_SERVICE_ID = 'service_9kbwben';
-  process.env.EMAILJS_TEMPLATE_ID = 'template_2xxvycw';
+  process.env.EMAILJS_PUBLIC_KEY = 'mock_emailjs_public_key';
+  process.env.EMAILJS_SERVICE_ID = 'mock_emailjs_service_id';
+  process.env.EMAILJS_TEMPLATE_ID = 'mock_emailjs_template_id';
 
   const testEmail = 'emailjs_test_' + Date.now() + '@example.com';
   let generatedOtpCode = null;
@@ -54,9 +54,9 @@ test('EmailJS OTP Integration & Password Reset Flow', async (t) => {
 
       // Verify intercepted EmailJS payload
       assert.ok(emailJsPayload);
-      assert.equal(emailJsPayload.service_id, 'service_9kbwben');
-      assert.equal(emailJsPayload.template_id, 'template_2xxvycw');
-      assert.equal(emailJsPayload.user_id, 'czyv3jAfR0Ie75oKe');
+      assert.equal(emailJsPayload.service_id, 'mock_emailjs_service_id');
+      assert.equal(emailJsPayload.template_id, 'mock_emailjs_template_id');
+      assert.equal(emailJsPayload.user_id, 'mock_emailjs_public_key');
       assert.equal(emailJsPayload.template_params.to_email, testEmail);
       assert.ok(emailJsPayload.template_params.otp);
       assert.equal(emailJsPayload.template_params.otp.length, 6);

@@ -152,9 +152,17 @@ class LocalFallbackDB {
           const val = params[i];
           if (val === 'active' || val === 'frozen' || val === 'suspended') {
             user.account_status = val;
-          } else if (typeof val === 'string' && (val.startsWith('+') || val.match(/\d/))) {
+          } else if (typeof val === 'string' && (val.startsWith('+') || (val.match(/^\d+$/) && val.length >= 7))) {
             user.phone = val;
+          } else if (typeof val === 'string' && val) {
+            user.location = val;
           }
+        }
+      }
+      if (q.includes('DO NOTHING')) {
+        const existing = this.tables.users.find(u => u.contact && u.contact.toLowerCase() === String(user.contact).toLowerCase());
+        if (existing) {
+          return { rows: [] };
         }
       }
       this.tables.users.push(user);
@@ -199,6 +207,11 @@ class LocalFallbackDB {
 
     if (q.includes('FROM reviews')) {
       let revs = [...this.tables.reviews];
+      if (q.includes('seller_id = $1') || q.includes('p.seller_id = $1')) {
+        const sellerId = params[0];
+        const sellerProductIds = this.tables.products.filter(p => p.seller_id === sellerId).map(p => p.id);
+        revs = revs.filter(r => sellerProductIds.includes(r.product_id));
+      }
       if (q.includes('product_id = $1')) {
         const prodId = params[0];
         revs = revs.filter(r => r.product_id === prodId);
@@ -210,9 +223,12 @@ class LocalFallbackDB {
 
       const enriched = revs.map(r => {
         const buyer = this.tables.users.find(u => u.id === r.buyer_id) || {};
+        const prod = this.tables.products.find(p => p.id === r.product_id) || {};
         return {
           ...r,
           buyerName: buyer.name || 'Verified Buyer',
+          productName: prod.name || 'Produce Item',
+          productCategory: prod.category || 'Produce',
           verifiedPurchase: true
         };
       });
@@ -281,10 +297,22 @@ class LocalFallbackDB {
     }
 
     if (q.startsWith('UPDATE notifications')) {
+      if (q.includes('WHERE user_id = $1') || (q.includes('user_id =') && !q.includes('id = $1'))) {
+        const uid = params[0];
+        let updatedCount = 0;
+        this.tables.notifications.forEach(n => {
+          if (n.user_id === uid) {
+            n.read = true;
+            updatedCount++;
+          }
+        });
+        return { rowCount: updatedCount, rows: [] };
+      }
       const id = params[0];
-      const n = this.tables.notifications.find(x => x.id === id);
+      const uid = params[1];
+      const n = this.tables.notifications.find(x => x.id === id && (!uid || x.user_id === uid));
       if (n) n.read = true;
-      return { rows: n ? [{ ...n }] : [] };
+      return { rowCount: n ? 1 : 0, rows: n ? [{ ...n }] : [] };
     }
 
     // 13. ADMIN METRICS
@@ -323,6 +351,7 @@ class LocalFallbackDB {
       const sp = {
         id: params[0], user_id: params[1], business_name: params[2] || null,
         description: params[3] || null, verification_status: params[4] || 'pending',
+        location: params[5] || null,
         created_at: new Date().toISOString(), updated_at: new Date().toISOString()
       };
       this.tables.seller_profiles.push(sp);
@@ -975,15 +1004,46 @@ class LocalFallbackDB {
 
 const fallbackDb = new LocalFallbackDB();
 
+function getPgSslConfig(connectionString) {
+  const isSupabase = Boolean(connectionString && (connectionString.includes('supabase.co') || connectionString.includes('supabase.com') || connectionString.includes('pooler.supabase')));
+  const isProduction = process.env.NODE_ENV === 'production' || isSupabase;
+
+  if (!isProduction && (!connectionString || !connectionString.includes('sslmode=require'))) {
+    return false;
+  }
+
+  const ssl = {};
+  if (process.env.PG_SSL_CA) {
+    ssl.ca = process.env.PG_SSL_CA;
+  }
+
+  // Certificate verification MUST be enabled by default.
+  // Production strictly enforces certificate verification (rejectUnauthorized: true).
+  // In development/test environments, opt-in insecure TLS is only allowed if DB_SSL_ALLOW_INSECURE === 'true'.
+  if (process.env.NODE_ENV === 'production') {
+    ssl.rejectUnauthorized = true;
+  } else {
+    // Default is strict verification (true); only explicit opt-in env var can bypass in development
+    const allowInsecureDev = process.env.DB_SSL_ALLOW_INSECURE === 'true' || process.env.DB_SSL_REJECT_UNAUTHORIZED === 'false';
+    ssl.rejectUnauthorized = !allowInsecureDev;
+  }
+
+  return ssl;
+}
+
 async function initDb() {
   const connectionString = process.env.DATABASE_URL;
+  const isTestMode = process.env.NODE_ENV === 'test';
+  const shouldConnectPg = Boolean(
+    connectionString && 
+    (!isTestMode || process.env.TEST_LIVE_DB === 'true')
+  );
 
-  if (connectionString) {
+  if (shouldConnectPg) {
     try {
-      const isProduction = process.env.NODE_ENV === 'production' || connectionString.includes('supabase.co');
       pool = new Pool({
         connectionString,
-        ssl: isProduction ? { rejectUnauthorized: false } : false,
+        ssl: getPgSslConfig(connectionString),
         connectionTimeoutMillis: 5000,
         idleTimeoutMillis: 10000,
         max: 10
@@ -1011,10 +1071,14 @@ async function initDb() {
       console.log('Successfully connected to PostgreSQL production database.');
     } catch (err) {
       console.warn('PostgreSQL connection attempt failed:', err.message);
+      if (err.message && err.message.includes('ENOTFOUND') && connectionString.includes('db.') && connectionString.includes('.supabase.co')) {
+        console.warn('NOTE: Supabase direct hosts (db.<ref>.supabase.co) only resolve over IPv6. On IPv4 networks, configure the Supavisor connection pooler host (aws-0-<region>.pooler.supabase.com:5432) with user "postgres.<ref>".');
+      }
       console.warn('Using embedded database fallback engine for local operation.');
       isPgConnected = false;
     }
   } else {
+    console.warn('DATABASE_URL is required for PostgreSQL database access.');
     console.warn('No DATABASE_URL configured. Using embedded database fallback engine.');
     isPgConnected = false;
   }
@@ -1037,6 +1101,18 @@ async function seedAdminAccount() {
   } catch (err) {
     console.warn('[DB SEED] Admin account seed skipped:', err.message);
   }
+}
+
+async function pingDb() {
+  if (isPgConnected && pool) {
+    try {
+      await pool.query('SELECT 1');
+      return { connected: true, type: 'postgresql' };
+    } catch (err) {
+      return { connected: false, error: err.message, type: 'postgresql' };
+    }
+  }
+  return { connected: isPgConnected, type: isPgConnected ? 'postgresql' : 'fallback' };
 }
 
 async function query(text, params) {
@@ -1081,5 +1157,7 @@ module.exports = {
   getClient,
   withTransaction,
   isPgConnected: () => isPgConnected,
-  fallbackDb
+  pingDb,
+  fallbackDb,
+  getPgSslConfig
 };
