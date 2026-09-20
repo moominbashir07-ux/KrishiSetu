@@ -180,34 +180,34 @@
 <nav id="mainPublicNav" class="bg-surface dark:bg-inverse-surface text-primary dark:text-inverse-primary docked full-width top-0 z-50 shadow-[0_4px_18px_rgba(23,49,34,0.07)] sticky">
   <div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-3 md:py-4 max-w-max-width mx-auto">
     <div class="flex items-center gap-3 sm:gap-6">
-      <a class="flex items-center" href="#" onclick="showScreen('landing')" title="KrishiSetu Home">
+      <a class="flex items-center" href="#" data-action="show-screen" data-screen="landing" title="KrishiSetu Home">
         <img src="images/logo.png" class="navbar-logo" alt="KrishiSetu Logo">
       </a>
       <div class="hidden md:flex gap-3 lg:gap-6 items-center">
-        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-xs lg:text-body-default font-semibold hidden" id="dashboardNavBtn" onclick="onNavDashboardClick()" type="button">Dashboard</button>
-        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-xs lg:text-body-default font-semibold" onclick="onNavMarketplaceClick()" type="button">Marketplace</button>
-        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-xs lg:text-body-default font-semibold" onclick="showScreen('price')" type="button">Mandi Rates</button>
-        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-xs lg:text-body-default font-semibold" id="sellNavBtn" onclick="showScreen('sell')" type="button" style="display:none">Sell Products</button>
-        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-xs lg:text-body-default font-semibold flex items-center gap-1.5" onclick="showScreen('orders')" type="button">
+        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-xs lg:text-body-default font-semibold hidden" id="dashboardNavBtn" data-action="nav-dashboard" type="button">Dashboard</button>
+        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-xs lg:text-body-default font-semibold" data-action="nav-marketplace" type="button">Marketplace</button>
+        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-xs lg:text-body-default font-semibold" data-action="show-screen" data-screen="price" type="button">Mandi Rates</button>
+        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-xs lg:text-body-default font-semibold" id="sellNavBtn" data-action="show-screen" data-screen="sell" type="button" style="display:none">Sell Products</button>
+        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-xs lg:text-body-default font-semibold flex items-center gap-1.5" data-action="show-screen" data-screen="orders" type="button">
           <span>Orders</span>
           <span id="ordersCountBadge" class="hidden bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full"></span>
         </button>
-        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-xs lg:text-body-default font-semibold" onclick="showScreen('about')" type="button">About Us</button>
+        <button class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors text-xs lg:text-body-default font-semibold" data-action="show-screen" data-screen="about" type="button">About Us</button>
       </div>
     </div>
     <div class="flex items-center gap-1.5 sm:gap-2 lg:gap-4 shrink-0">
-      <button class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 text-xs" onclick="detectMyLocation()" title="Detect Geolocation" type="button">
+      <button class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 text-xs" data-action="detect-location" title="Detect Geolocation" type="button">
         <span class="material-symbols-outlined text-sm sm:text-base" data-icon="location_on">location_on</span>
         <span id="topLocationText" class="hidden lg:inline text-xs font-semibold">Detect Location</span>
       </button>
-      <button class="text-on-surface-variant hover:text-primary transition-colors relative p-1.5" onclick="onNavCartClick()" type="button" title="View Cart">
+      <button class="text-on-surface-variant hover:text-primary transition-colors relative p-1.5" data-action="nav-cart" type="button" title="View Cart">
         <span class="material-symbols-outlined text-xl" data-icon="shopping_cart">shopping_cart</span>
         <span id="cartCountBadge" class="absolute -top-1 -right-1 bg-harvest-gold text-inverse-surface font-bold text-[10px] w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center">0</span>
       </button>
       
       <!-- NOTIFICATION BELL & DROPDOWN -->
       <div class="relative">
-        <button id="notifBtn" class="hidden text-on-surface-variant hover:text-primary transition-colors relative p-1.5 focus:outline-none" onclick="toggleNotificationsDropdown()" type="button" title="Notifications & Background Alerts">
+        <button id="notifBtn" class="hidden text-on-surface-variant hover:text-primary transition-colors relative p-1.5 focus:outline-none" data-action="toggle-notifications" type="button" title="Notifications & Background Alerts">
           <span class="material-symbols-outlined text-xl">notifications</span>
           <span id="notifBadge" class="hidden absolute -top-1 -right-1 bg-error-crisp text-white font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center animate-pulse">0</span>
         </button>
@@ -220,7 +220,7 @@
               <span id="notifCountPill" class="text-[10px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-full">0</span>
             </div>
             <div class="flex items-center gap-2">
-              <button class="text-[10px] text-soil-brown hover:text-primary font-bold underline transition-colors" onclick="markAllNotificationsRead()" type="button">Mark All Read</button>
+              <button class="text-[10px] text-soil-brown hover:text-primary font-bold underline transition-colors" data-action="mark-all-read" type="button">Mark All Read</button>
             </div>
           </div>
 
@@ -235,15 +235,15 @@
             </div>
             <p id="bgNotifDescription" class="text-[11px] text-soil-brown leading-snug">Receive instant OS desktop notifications when orders, payments, or price alerts occur.</p>
             <div class="flex flex-wrap items-center gap-2 pt-1">
-              <button id="btnToggleBgNotif" class="px-2.5 py-1 bg-primary text-white text-[11px] font-bold rounded-lg hover:bg-primary-container transition-colors flex items-center gap-1" onclick="BackgroundNotificationManager.requestPermission()" type="button">
+              <button id="btnToggleBgNotif" class="px-2.5 py-1 bg-primary text-white text-[11px] font-bold rounded-lg hover:bg-primary-container transition-colors flex items-center gap-1" data-action="request-notification-permission" type="button">
                 <span class="material-symbols-outlined text-xs">tune</span>
                 <span id="btnToggleBgNotifText">Enable Alerts</span>
               </button>
-              <button id="btnTestBgNotif" class="px-2 py-1 bg-white border border-primary/30 text-primary text-[11px] font-bold rounded-lg hover:bg-surface transition-colors flex items-center gap-1" onclick="triggerTestBackgroundAlert(3)" type="button" title="Sends a test alert in 3s so you can switch tabs or minimize">
+              <button id="btnTestBgNotif" class="px-2 py-1 bg-white border border-primary/30 text-primary text-[11px] font-bold rounded-lg hover:bg-surface transition-colors flex items-center gap-1" data-action="trigger-test-alert" data-seconds="3" type="button" title="Sends a test alert in 3s so you can switch tabs or minimize">
                 <span class="material-symbols-outlined text-xs">timer</span>
                 <span>Test (3s Delay)</span>
               </button>
-              <button id="btnNotifSoundToggle" class="px-2 py-1 bg-white border border-border-subtle text-soil-brown hover:text-primary text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1" onclick="toggleAlertSound()" type="button" title="Toggle audio chime">
+              <button id="btnNotifSoundToggle" class="px-2 py-1 bg-white border border-border-subtle text-soil-brown hover:text-primary text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1" data-action="toggle-alert-sound" type="button" title="Toggle audio chime">
                 <span id="soundIcon" class="material-symbols-outlined text-xs">volume_up</span>
                 <span id="soundLabel">Sound On</span>
               </button>
@@ -252,7 +252,7 @@
 
           <!-- Quick System Diagnostic Checkup Trigger -->
           <div class="mb-3">
-            <button onclick="openQuickCheckupModal()" class="w-full py-2 px-3 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 rounded-xl text-emerald-900 text-[11px] font-bold flex items-center justify-between transition-colors shadow-xs" type="button">
+            <button data-action="open-quick-checkup" class="w-full py-2 px-3 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 rounded-xl text-emerald-900 text-[11px] font-bold flex items-center justify-between transition-colors shadow-xs" type="button">
               <div class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                 <span>Platform Quick Checkup (All Systems)</span>
@@ -269,11 +269,11 @@
       </div>
 
       <span id="userRoleBadge" class="hidden text-xs font-extrabold px-2.5 py-1 rounded-full bg-surface text-primary border border-primary/20"></span>
-      <button id="profileNavBtn" class="hidden text-xs sm:text-body-sm text-soil-brown hover:text-primary font-bold transition-colors" onclick="showScreen('profile')" type="button">Profile</button>
-      <button id="authHeaderBtn" class="text-xs sm:text-body-sm bg-primary text-white rounded-lg px-3 py-2 sm:px-4 sm:py-2 hover:bg-primary-container transition-colors font-bold" onclick="openAuthModal()" type="button">Login</button>
+      <button id="profileNavBtn" class="hidden text-xs sm:text-body-sm text-soil-brown hover:text-primary font-bold transition-colors" data-action="show-screen" data-screen="profile" type="button">Profile</button>
+      <button id="authHeaderBtn" class="text-xs sm:text-body-sm bg-primary text-white rounded-lg px-3 py-2 sm:px-4 sm:py-2 hover:bg-primary-container transition-colors font-bold" data-action="open-auth-modal" type="button">Login</button>
       
       <!-- Mobile Menu Toggle Button -->
-      <button class="md:hidden text-primary p-2 focus:outline-none flex items-center justify-center" onclick="toggleMobileMenu()" type="button" aria-label="Toggle Menu">
+      <button class="md:hidden text-primary p-2 focus:outline-none flex items-center justify-center" data-action="toggle-mobile-menu" type="button" aria-label="Toggle Menu">
         <span class="material-symbols-outlined text-2xl">menu</span>
       </button>
     </div>
@@ -281,16 +281,16 @@
 
   <!-- Mobile Dropdown Navigation Menu Drawer -->
   <div id="mobileNavMenu" class="hidden md:hidden border-t border-border-subtle bg-white px-4 py-3 space-y-2 shadow-lg">
-    <button id="mobileDashboardBtn" class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface hidden" onclick="toggleMobileMenu(); onNavDashboardClick();" type="button">📊 My Dashboard</button>
-    <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); onNavMarketplaceClick();" type="button">🛒 Marketplace</button>
-    <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); showScreen('price');" type="button">📊 Mandi Rates</button>
-    <button id="mobileSellBtn" class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface hidden" onclick="toggleMobileMenu(); showScreen('sell');" type="button">👨‍🌾 Sell Products</button>
-    <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface flex items-center justify-between" onclick="toggleMobileMenu(); showScreen('orders');" type="button">
+    <button id="mobileDashboardBtn" class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface hidden" data-action="mobile-nav" data-subaction="dashboard" type="button">📊 My Dashboard</button>
+    <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" data-action="mobile-nav" data-subaction="marketplace" type="button">🛒 Marketplace</button>
+    <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" data-action="mobile-nav" data-subaction="screen" data-screen="price" type="button">📊 Mandi Rates</button>
+    <button id="mobileSellBtn" class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface hidden" data-action="mobile-nav" data-subaction="screen" data-screen="sell" type="button">👨‍🌾 Sell Products</button>
+    <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface flex items-center justify-between" data-action="mobile-nav" data-subaction="screen" data-screen="orders" type="button">
       <span>📦 Orders Tracking</span>
       <span id="mobileOrdersCountBadge" class="hidden bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full"></span>
     </button>
-    <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); showScreen('about');" type="button">🌾 About Us</button>
-    <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" onclick="toggleMobileMenu(); openFeedbackModal();" type="button">💬 Platform Feedback</button>
+    <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" data-action="mobile-nav" data-subaction="screen" data-screen="about" type="button">🌾 About Us</button>
+    <button class="w-full text-left py-2 px-3 text-sm font-semibold text-primary rounded-lg hover:bg-surface" data-action="mobile-nav" data-subaction="feedback" type="button">💬 Platform Feedback</button>
   </div>
 </nav>
 
@@ -316,9 +316,9 @@
         </div>
 
         <div class="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4">
-          <button class="w-full sm:w-auto bg-primary text-white px-7 py-3 rounded-xl text-sm md:text-section-head font-bold shadow-md hover:bg-primary-container transition-all min-h-[44px]" onclick="onExploreClick()" type="button">Explore Marketplace</button>
-          <button class="w-full sm:w-auto border-2 border-primary text-primary px-7 py-3 rounded-xl text-sm md:text-section-head font-bold hover:bg-primary hover:text-white transition-all bg-white/70 backdrop-blur-md min-h-[44px]" onclick="onSellClick()" type="button">Sell on KrishiSetu</button>
-          <button class="w-full sm:w-auto bg-surface text-primary border border-primary/30 px-5 py-3 rounded-xl text-sm md:text-section-head font-bold hover:bg-primary/10 transition-all flex items-center justify-center gap-2 min-h-[44px]" onclick="showScreen('price')" type="button">
+          <button class="w-full sm:w-auto bg-primary text-white px-7 py-3 rounded-xl text-sm md:text-section-head font-bold shadow-md hover:bg-primary-container transition-all min-h-[44px]" data-action="explore-click" type="button">Explore Marketplace</button>
+          <button class="w-full sm:w-auto border-2 border-primary text-primary px-7 py-3 rounded-xl text-sm md:text-section-head font-bold hover:bg-primary hover:text-white transition-all bg-white/70 backdrop-blur-md min-h-[44px]" data-action="sell-click" type="button">Sell on KrishiSetu</button>
+          <button class="w-full sm:w-auto bg-surface text-primary border border-primary/30 px-5 py-3 rounded-xl text-sm md:text-section-head font-bold hover:bg-primary/10 transition-all flex items-center justify-center gap-2 min-h-[44px]" data-action="show-screen" data-screen="price" type="button">
             <span>📊</span> View Market Prices
           </button>
         </div>
@@ -356,14 +356,14 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
         <div class="bg-white p-8 rounded-2xl border border-border-subtle shadow-sm flex flex-col items-center">
           <div class="w-16 h-16 rounded-2xl overflow-hidden shadow-sm mb-4 border border-primary/20 bg-surface flex items-center justify-center">
-            <img src="images/farmer.png" alt="Direct Farmer Profit" class="w-full h-full object-cover rounded-2xl" onerror="this.src='images/logo.png'">
+            <img src="images/farmer.png" alt="Direct Farmer Profit" class="w-full h-full object-cover rounded-2xl" >
           </div>
           <h3 class="text-headline-md font-bold text-primary mb-2">Direct Farmer Profit</h3>
           <p class="text-body-sm text-soil-brown">Farmers set their own pricing and sell directly to nearby consumers without middleman commissions.</p>
         </div>
         <div class="bg-white p-8 rounded-2xl border border-border-subtle shadow-sm flex flex-col items-center">
           <div class="w-16 h-16 rounded-2xl overflow-hidden shadow-sm mb-4 border border-primary/20 bg-surface flex items-center justify-center">
-            <img src="images/graph.png" alt="Mandi Rates" class="w-full h-full object-cover rounded-2xl" onerror="this.src='images/logo.png'">
+            <img src="images/graph.png" alt="Mandi Rates" class="w-full h-full object-cover rounded-2xl" >
           </div>
           <h3 class="text-headline-md font-bold text-primary mb-2">Mandi Rates</h3>
           <p class="text-body-sm text-soil-brown">Live Government mandi arrival data, historical price trends, and APMC comparison charts.</p>
@@ -390,10 +390,10 @@
         <p class="text-body-sm text-soil-brown">Source farm-fresh produce directly, track active shipments, and monitor mandi arrival benchmarks.</p>
       </div>
       <div class="flex items-center gap-3">
-        <button class="bg-primary text-white px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-primary-container transition-all flex items-center gap-1.5 shadow-sm" onclick="showScreen('buyer-market')" type="button">
+        <button class="bg-primary text-white px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-primary-container transition-all flex items-center gap-1.5 shadow-sm" data-action="show-screen" data-screen="buyer-market" type="button">
           <span class="material-symbols-outlined text-sm">storefront</span> Browse Produce
         </button>
-        <button class="bg-surface text-primary border border-primary/20 px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-primary/10 transition-all flex items-center gap-1.5" onclick="showScreen('cart')" type="button">
+        <button class="bg-surface text-primary border border-primary/20 px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-primary/10 transition-all flex items-center gap-1.5" data-action="show-screen" data-screen="cart" type="button">
           <span class="material-symbols-outlined text-sm">shopping_cart</span> My Cart (<span id="custDashCartCount">0</span>)
         </button>
       </div>
@@ -401,19 +401,19 @@
 
     <!-- Quick Actions Bento -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:-translate-y-1 transition-transform cursor-pointer group" onclick="showScreen('buyer-market')">
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:-translate-y-1 transition-transform cursor-pointer group" data-action="show-screen" data-screen="buyer-market">
         <div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-2xl mb-4 group-hover:bg-primary group-hover:text-white transition-colors">🛒</div>
         <h3 class="font-bold text-primary text-base mb-1">Explore Marketplace</h3>
         <p class="text-xs text-soil-brown mb-3">Browse fruits, vegetables, grains, and pulses freshly listed by local producers.</p>
         <span class="text-xs font-bold text-primary flex items-center gap-1">Browse Catalog →</span>
       </div>
-      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:-translate-y-1 transition-transform cursor-pointer group" onclick="showScreen('price')">
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:-translate-y-1 transition-transform cursor-pointer group" data-action="show-screen" data-screen="price">
         <div class="w-12 h-12 rounded-xl bg-harvest-gold/20 text-inverse-surface flex items-center justify-center text-2xl mb-4 group-hover:bg-harvest-gold transition-colors">📈</div>
         <h3 class="font-bold text-primary text-base mb-1">Check Mandi Rates</h3>
         <p class="text-xs text-soil-brown mb-3">Compare daily APMC arrival rates and benchmark modal prices before buying.</p>
         <span class="text-xs font-bold text-primary flex items-center gap-1">Open Intelligence Terminal →</span>
       </div>
-      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:-translate-y-1 transition-transform cursor-pointer group" onclick="showScreen('orders')">
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:-translate-y-1 transition-transform cursor-pointer group" data-action="show-screen" data-screen="orders">
         <div class="w-12 h-12 rounded-xl bg-surface text-primary flex items-center justify-center text-2xl mb-4 group-hover:bg-surface-variant transition-colors">📦</div>
         <h3 class="font-bold text-primary text-base mb-1">Track Orders</h3>
         <p class="text-xs text-soil-brown mb-3">View live status transitions from harvest confirmation to arrival at your PIN.</p>
@@ -429,7 +429,7 @@
           <h3 class="text-base font-bold text-primary flex items-center gap-2">
             <span>📦</span> Active Orders & Deliveries
           </h3>
-          <button class="text-xs font-bold text-primary hover:underline" onclick="showScreen('orders')" type="button">View All Orders →</button>
+          <button class="text-xs font-bold text-primary hover:underline" data-action="show-screen" data-screen="orders" type="button">View All Orders →</button>
         </div>
         <div id="custActiveOrdersContainer" class="space-y-3">
           <div class="p-6 text-center text-soil-brown bg-surface rounded-xl border border-border-subtle text-xs">Loading active orders...</div>
@@ -442,7 +442,7 @@
           <h3 class="text-base font-bold text-primary flex items-center gap-2">
             <span>📊</span> Today's Mandi Benchmark
           </h3>
-          <button class="text-xs font-bold text-primary hover:underline" onclick="showScreen('price')" type="button">All Rates →</button>
+          <button class="text-xs font-bold text-primary hover:underline" data-action="show-screen" data-screen="price" type="button">All Rates →</button>
         </div>
         <p class="text-[11px] text-soil-brown mb-3">Modal APMC arrival rates (Govt. of India / AGMARKNET)</p>
         <div id="custMandiSnapshotContainer" class="space-y-2.5">
@@ -458,7 +458,7 @@
           <h3 class="text-base font-bold text-primary">Fresh Harvest Available for Order</h3>
           <p class="text-xs text-soil-brown">Direct from verified Indian farmers with zero middleman markups.</p>
         </div>
-        <button class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors" onclick="showScreen('buyer-market')" type="button">View Full Catalog →</button>
+        <button class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors" data-action="show-screen" data-screen="buyer-market" type="button">View Full Catalog →</button>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4" id="custFeaturedProduceGrid">
         <div class="p-6 text-center text-soil-brown text-xs col-span-full">Loading fresh harvest...</div>
@@ -472,7 +472,7 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-white p-6 rounded-2xl border border-border-subtle shadow-sm">
       <div class="flex items-center gap-4">
         <div class="w-14 h-14 rounded-2xl overflow-hidden bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-          <img id="sellerDashPhoto" src="images/farmer.png" class="w-full h-full object-cover" alt="Farmer Profile" onerror="this.src='images/logo.png'">
+          <img id="sellerDashPhoto" src="images/farmer.png" class="w-full h-full object-cover" alt="Farmer Profile" >
         </div>
         <div>
           <div class="flex items-center gap-2">
@@ -484,10 +484,10 @@
         </div>
       </div>
       <div class="flex flex-wrap items-center gap-2.5">
-        <button class="bg-primary text-white px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-primary-container transition-all flex items-center gap-1.5 shadow-sm" onclick="showScreen('sell')" type="button">
+        <button class="bg-primary text-white px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-primary-container transition-all flex items-center gap-1.5 shadow-sm" data-action="show-screen" data-screen="sell" type="button">
           <span class="material-symbols-outlined text-sm">add_circle</span> + Add New Listing
         </button>
-        <button class="bg-surface text-primary border border-primary/20 px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-primary/10 transition-all flex items-center gap-1.5" onclick="showScreen('price')" type="button">
+        <button class="bg-surface text-primary border border-primary/20 px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-primary/10 transition-all flex items-center gap-1.5" data-action="show-screen" data-screen="price" type="button">
           <span class="material-symbols-outlined text-sm">trending_up</span> Mandi Rates
         </button>
       </div>
@@ -526,7 +526,7 @@
           </h3>
           <p class="text-xs text-soil-brown">Review buyer delivery coordinates and advance order fulfillment steps.</p>
         </div>
-        <button class="text-xs font-bold text-primary hover:underline" onclick="showScreen('orders')" type="button">All Orders →</button>
+        <button class="text-xs font-bold text-primary hover:underline" data-action="show-screen" data-screen="orders" type="button">All Orders →</button>
       </div>
       <div id="sellerIncomingOrdersContainer" class="space-y-3">
         <div class="p-6 text-center text-soil-brown text-xs bg-surface rounded-xl border border-border-subtle">Loading incoming orders...</div>
@@ -542,7 +542,7 @@
           </h3>
           <p class="text-xs text-soil-brown">Live listings published on the KrishiSetu Marketplace.</p>
         </div>
-        <button class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors shadow-sm" onclick="showScreen('sell')" type="button">+ New Produce Listing</button>
+        <button class="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors shadow-sm" data-action="show-screen" data-screen="sell" type="button">+ New Produce Listing</button>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs">
@@ -611,7 +611,7 @@
             <div class="text-3xl font-black text-primary" id="sellerProfActiveCrops">0</div>
             <p class="text-xs font-semibold text-soil-brown mt-1">Active crop listings available for buyer orders</p>
           </div>
-          <button class="mt-4 bg-primary text-white py-2 px-3 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors" onclick="showScreen('sell')" type="button">+ Add Another Listing</button>
+          <button class="mt-4 bg-primary text-white py-2 px-3 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors" data-action="show-screen" data-screen="sell" type="button">+ Add Another Listing</button>
         </div>
       </div>
     </div>
@@ -625,7 +625,7 @@
           </h3>
           <p class="text-xs text-soil-brown">Verified buyer feedback associated exclusively with your produce orders.</p>
         </div>
-        <button class="text-xs font-bold text-primary hover:underline" onclick="loadSellerReviews()" type="button">↻ Refresh Reviews</button>
+        <button class="text-xs font-bold text-primary hover:underline" data-action="load-seller-reviews" type="button">↻ Refresh Reviews</button>
       </div>
       <div id="sellerReviewsContainer" class="space-y-3">
         <div class="p-6 text-center text-soil-brown text-xs bg-surface rounded-xl border border-border-subtle">Loading your verified customer reviews...</div>
@@ -643,7 +643,7 @@
           <h2 class="text-headline-md font-bold text-primary">My Listings</h2>
           <p class="text-body-sm text-soil-brown">Manage and update your published product listings.</p>
         </div>
-        <button class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors shadow-sm" onclick="showScreen('sell')" type="button">+ Add New Product Listing</button>
+        <button class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors shadow-sm" data-action="show-screen" data-screen="sell" type="button">+ Add New Product Listing</button>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6" id="myListingsGrid">
         <div class="p-8 text-center text-soil-brown bg-white rounded-xl border border-border-subtle col-span-full">Loading your product listings...</div>
@@ -658,9 +658,9 @@
       <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
         <div class="relative flex-1 sm:w-64">
           <span class="material-symbols-outlined absolute left-3 top-2.5 text-soil-brown text-sm">search</span>
-          <input type="text" id="marketSearchInput" placeholder="Search produce or farmer..." class="w-full pl-8 pr-3 py-2 border border-border-subtle rounded-xl bg-white text-xs font-semibold outline-none focus:ring-2 focus:ring-primary min-h-[38px]" oninput="filterMarketProducts()">
+          <input type="text" id="marketSearchInput" placeholder="Search produce or farmer..." class="w-full pl-8 pr-3 py-2 border border-border-subtle rounded-xl bg-white text-xs font-semibold outline-none focus:ring-2 focus:ring-primary min-h-[38px]" >
         </div>
-        <select id="marketCategoryFilter" class="p-2 border border-border-subtle rounded-xl bg-white text-xs font-bold outline-none focus:ring-2 focus:ring-primary min-h-[38px]" onchange="renderProducts()">
+        <select id="marketCategoryFilter" class="p-2 border border-border-subtle rounded-xl bg-white text-xs font-bold outline-none focus:ring-2 focus:ring-primary min-h-[38px]" >
           <option value="All">All Categories</option>
           <option value="Vegetables">Vegetables</option>
           <option value="Fruits">Fruits</option>
@@ -668,13 +668,13 @@
           <option value="Pulses">Pulses</option>
           <option value="Spices">Spices</option>
         </select>
-        <select id="marketSortFilter" class="p-2 border border-border-subtle rounded-xl bg-white text-xs font-bold outline-none focus:ring-2 focus:ring-primary min-h-[38px]" onchange="filterMarketProducts()">
+        <select id="marketSortFilter" class="p-2 border border-border-subtle rounded-xl bg-white text-xs font-bold outline-none focus:ring-2 focus:ring-primary min-h-[38px]" >
           <option value="default">Sort: Default</option>
           <option value="price_asc">Price: Low to High</option>
           <option value="price_desc">Price: High to Low</option>
           <option value="stock_desc">Available Stock</option>
         </select>
-        <button class="bg-surface text-primary border border-primary/20 px-3 py-2 rounded-xl text-xs font-bold hover:bg-primary/10 transition-colors flex items-center gap-1 shrink-0 min-h-[38px]" onclick="detectMyLocation()" type="button" title="Detect GPS location for distance sorting">
+        <button class="bg-surface text-primary border border-primary/20 px-3 py-2 rounded-xl text-xs font-bold hover:bg-primary/10 transition-colors flex items-center gap-1 shrink-0 min-h-[38px]" data-action="detect-location" type="button" title="Detect GPS location for distance sorting">
           <span class="material-symbols-outlined text-sm">my_location</span> GPS
         </button>
       </div>
@@ -691,7 +691,7 @@
         <h2 class="text-headline-md font-bold text-primary">In Your Product Cart</h2>
         <p class="text-body-sm text-soil-brown">Review selected product items before placing your server order.</p>
       </div>
-      <button class="text-primary text-xs font-bold underline" onclick="showScreen('buyer-market')" type="button">← Continue Shopping</button>
+      <button class="text-primary text-xs font-bold underline" data-action="show-screen" data-screen="buyer-market" type="button">← Continue Shopping</button>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" id="cartContentLayout">
@@ -716,7 +716,7 @@
             <span id="cartTotalVal">₹0</span>
           </div>
         </div>
-        <button id="cartCheckoutBtn" class="w-full bg-primary text-white py-3 rounded-xl font-bold mt-6 hover:bg-primary-container transition-colors shadow-md" onclick="checkoutCart()" type="button">Proceed to Checkout →</button>
+        <button id="cartCheckoutBtn" class="w-full bg-primary text-white py-3 rounded-xl font-bold mt-6 hover:bg-primary-container transition-colors shadow-md" data-action="checkout-cart" type="button">Proceed to Checkout →</button>
         <p class="text-[11px] text-soil-brown text-center mt-3">⚡ Orders with subtotal ≥ ₹5,000 qualify for discounted 0.5% bulk platform fee.</p>
       </div>
     </div>
@@ -745,7 +745,7 @@
           </div>
           <div>
             <label class="block text-xs font-bold text-soil-brown uppercase mb-1">QUALITY GRADE</label>
-            <select id="prodGrade" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-sm outline-none focus:border-primary" onchange="handleProductGradeChange(this.value)">
+            <select id="prodGrade" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-sm outline-none focus:border-primary" >
               <option value="Grade A" selected>Grade A (Premium)</option>
               <option value="Grade B">Grade B (Standard)</option>
               <option value="Standard Quality">Standard Quality</option>
@@ -777,7 +777,7 @@
             PRODUCT PHOTO / EVIDENCE
             <span id="gradeAImageTag" class="text-amber-600 font-semibold normal-case ml-1.5 text-[11px]">★ Photo Evidence Required for Grade A</span>
           </label>
-          <input id="prodImageInput" type="file" accept="image/*" class="w-full p-2 border-2 border-amber-500/60 rounded-lg bg-input-bg text-xs transition-all ring-1 ring-amber-500/20" onchange="previewProductImage(event)">
+          <input id="prodImageInput" type="file" accept="image/*" class="w-full p-2 border-2 border-amber-500/60 rounded-lg bg-input-bg text-xs transition-all ring-1 ring-amber-500/20" >
           <div id="imagePreviewContainer" class="mt-2 hidden">
             <img id="imagePreviewThumb" class="w-24 h-24 object-cover rounded-lg border border-border-subtle" alt="Preview">
           </div>
@@ -786,7 +786,7 @@
           <label class="block text-xs font-bold text-soil-brown uppercase mb-1">SELLER LOCATION</label>
           <input id="prodLocation" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-sm outline-none focus:border-primary" placeholder="Detect or enter city/mandi name">
         </div>
-        <button class="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary-container transition-colors mt-4" onclick="publishProduct()" type="button">Publish Product Listing</button>
+        <button class="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-primary-container transition-colors mt-4" data-action="publish-product" type="button">Publish Product Listing</button>
       </div>
     </div>
   </section>
@@ -800,11 +800,11 @@
       </div>
       <!-- Tab Switcher -->
       <div class="flex bg-surface p-1 rounded-xl border border-primary/20 gap-1" id="ordersTabButtonGroup">
-        <button id="tabOrdersActiveBtn" class="px-4 py-2 text-xs font-bold bg-primary text-white rounded-lg shadow-sm transition-all flex items-center gap-1.5" onclick="switchOrdersTab('active')" type="button">
+        <button id="tabOrdersActiveBtn" class="px-4 py-2 text-xs font-bold bg-primary text-white rounded-lg shadow-sm transition-all flex items-center gap-1.5" data-action="orders-tab" data-tab="active" type="button">
           <span>📦 Active Orders</span>
           <span id="tabOrdersActiveCount" class="bg-white/20 text-white text-[10px] px-1.5 py-0.2 rounded-full font-mono">0</span>
         </button>
-        <button id="tabOrdersHistoryBtn" class="px-4 py-2 text-xs font-bold text-soil-brown hover:text-primary rounded-lg transition-all flex items-center gap-1.5" onclick="switchOrdersTab('history')" type="button">
+        <button id="tabOrdersHistoryBtn" class="px-4 py-2 text-xs font-bold text-soil-brown hover:text-primary rounded-lg transition-all flex items-center gap-1.5" data-action="orders-tab" data-tab="history" type="button">
           <span>📜 My History</span>
           <span id="tabOrdersHistoryCount" class="bg-primary/10 text-primary text-[10px] px-1.5 py-0.2 rounded-full font-mono">0</span>
         </button>
@@ -814,10 +814,10 @@
     <!-- Filter Pills -->
     <div class="flex flex-wrap items-center gap-2 mb-6" id="ordersFilterGroup">
       <span class="text-xs font-bold text-soil-brown uppercase mr-1 text-[10px]">Filter:</span>
-      <button class="orders-filter-btn active px-3 py-1 text-xs font-bold rounded-lg bg-primary text-white" onclick="filterOrdersByStatus('all', this)" type="button">All</button>
-      <button class="orders-filter-btn px-3 py-1 text-xs font-bold rounded-lg bg-surface text-soil-brown border border-border-subtle hover:text-primary" onclick="filterOrdersByStatus('pending', this)" type="button">Pending Confirmation</button>
-      <button class="orders-filter-btn px-3 py-1 text-xs font-bold rounded-lg bg-surface text-soil-brown border border-border-subtle hover:text-primary" onclick="filterOrdersByStatus('in_transit', this)" type="button">Preparing / Ready</button>
-      <button class="orders-filter-btn px-3 py-1 text-xs font-bold rounded-lg bg-surface text-soil-brown border border-border-subtle hover:text-primary" onclick="filterOrdersByStatus('completed', this)" type="button">Completed</button>
+      <button class="orders-filter-btn active px-3 py-1 text-xs font-bold rounded-lg bg-primary text-white" data-action="filter-orders-status" data-status="all" type="button">All</button>
+      <button class="orders-filter-btn px-3 py-1 text-xs font-bold rounded-lg bg-surface text-soil-brown border border-border-subtle hover:text-primary" data-action="filter-orders-status" data-status="pending" type="button">Pending Confirmation</button>
+      <button class="orders-filter-btn px-3 py-1 text-xs font-bold rounded-lg bg-surface text-soil-brown border border-border-subtle hover:text-primary" data-action="filter-orders-status" data-status="in_transit" type="button">Preparing / Ready</button>
+      <button class="orders-filter-btn px-3 py-1 text-xs font-bold rounded-lg bg-surface text-soil-brown border border-border-subtle hover:text-primary" data-action="filter-orders-status" data-status="completed" type="button">Completed</button>
     </div>
 
     <div class="space-y-4" id="ordersContainer">
@@ -837,14 +837,14 @@
         </div>
         <p class="text-body-sm text-soil-brown">Source: Government of India — AGMARKNET / Data.gov.in official market arrival observations.</p>
       </div>
-      <button class="bg-primary text-white px-4 py-2.5 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors" onclick="loadMarketPrices(true)" type="button">↻ Refresh Mandi Data</button>
+      <button class="bg-primary text-white px-4 py-2.5 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors" data-action="refresh-mandi" type="button">↻ Refresh Mandi Data</button>
     </div>
 
     <!-- Controls & Selectors -->
     <div class="bg-white p-6 rounded-2xl border border-border-subtle mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4 shadow-sm">
       <div>
         <label class="block text-xs font-bold text-soil-brown uppercase mb-1" for="mandiCommodity">COMMODITY</label>
-        <select id="mandiCommodity" class="w-full p-3 border border-border-subtle rounded-xl bg-input-bg font-semibold text-sm outline-none focus:ring-2 focus:ring-primary min-h-[44px]" onchange="loadMarketPrices()">
+        <select id="mandiCommodity" class="w-full p-3 border border-border-subtle rounded-xl bg-input-bg font-semibold text-sm outline-none focus:ring-2 focus:ring-primary min-h-[44px]" >
           <option value="Onion">Onion</option>
           <option value="Tomato">Tomato</option>
           <option value="Potato">Potato</option>
@@ -858,7 +858,7 @@
       </div>
       <div>
         <label class="block text-xs font-bold text-soil-brown uppercase mb-1" for="mandiState">STATE</label>
-        <select id="mandiState" class="w-full p-3 border border-border-subtle rounded-xl bg-input-bg font-semibold text-sm outline-none focus:ring-2 focus:ring-primary min-h-[44px]" onchange="onMandiStateChange()">
+        <select id="mandiState" class="w-full p-3 border border-border-subtle rounded-xl bg-input-bg font-semibold text-sm outline-none focus:ring-2 focus:ring-primary min-h-[44px]" >
           <option value="Maharashtra">Maharashtra</option>
           <option value="Delhi">Delhi</option>
           <option value="Uttar Pradesh">Uttar Pradesh</option>
@@ -876,7 +876,7 @@
       </div>
       <div>
         <label class="block text-xs font-bold text-soil-brown uppercase mb-1" for="mandiDistrict">DISTRICT FILTER</label>
-        <select id="mandiDistrict" class="w-full p-3 border border-border-subtle rounded-xl bg-input-bg font-semibold text-sm outline-none focus:ring-2 focus:ring-primary min-h-[44px]" onchange="loadMarketPrices()">
+        <select id="mandiDistrict" class="w-full p-3 border border-border-subtle rounded-xl bg-input-bg font-semibold text-sm outline-none focus:ring-2 focus:ring-primary min-h-[44px]" >
           <option value="">All Districts</option>
         </select>
       </div>
@@ -922,16 +922,16 @@
         <div class="flex flex-wrap items-center gap-2.5">
           <!-- Timeframe Selector -->
           <div class="flex bg-surface rounded-xl p-1 border border-primary/20" id="mandiTimeframeButtonGroup">
-            <button id="btnTf1D" class="px-2.5 py-1 text-xs font-bold text-soil-brown hover:text-primary rounded-lg transition-colors" onclick="setMandiTimeframe('1D')" type="button">1D</button>
-            <button id="btnTf7D" class="px-2.5 py-1 text-xs font-bold bg-primary text-white rounded-lg shadow-sm transition-colors" onclick="setMandiTimeframe('7D')" type="button">7D</button>
-            <button id="btnTf1M" class="px-2.5 py-1 text-xs font-bold text-soil-brown hover:text-primary rounded-lg transition-colors" onclick="setMandiTimeframe('1M')" type="button">1M</button>
-            <button id="btnTf1Y" class="px-2.5 py-1 text-xs font-bold text-soil-brown hover:text-primary rounded-lg transition-colors" onclick="setMandiTimeframe('1Y')" type="button">1Y</button>
+            <button id="btnTf1D" class="px-2.5 py-1 text-xs font-bold text-soil-brown hover:text-primary rounded-lg transition-colors" data-action="mandi-timeframe" data-tf="1D" type="button">1D</button>
+            <button id="btnTf7D" class="px-2.5 py-1 text-xs font-bold bg-primary text-white rounded-lg shadow-sm transition-colors" data-action="mandi-timeframe" data-tf="7D" type="button">7D</button>
+            <button id="btnTf1M" class="px-2.5 py-1 text-xs font-bold text-soil-brown hover:text-primary rounded-lg transition-colors" data-action="mandi-timeframe" data-tf="1M" type="button">1M</button>
+            <button id="btnTf1Y" class="px-2.5 py-1 text-xs font-bold text-soil-brown hover:text-primary rounded-lg transition-colors" data-action="mandi-timeframe" data-tf="1Y" type="button">1Y</button>
           </div>
           <!-- Metric Selector -->
           <div class="flex gap-1 bg-input-bg p-1 rounded-xl border border-border-subtle" id="chartMetricButtonGroup">
-            <button id="btnMetricModal" class="px-2.5 py-1 text-xs font-bold bg-primary text-white rounded-lg shadow-sm cursor-pointer transition-all" onclick="setChartMetric('modal_price')" type="button">Modal</button>
-            <button id="btnMetricMin" class="px-2.5 py-1 text-xs font-bold bg-transparent text-soil-brown hover:bg-slate-200 rounded-lg cursor-pointer transition-all" onclick="setChartMetric('min_price')" type="button">Min</button>
-            <button id="btnMetricMax" class="px-2.5 py-1 text-xs font-bold bg-transparent text-soil-brown hover:bg-slate-200 rounded-lg cursor-pointer transition-all" onclick="setChartMetric('max_price')" type="button">Max</button>
+            <button id="btnMetricModal" class="px-2.5 py-1 text-xs font-bold bg-primary text-white rounded-lg shadow-sm cursor-pointer transition-all" data-action="chart-metric" data-metric="modal_price" type="button">Modal</button>
+            <button id="btnMetricMin" class="px-2.5 py-1 text-xs font-bold bg-transparent text-soil-brown hover:bg-slate-200 rounded-lg cursor-pointer transition-all" data-action="chart-metric" data-metric="min_price" type="button">Min</button>
+            <button id="btnMetricMax" class="px-2.5 py-1 text-xs font-bold bg-transparent text-soil-brown hover:bg-slate-200 rounded-lg cursor-pointer transition-all" data-action="chart-metric" data-metric="max_price" type="button">Max</button>
           </div>
         </div>
       </div>
@@ -999,7 +999,7 @@
   <!-- 8. ABOUT US SCREEN -->
   <section class="screen max-w-3xl mx-auto px-margin-mobile md:px-margin-desktop py-12 text-center" id="about">
     <div class="bg-white p-10 rounded-2xl border border-border-subtle shadow-sm">
-      <img src="images/logo.png" class="h-20 w-auto object-contain mx-auto mb-4" alt="KrishiSetu Brand Logo" onerror="this.style.display='none';">
+      <img src="images/logo.png" class="h-20 w-auto object-contain mx-auto mb-4" alt="KrishiSetu Brand Logo" >
       <h2 class="text-headline-lg font-bold text-primary mt-2 mb-4">About KrishiSetu</h2>
       <p class="text-body-default text-soil-brown mb-6 max-w-2xl mx-auto">
         KrishiSetu is an agricultural price intelligence and direct farm-to-customer marketplace designed to empower local farmers with direct consumer access, transparent platform fees, and live AGMARKNET mandi rates.
@@ -1008,7 +1008,7 @@
         🚀 Made by Code Red
       </div>
       <div class="mt-4">
-        <button class="bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors px-6 py-2.5 rounded-xl font-bold text-xs" onclick="openFeedbackModal()" type="button">💬 Give Platform Feedback</button>
+        <button class="bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors px-6 py-2.5 rounded-xl font-bold text-xs" data-action="open-feedback" type="button">💬 Give Platform Feedback</button>
       </div>
     </div>
   </section>
@@ -1018,7 +1018,7 @@
     <!-- Admin Master Top Navigation Bar -->
     <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 md:px-8 py-3.5 flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <button class="md:hidden text-slate-400 hover:text-white p-2 text-xl" onclick="$('adminSidebar').classList.toggle('hidden')" type="button">☰</button>
+        <button class="md:hidden text-slate-400 hover:text-white p-2 text-xl" data-action="toggle-admin-sidebar" type="button">☰</button>
         <div class="w-10 h-10 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center justify-center text-emerald-400 font-black text-xl shadow-inner">🛡</div>
         <div>
           <h1 class="text-base md:text-lg font-black tracking-tight text-white flex items-center gap-2">
@@ -1033,11 +1033,11 @@
       <!-- Top Bar Actions & Grouped Search -->
       <div class="flex items-center gap-3">
         <div class="relative hidden sm:block w-64 md:w-80">
-          <input type="text" id="adminGlobalSearchInput" placeholder="Grouped search (user, order, txn, product)..." class="w-full pl-8 pr-3 py-1.5 bg-slate-800/80 border border-slate-700 rounded-xl text-xs text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50" onkeyup="if(event.key==='Enter') executeAdminGlobalSearch()">
+          <input type="text" id="adminGlobalSearchInput" placeholder="Grouped search (user, order, txn, product)..." class="w-full pl-8 pr-3 py-1.5 bg-slate-800/80 border border-slate-700 rounded-xl text-xs text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50" >
           <span class="absolute left-2.5 top-2 text-xs text-slate-400">🔍</span>
         </div>
 
-        <select id="adminCsvExportSelect" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 font-bold focus:outline-none" onchange="if(this.value){ exportAdminCsv(this.value); this.value=''; }">
+        <select id="adminCsvExportSelect" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 font-bold focus:outline-none" >
           <option value="">📥 Export CSV</option>
           <option value="users">Users</option>
           <option value="orders">Orders</option>
@@ -1047,11 +1047,11 @@
           <option value="audit-logs">Audit Logs</option>
         </select>
 
-        <button class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shrink-0" onclick="loadAdminDashboard()" type="button">🔄 Refresh</button>
+        <button class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shrink-0" data-action="load-admin-dashboard" type="button">🔄 Refresh</button>
 
         <div class="flex items-center gap-2 border-l border-slate-800 pl-3">
           <span class="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center text-xs font-bold text-emerald-400 border border-slate-700">ADM</span>
-          <button class="text-slate-400 hover:text-rose-400 text-xs font-bold" onclick="AuthService.logout(); showScreen('buyer-market');" type="button">Logout</button>
+          <button class="text-slate-400 hover:text-rose-400 text-xs font-bold" data-action="admin-logout" type="button">Logout</button>
         </div>
       </div>
     </header>
@@ -1061,24 +1061,24 @@
       <!-- PERSISTENT ADMIN SIDEBAR (20 NAVIGATION ITEMS) -->
       <aside id="adminSidebar" class="w-64 bg-slate-900 border-r border-slate-800 p-4 space-y-1 shrink-0 hidden md:block overflow-y-auto max-h-[calc(100vh-60px)]">
         <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 mb-2">Executive Navigation</div>
-        <button id="admTabAnalytics" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('analytics')">📊 Executive Overview</button>
-        <button id="admTabLive" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('live')">🟢 Live Presence & Stream</button>
-        <button id="admTabUsers" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('users')">👥 User Accounts Governance</button>
-        <button id="admTabCustomers" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('customers')">🛒 Customer Roster</button>
-        <button id="admTabSellers" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('sellers')">👨‍🌾 Sellers & Verification</button>
-        <button id="admTabProducts" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('products')">🌾 Product Moderation</button>
-        <button id="admTabOrders" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('orders')">📦 Orders Control Room</button>
-        <button id="admTabPayments" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('payments')">💳 Payment Control Room</button>
-        <button id="admTabFinance" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('finance')">💸 Profit & Expenses BI</button>
-        <button id="admTabMandi" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('mandi')">🏛 Mandi Intelligence & Debug</button>
-        <button id="admTabReviews" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('reviews')">⭐ Reviews Moderation</button>
-        <button id="admTabFeedback" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('feedback')">💬 Platform Feedback</button>
-        <button id="admTabLoginHistory" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('loginHistory')">🔑 Security & Login Audits</button>
-        <button id="admTabAudit" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('audit')">📜 System Audit Logs</button>
-        <button id="admTabDatabase" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('database')">🗄 DB Table Inspector</button>
-        <button id="admTabHealth" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('health')">🩺 System Health Monitor</button>
-        <button id="admTabSettings" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('settings')">⚙️ Platform Settings</button>
-        <button id="admTabTrust" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" onclick="switchAdminTab('trust')">🛡️ Trust & Integrity BI</button>
+        <button id="admTabAnalytics" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="analytics">📊 Executive Overview</button>
+        <button id="admTabLive" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="live">🟢 Live Presence & Stream</button>
+        <button id="admTabUsers" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="users">👥 User Accounts Governance</button>
+        <button id="admTabCustomers" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="customers">🛒 Customer Roster</button>
+        <button id="admTabSellers" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="sellers">👨‍🌾 Sellers & Verification</button>
+        <button id="admTabProducts" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="products">🌾 Product Moderation</button>
+        <button id="admTabOrders" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="orders">📦 Orders Control Room</button>
+        <button id="admTabPayments" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="payments">💳 Payment Control Room</button>
+        <button id="admTabFinance" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="finance">💸 Profit & Expenses BI</button>
+        <button id="admTabMandi" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="mandi">🏛 Mandi Intelligence & Debug</button>
+        <button id="admTabReviews" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="reviews">⭐ Reviews Moderation</button>
+        <button id="admTabFeedback" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="feedback">💬 Platform Feedback</button>
+        <button id="admTabLoginHistory" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="loginHistory">🔑 Security & Login Audits</button>
+        <button id="admTabAudit" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="audit">📜 System Audit Logs</button>
+        <button id="admTabDatabase" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="database">🗄 DB Table Inspector</button>
+        <button id="admTabHealth" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="health">🩺 System Health Monitor</button>
+        <button id="admTabSettings" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="settings">⚙️ Platform Settings</button>
+        <button id="admTabTrust" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-colors" data-action="switch-admin-tab" data-tab="trust">🛡️ Trust & Integrity BI</button>
       </aside>
 
       <!-- Main Dashboard Content Area -->
@@ -1119,7 +1119,7 @@
                 <h4 class="font-bold text-white text-base">Platform GMV & Revenue Analytics</h4>
                 <p class="text-xs text-slate-400">Order merchandise value and platform fee trends.</p>
               </div>
-              <select id="analyticsDateRange" class="p-2 border border-slate-700 rounded-xl text-xs bg-slate-800 font-bold text-emerald-400" onchange="loadAdminAnalytics(this.value)">
+              <select id="analyticsDateRange" class="p-2 border border-slate-700 rounded-xl text-xs bg-slate-800 font-bold text-emerald-400" >
                 <option value="30d">Last 30 Days</option>
                 <option value="7d">Last 7 Days</option>
                 <option value="today">Today</option>
@@ -1171,7 +1171,7 @@
         <div id="adminTabContentUsers" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl hidden">
           <div class="flex justify-between items-center mb-4">
             <h4 class="font-bold text-white text-base">User Accounts Governance</h4>
-            <select id="adminUserFilter" class="p-2 border border-slate-700 rounded-lg text-xs bg-slate-800 font-bold text-slate-200" onchange="loadAdminUsers()">
+            <select id="adminUserFilter" class="p-2 border border-slate-700 rounded-lg text-xs bg-slate-800 font-bold text-slate-200" >
               <option value="">All Roles</option>
               <option value="customer">Customers Only</option>
               <option value="seller">Sellers Only</option>
@@ -1358,7 +1358,7 @@
           <!-- Add Expense Form -->
           <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
             <h4 class="font-bold text-white mb-3 text-sm">Record Platform Expense</h4>
-            <form id="adminExpenseForm" onsubmit="event.preventDefault(); recordAdminExpense();" class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+            <form id="adminExpenseForm"  class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
               <div>
                 <label class="font-bold text-slate-400 block mb-1">Expense Title</label>
                 <input type="text" id="expTitle" required placeholder="e.g. AWS Server Hosting" class="w-full p-2.5 border border-slate-700 rounded-xl bg-slate-800 text-white focus:outline-none">
@@ -1477,7 +1477,7 @@
                 <option value="user_activity">user_activity</option>
                 <option value="platform_expenses">platform_expenses</option>
               </select>
-              <button class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-emerald-500" onclick="inspectSelectedAdminTable()" type="button">Inspect Table</button>
+              <button class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-emerald-500" data-action="inspect-admin-table" type="button">Inspect Table</button>
             </div>
           </div>
           <div id="dbInspectorContainer" class="overflow-x-auto border border-slate-800 rounded-xl p-3 bg-slate-950 text-xs">
@@ -1569,7 +1569,7 @@
               </h3>
               <p class="text-xs text-slate-400 mt-1">Real database aggregation of disputes, quality grading distribution, mandi arrival freshness, and seller integrity.</p>
             </div>
-            <button class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-colors" onclick="loadAdminTrustMetrics()" type="button">🔄 Refresh Trust BI</button>
+            <button class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-colors" data-action="load-admin-trust" type="button">🔄 Refresh Trust BI</button>
           </div>
 
           <!-- 4 Grid Overview -->
@@ -1622,7 +1622,7 @@
   <!-- ACCOUNT FREEZE / SUSPEND REASON MODAL -->
   <div id="adminReasonModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative">
-      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" onclick="$('adminReasonModal').classList.add('hidden')" type="button">✕</button>
+      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" data-action="hide-admin-reason-modal" type="button">✕</button>
       <h3 class="text-lg font-bold text-primary mb-1" id="reasonModalTitle">Update Account Status</h3>
       <p class="text-xs text-soil-brown mb-4" id="reasonModalSubtitle">Provide a clear audit reason for changing this account status.</p>
       
@@ -1633,8 +1633,8 @@
       <textarea id="reasonModalTextarea" rows="3" placeholder="Enter reason (e.g. Terms violation, requested by user, verification issue)..." class="w-full p-3 border border-border-subtle rounded-xl text-xs bg-input-bg mb-4 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
 
       <div class="flex justify-end gap-2">
-        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold text-soil-brown border border-border-subtle hover:bg-input-bg" onclick="$('adminReasonModal').classList.add('hidden')">Cancel</button>
-        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-primary text-white hover:bg-primary-container" onclick="submitAccountActionWithReason()">Confirm Status Update</button>
+        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold text-soil-brown border border-border-subtle hover:bg-input-bg" data-action="hide-admin-reason-modal">Cancel</button>
+        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-primary text-white hover:bg-primary-container" data-action="submit-admin-reason">Confirm Status Update</button>
       </div>
     </div>
   </div>
@@ -1642,7 +1642,7 @@
   <!-- EMERGENCY ADMIN OVERRIDE MODAL -->
   <div id="adminEmergencyOverrideModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative">
-      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" onclick="$('adminEmergencyOverrideModal').classList.add('hidden')" type="button">✕</button>
+      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" data-action="hide-admin-emergency-modal" type="button">✕</button>
       <h3 class="text-lg font-bold text-error mb-1" id="overrideModalTitle">🚨 Emergency Admin Override</h3>
       <p class="text-xs text-soil-brown mb-4">Emergency administrative override on order fulfillment. Normal fulfillment acceptance belongs strictly to sellers.</p>
       
@@ -1659,8 +1659,8 @@
       <textarea id="overrideReasonTextarea" rows="3" placeholder="Enter explicit audit reason for emergency override..." class="w-full p-3 border border-border-subtle rounded-xl text-xs bg-input-bg mb-4 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
 
       <div class="flex justify-end gap-2">
-        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold text-soil-brown border border-border-subtle hover:bg-input-bg" onclick="$('adminEmergencyOverrideModal').classList.add('hidden')">Cancel</button>
-        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-error text-white hover:bg-error/90" onclick="submitEmergencyAdminOverride()">Execute Override</button>
+        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold text-soil-brown border border-border-subtle hover:bg-input-bg" data-action="hide-admin-emergency-modal">Cancel</button>
+        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-error text-white hover:bg-error/90" data-action="submit-admin-emergency">Execute Override</button>
       </div>
     </div>
   </div>
@@ -1668,7 +1668,7 @@
   <!-- SELLER VERIFICATION REVIEW MODAL (ADMIN ONLY) -->
   <div id="adminSellerVerifModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative">
-      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" onclick="$('adminSellerVerifModal').classList.add('hidden')" type="button">✕</button>
+      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" data-action="hide-admin-seller-verif-modal" type="button">✕</button>
       <h3 class="text-lg font-bold text-primary mb-1">Review Seller Verification</h3>
       <p class="text-xs text-soil-brown mb-4">Review credentials and approve or reject verified farmer status.</p>
       
@@ -1689,8 +1689,8 @@
       <textarea id="verifReasonTextarea" rows="3" placeholder="Provide notes or specific rejection reasons for the farmer..." class="w-full p-3 border border-border-subtle rounded-xl text-xs bg-input-bg mb-4 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
 
       <div class="flex justify-end gap-2">
-        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold text-soil-brown border border-border-subtle hover:bg-input-bg" onclick="$('adminSellerVerifModal').classList.add('hidden')">Cancel</button>
-        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-primary text-white hover:bg-primary-container" onclick="submitSellerVerificationDecision()">Confirm Decision</button>
+        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold text-soil-brown border border-border-subtle hover:bg-input-bg" data-action="hide-admin-seller-verif-modal">Cancel</button>
+        <button type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-primary text-white hover:bg-primary-container" data-action="submit-admin-seller-verif">Confirm Decision</button>
       </div>
     </div>
   </div>
@@ -1698,7 +1698,7 @@
   <!-- USER PROFILE INSPECTOR DRAWER (ADMIN ONLY) -->
   <div id="adminUserProfileDrawer" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-end hidden">
     <div class="bg-slate-900 text-slate-100 max-w-xl w-full h-full p-6 shadow-2xl overflow-y-auto border-l border-slate-800 relative">
-      <button class="absolute top-4 right-4 text-slate-400 font-bold text-xl hover:text-white" onclick="$('adminUserProfileDrawer').classList.add('hidden')" type="button">✕</button>
+      <button class="absolute top-4 right-4 text-slate-400 font-bold text-xl hover:text-white" data-action="hide-admin-user-drawer" type="button">✕</button>
       <div class="flex items-center gap-3 mb-6">
         <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center font-bold text-2xl" id="drawerUserAvatar">👤</div>
         <div>
@@ -1718,22 +1718,22 @@
 <!-- AUTHENTICATION MODAL -->
 <div id="authModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
   <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative">
-    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" onclick="closeAuthModal()" type="button">✕</button>
+    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" data-action="close-auth-modal" type="button">✕</button>
     <h3 class="text-xl font-bold text-primary mb-1" id="authModalTitle">Sign in to KrishiSetu</h3>
     <p class="text-xs text-soil-brown mb-4" id="authModalSub">Access direct farm product marketplace.</p>
     
     <div class="flex bg-input-bg p-1 rounded-lg mb-4" id="authTabContainer">
-      <button id="modalTabSignin" class="flex-1 py-2 text-xs font-bold rounded-md bg-white text-primary shadow-sm" onclick="setAuthTab('signin')" type="button">Sign In</button>
-      <button id="modalTabSignup" class="flex-1 py-2 text-xs font-bold rounded-md text-soil-brown" onclick="setAuthTab('signup')" type="button">Create Account</button>
+      <button id="modalTabSignin" class="flex-1 py-2 text-xs font-bold rounded-md bg-white text-primary shadow-sm" data-action="auth-tab" data-tab="signin" type="button">Sign In</button>
+      <button id="modalTabSignup" class="flex-1 py-2 text-xs font-bold rounded-md text-soil-brown" data-action="auth-tab" data-tab="signup" type="button">Create Account</button>
     </div>
 
     <!-- MAIN AUTH FORM VIEW -->
     <div id="authFormView">
       <div id="modalRoleSelector" class="grid grid-cols-2 gap-3 mb-3 hidden">
-        <button type="button" id="roleSellerBtn" class="rolecard selected p-3 border border-border-subtle rounded-xl text-left" onclick="selectAuthRole('seller')">
+        <button type="button" id="roleSellerBtn" class="rolecard selected p-3 border border-border-subtle rounded-xl text-left" data-action="auth-role" data-role="seller">
           <span class="text-lg">👨‍🌾</span> <b class="block text-xs text-primary">Seller / Farmer</b>
         </button>
-        <button type="button" id="roleBuyerBtn" class="rolecard p-3 border border-border-subtle rounded-xl text-left" onclick="selectAuthRole('customer')">
+        <button type="button" id="roleBuyerBtn" class="rolecard p-3 border border-border-subtle rounded-xl text-left" data-action="auth-role" data-role="customer">
           <span class="text-lg">🛒</span> <b class="block text-xs text-primary">Buyer / Customer</b>
         </button>
       </div>
@@ -1751,8 +1751,8 @@
       <div class="mb-3">
         <label class="block text-[10px] font-bold text-soil-brown uppercase mb-1">PASSWORD *</label>
         <div class="relative">
-          <input id="modalPasswordInput" type="password" class="w-full p-3 pr-10 border border-border-subtle rounded-lg bg-input-bg text-xs outline-none" placeholder="Enter password (min 8 chars)" oninput="evaluatePasswordStrength(this.value)">
-          <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-soil-brown hover:text-primary text-xs" onclick="togglePasswordVisibility('modalPasswordInput', this)" title="Show/Hide Password" aria-label="Toggle password visibility">👁️</button>
+          <input id="modalPasswordInput" type="password" class="w-full p-3 pr-10 border border-border-subtle rounded-lg bg-input-bg text-xs outline-none" placeholder="Enter password (min 8 chars)" >
+          <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-soil-brown hover:text-primary text-xs" data-action="toggle-password" data-target="modalPasswordInput" title="Show/Hide Password" aria-label="Toggle password visibility">👁️</button>
         </div>
         <div id="passwordStrengthMeter" class="hidden mt-1.5 text-[10px] font-bold flex justify-between items-center px-1">
           <span id="strengthText" class="text-error font-bold">Strength: Weak</span>
@@ -1763,13 +1763,13 @@
       <div id="modalConfirmField" class="mb-4 hidden">
         <label class="block text-[10px] font-bold text-soil-brown uppercase mb-1">CONFIRM PASSWORD *</label>
         <div class="relative">
-          <input id="modalConfirmInput" type="password" class="w-full p-3 pr-10 border border-border-subtle rounded-lg bg-input-bg text-xs outline-none" placeholder="Re-enter password" oninput="checkConfirmPasswordMatch()">
-          <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-soil-brown hover:text-primary text-xs" onclick="togglePasswordVisibility('modalConfirmInput', this)" title="Show/Hide Password" aria-label="Toggle confirm password visibility">👁️</button>
+          <input id="modalConfirmInput" type="password" class="w-full p-3 pr-10 border border-border-subtle rounded-lg bg-input-bg text-xs outline-none" placeholder="Re-enter password" >
+          <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-soil-brown hover:text-primary text-xs" data-action="toggle-password" data-target="modalConfirmInput" title="Show/Hide Password" aria-label="Toggle confirm password visibility">👁️</button>
         </div>
         <span id="confirmErrorText" class="hidden text-error text-[10px] font-bold mt-1">Passwords do not match</span>
       </div>
 
-      <button id="modalSubmitBtn" class="w-full bg-primary text-white py-3 rounded-lg font-bold text-sm hover:bg-primary-container transition-colors" onclick="submitAuthModal()" type="button">Sign In</button>
+      <button id="modalSubmitBtn" class="w-full bg-primary text-white py-3 rounded-lg font-bold text-sm hover:bg-primary-container transition-colors" data-action="submit-auth" type="button">Sign In</button>
     </div>
 
     <!-- OTP VERIFICATION VIEW -->
@@ -1779,8 +1779,8 @@
         <label class="block text-[10px] font-bold text-soil-brown uppercase mb-1">6-DIGIT EMAIL OTP CODE</label>
         <input id="modalOtpInput" maxlength="6" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-center font-bold tracking-widest text-lg outline-none" placeholder="000000">
       </div>
-      <button class="w-full bg-primary text-white py-3 rounded-lg font-bold text-sm hover:bg-primary-container transition-colors mb-2" onclick="verifyRegistrationOtp()" type="button">Verify OTP & Complete Registration</button>
-      <button id="resendOtpBtn" disabled class="w-full border border-border-subtle text-soil-brown py-2 rounded-lg font-semibold text-xs bg-slate-100 cursor-not-allowed transition-all" onclick="resendRegistrationOtp()" type="button">
+      <button class="w-full bg-primary text-white py-3 rounded-lg font-bold text-sm hover:bg-primary-container transition-colors mb-2" data-action="verify-otp" type="button">Verify OTP & Complete Registration</button>
+      <button id="resendOtpBtn" disabled class="w-full border border-border-subtle text-soil-brown py-2 rounded-lg font-semibold text-xs bg-slate-100 cursor-not-allowed transition-all" data-action="resend-otp" type="button">
         Resend OTP in <span id="otpCountdownText">00:59</span>
       </button>
       <p id="otpExpiryNotice" class="text-[10px] text-soil-brown/80 text-center mt-2">Code valid for 10 minutes from dispatch</p>
@@ -1791,7 +1791,7 @@
 <!-- SELLER PROFILE MODAL (BUYER VIEW) -->
 <div id="sellerModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
   <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl relative max-h-[90vh] overflow-y-auto" id="sellerModalContent">
-    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" onclick="closeSellerModal()" type="button">✕</button>
+    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" data-action="close-seller-modal" type="button">✕</button>
     <div class="text-center py-6 text-soil-brown">Loading seller profile...</div>
   </div>
 </div>
@@ -1799,7 +1799,7 @@
 <!-- PRODUCT DETAILS MODAL (WITH SELLER CARD, VERIFIED REVIEWS, CALL SELLER) -->
 <div id="productDetailsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
   <div class="bg-white rounded-2xl max-w-xl w-[92vw] p-6 shadow-xl relative max-h-[90vh] overflow-y-auto" id="productDetailsModalContent">
-    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" onclick="closeProductDetailsModal()" type="button">✕</button>
+    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" data-action="close-product-details" type="button">✕</button>
     <div class="text-center py-8 text-soil-brown">Loading product details...</div>
   </div>
 </div>
@@ -1807,7 +1807,7 @@
 <!-- BUYER ORDER DETAILS MODAL -->
 <div id="orderDetailsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
   <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto" id="orderDetailsModalContent">
-    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" onclick="closeOrderDetailsModal()" type="button">✕</button>
+    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" data-action="close-order-details" type="button">✕</button>
     <div class="text-center py-8 text-soil-brown">Loading order details...</div>
   </div>
 </div>
@@ -1815,7 +1815,7 @@
 <!-- BUYER RATE & REVIEW MODAL -->
 <div id="rateProductModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
   <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
-    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" onclick="closeRateProductModal()" type="button">✕</button>
+    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" data-action="close-rate-product" type="button">✕</button>
     <h3 class="text-base font-bold text-primary mb-1">Rate & Review Produce</h3>
     <p class="text-xs text-soil-brown mb-4" id="rateModalSubtitle">Share your verified customer review with the farming community.</p>
     
@@ -1825,11 +1825,11 @@
     <div class="mb-4 text-center">
       <label class="block text-[10px] font-bold text-soil-brown uppercase mb-2">Select Star Rating</label>
       <div class="flex justify-center gap-2 text-3xl cursor-pointer select-none" id="starRatingContainer">
-        <span class="star-rating text-amber-400 hover:scale-110 transition-transform" onclick="selectStarRating(1)">★</span>
-        <span class="star-rating text-amber-400 hover:scale-110 transition-transform" onclick="selectStarRating(2)">★</span>
-        <span class="star-rating text-amber-400 hover:scale-110 transition-transform" onclick="selectStarRating(3)">★</span>
-        <span class="star-rating text-amber-400 hover:scale-110 transition-transform" onclick="selectStarRating(4)">★</span>
-        <span class="star-rating text-amber-400 hover:scale-110 transition-transform" onclick="selectStarRating(5)">★</span>
+        <span class="star-rating text-amber-400 hover:scale-110 transition-transform" data-action="star-rating" data-rating="1">★</span>
+        <span class="star-rating text-amber-400 hover:scale-110 transition-transform" data-action="star-rating" data-rating="2">★</span>
+        <span class="star-rating text-amber-400 hover:scale-110 transition-transform" data-action="star-rating" data-rating="3">★</span>
+        <span class="star-rating text-amber-400 hover:scale-110 transition-transform" data-action="star-rating" data-rating="4">★</span>
+        <span class="star-rating text-amber-400 hover:scale-110 transition-transform" data-action="star-rating" data-rating="5">★</span>
       </div>
       <span id="selectedRatingText" class="text-xs font-bold text-primary mt-1 block">5 Stars (Excellent Quality)</span>
     </div>
@@ -1840,8 +1840,8 @@
     </div>
 
     <div class="flex gap-2">
-      <button class="flex-1 py-2.5 rounded-xl border border-border-subtle text-soil-brown font-semibold text-xs hover:bg-input-bg transition-colors" onclick="closeRateProductModal()" type="button">Cancel</button>
-      <button class="flex-1 py-2.5 rounded-xl bg-primary text-white font-bold text-xs hover:bg-primary-container transition-colors shadow-sm" onclick="submitProductReview()" type="button">Submit Verified Review</button>
+      <button class="flex-1 py-2.5 rounded-xl border border-border-subtle text-soil-brown font-semibold text-xs hover:bg-input-bg transition-colors" data-action="close-rate-product" type="button">Cancel</button>
+      <button class="flex-1 py-2.5 rounded-xl bg-primary text-white font-bold text-xs hover:bg-primary-container transition-colors shadow-sm" data-action="submit-product-review" type="button">Submit Verified Review</button>
     </div>
   </div>
 </div>
@@ -1849,7 +1849,7 @@
 <!-- PLATFORM FEEDBACK MODAL -->
 <div id="feedbackModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
   <div class="bg-white rounded-2xl max-w-md w-[92vw] p-6 shadow-xl relative">
-    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" onclick="closeFeedbackModal()" type="button">✕</button>
+    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" data-action="close-feedback" type="button">✕</button>
     <h3 class="text-xl font-bold text-primary mb-1">Platform Feedback</h3>
     <p class="text-xs text-soil-brown mb-4">Share your feedback to help us improve KrishiSetu.</p>
     <div class="space-y-3">
@@ -1880,7 +1880,7 @@
         <label class="block text-[10px] font-bold text-soil-brown uppercase mb-1">YOUR MESSAGE *</label>
         <textarea id="fbMessage" rows="3" class="w-full p-3 border border-border-subtle rounded-lg bg-input-bg text-xs outline-none" placeholder="Describe your experience or suggestion..."></textarea>
       </div>
-      <button class="w-full bg-primary text-white py-3 rounded-lg font-bold text-sm hover:bg-primary-container transition-colors mt-2" onclick="submitFeedbackForm()" type="button">Submit Feedback</button>
+      <button class="w-full bg-primary text-white py-3 rounded-lg font-bold text-sm hover:bg-primary-container transition-colors mt-2" data-action="submit-feedback" type="button">Submit Feedback</button>
     </div>
   </div>
 </div>
@@ -1888,7 +1888,7 @@
 <!-- STEP 1: AMAZON-STYLE INDIAN DELIVERY ADDRESS MODAL -->
 <div id="deliveryAddressModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
   <div class="bg-white rounded-2xl max-w-lg w-[94vw] p-6 shadow-xl relative max-h-[92vh] overflow-y-auto" id="deliveryAddressModalContent">
-    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" onclick="closeDeliveryAddressModal()" type="button">✕</button>
+    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" data-action="close-delivery-address" type="button">✕</button>
     
     <div class="flex items-center gap-2 text-xs font-bold text-success-emerald uppercase tracking-wider mb-1">
       <span class="bg-success-emerald/10 px-2 py-0.5 rounded-full border border-success-emerald/20">Step 1 of 2</span>
@@ -1897,7 +1897,7 @@
     <h3 class="text-xl font-bold text-primary mb-1">Select Delivery Address</h3>
     <p class="text-xs text-soil-brown mb-4">Enter your full Indian delivery address so the farmer can evaluate transit time and coordinate delivery.</p>
 
-    <form id="deliveryAddressForm" onsubmit="event.preventDefault(); submitDeliveryAddressAndProceed();" class="space-y-3">
+    <form id="deliveryAddressForm"  class="space-y-3">
       <!-- Full Name -->
       <div>
         <label for="addrFullName" class="block text-[11px] font-bold text-soil-brown uppercase mb-1">Full Name (First & Last Name) *</label>
@@ -2005,7 +2005,7 @@
 
       <!-- Action Buttons -->
       <div class="flex gap-2 pt-2">
-        <button type="button" onclick="closeDeliveryAddressModal()" class="flex-1 py-3 border border-border-subtle rounded-xl font-bold text-xs text-soil-brown hover:bg-surface transition-colors">Cancel</button>
+        <button type="button" data-action="close-delivery-address" class="flex-1 py-3 border border-border-subtle rounded-xl font-bold text-xs text-soil-brown hover:bg-surface transition-colors">Cancel</button>
         <button type="submit" id="btnDeliverToAddress" class="w-2/3 bg-primary text-white py-3 rounded-xl font-bold text-xs hover:bg-primary-container transition-colors shadow-md flex items-center justify-center gap-1.5">
           <span>Deliver to this Address ➔</span>
         </button>
@@ -2017,7 +2017,7 @@
 <!-- STEP 2: REAL PAYMENT SELECTION MODAL (SCANNER & PAY ON DELIVERY) -->
 <div id="paymentCheckoutModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
   <div class="bg-white rounded-2xl max-w-lg w-[92vw] p-6 shadow-xl relative max-h-[90vh] overflow-y-auto" id="paymentModalContent">
-    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" onclick="closePaymentCheckoutModal()" type="button">✕</button>
+    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" data-action="close-payment-checkout" type="button">✕</button>
     
     <div class="flex items-center gap-2 text-xs font-bold text-success-emerald uppercase tracking-wider mb-1">
       <span class="bg-success-emerald/10 px-2 py-0.5 rounded-full border border-success-emerald/20">Step 2 of 2</span>
@@ -2035,7 +2035,7 @@
         <p id="checkoutSelectedAddress" class="text-soil-brown text-[11px] leading-relaxed"></p>
         <p id="checkoutSelectedInstructions" class="text-[10px] text-primary/80 italic mt-0.5 hidden"></p>
       </div>
-      <button type="button" onclick="reopenDeliveryAddressModal()" class="text-primary font-bold text-[11px] underline hover:text-primary-container shrink-0 ml-2">Change</button>
+      <button type="button" data-action="reopen-delivery-address" class="text-primary font-bold text-[11px] underline hover:text-primary-container shrink-0 ml-2">Change</button>
     </div>
 
     <!-- Order Summary Container -->
@@ -2050,15 +2050,15 @@
 
     <!-- Payment Method Tabs -->
     <div class="flex bg-input-bg p-1 rounded-xl mb-4">
-      <button id="payTabScanner" class="flex-1 py-2 text-xs font-bold rounded-lg bg-white text-primary shadow-sm" onclick="switchPaymentMethod('upi_qr')" type="button">📱 Pay on Scanner (UPI QR)</button>
-      <button id="payTabCod" class="flex-1 py-2 text-xs font-bold rounded-lg text-soil-brown" onclick="switchPaymentMethod('cod')" type="button">💵 Pay on Delivery</button>
+      <button id="payTabScanner" class="flex-1 py-2 text-xs font-bold rounded-lg bg-white text-primary shadow-sm" data-action="switch-payment-method" data-method="upi_qr" type="button">📱 Pay on Scanner (UPI QR)</button>
+      <button id="payTabCod" class="flex-1 py-2 text-xs font-bold rounded-lg text-soil-brown" data-action="switch-payment-method" data-method="cod" type="button">💵 Pay on Delivery</button>
     </div>
 
     <!-- Option 1: Pay on Scanner -->
     <div id="payViewScanner" class="text-center space-y-3">
       <p class="text-xs text-soil-brown font-medium">Scan this QR code using PhonePe, Google Pay, Paytm, or any UPI app:</p>
       <div class="p-3 bg-white border border-border-subtle rounded-xl inline-block shadow-sm">
-        <img src="images/scanner.png" class="w-48 h-48 mx-auto object-contain" alt="UPI Payment Scanner" onerror="this.src='images/logo.png'">
+        <img src="images/scanner.png" class="w-48 h-48 mx-auto object-contain" alt="UPI Payment Scanner" >
       </div>
       <div class="text-xs font-bold text-success-emerald">Scan & Pay <span id="scannerPayAmount">₹0</span></div>
       
@@ -2069,10 +2069,10 @@
       </div>
 
       <div class="flex flex-col gap-2 pt-2">
-        <button id="shareProofBtn" class="w-full bg-surface text-primary border border-primary/30 py-2.5 rounded-xl font-bold text-xs hover:bg-primary/5 transition-colors flex items-center justify-center gap-2" onclick="sharePaymentProofAction()" type="button">
+        <button id="shareProofBtn" class="w-full bg-surface text-primary border border-primary/30 py-2.5 rounded-xl font-bold text-xs hover:bg-primary/5 transition-colors flex items-center justify-center gap-2" data-action="share-payment-proof" type="button">
           <span>📤 Share Payment Proof</span>
         </button>
-        <button id="btnSubmitUpiPayment" class="w-full bg-success-emerald text-white py-3 rounded-xl font-bold text-sm hover:bg-primary transition-colors shadow-md flex items-center justify-center gap-2" onclick="confirmPaymentAndPlaceOrder('upi_qr')" type="button">
+        <button id="btnSubmitUpiPayment" class="w-full bg-success-emerald text-white py-3 rounded-xl font-bold text-sm hover:bg-primary transition-colors shadow-md flex items-center justify-center gap-2" data-action="confirm-payment" data-method="upi_qr" type="button">
           <span>Submit Order & Payment Proof ✓</span>
         </button>
       </div>
@@ -2086,7 +2086,7 @@
         </div>
         <p class="text-xs text-soil-brown">Pay the farmer directly in cash or UPI when your product is delivered to your address.</p>
       </div>
-      <button id="btnSubmitCodPayment" class="w-full bg-primary text-white py-3 rounded-xl font-bold text-sm hover:bg-primary-container transition-colors shadow-md flex items-center justify-center gap-2" onclick="confirmPaymentAndPlaceOrder('cod')" type="button">
+      <button id="btnSubmitCodPayment" class="w-full bg-primary text-white py-3 rounded-xl font-bold text-sm hover:bg-primary-container transition-colors shadow-md flex items-center justify-center gap-2" data-action="confirm-payment" data-method="cod" type="button">
         <span>Place Order with Pay on Delivery →</span>
       </button>
     </div>
@@ -2099,7 +2099,7 @@
         <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
         <h3 class="text-base sm:text-lg font-bold text-primary">Platform Quick Checkup</h3>
       </div>
-      <button onclick="closeQuickCheckupModal()" class="text-soil-brown hover:text-primary p-1 text-lg font-bold" type="button">✕</button>
+      <button data-action="close-quick-checkup" class="text-soil-brown hover:text-primary p-1 text-lg font-bold" type="button">✕</button>
     </div>
     
     <p class="text-xs text-soil-brown mb-4">Live inspection of database connections, API health, authentication sessions, mandi feeds, and background notification engines.</p>
@@ -2114,16 +2114,16 @@
 
     <!-- Actions -->
     <div class="pt-4 mt-4 border-t border-border-subtle flex flex-wrap gap-2 justify-between items-center">
-      <button onclick="runPlatformQuickCheckup()" class="px-3 py-2 bg-surface border border-primary/20 text-primary text-xs font-bold rounded-xl hover:bg-emerald-50 transition-colors flex items-center gap-1.5" type="button">
+      <button data-action="run-quick-checkup" class="px-3 py-2 bg-surface border border-primary/20 text-primary text-xs font-bold rounded-xl hover:bg-emerald-50 transition-colors flex items-center gap-1.5" type="button">
         <span class="material-symbols-outlined text-sm">refresh</span>
         <span>Re-run Diagnostics</span>
       </button>
       <div class="flex items-center gap-2">
-        <button onclick="triggerTestBackgroundAlert(3)" class="px-3 py-2 bg-emerald-700 text-white text-xs font-bold rounded-xl hover:bg-emerald-800 transition-colors flex items-center gap-1" type="button">
+        <button data-action="trigger-test-alert" data-seconds="3" class="px-3 py-2 bg-emerald-700 text-white text-xs font-bold rounded-xl hover:bg-emerald-800 transition-colors flex items-center gap-1" type="button">
           <span class="material-symbols-outlined text-sm">timer</span>
           <span>Test Background Alert (3s)</span>
         </button>
-        <button onclick="closeQuickCheckupModal()" class="px-3 py-2 bg-surface text-soil-brown text-xs font-bold rounded-xl hover:text-primary transition-colors" type="button">
+        <button data-action="close-quick-checkup" class="px-3 py-2 bg-surface text-soil-brown text-xs font-bold rounded-xl hover:text-primary transition-colors" type="button">
           Close
         </button>
       </div>
@@ -2140,13 +2140,13 @@
       <span class="text-xs font-bold text-primary">Made by Code Red</span>
     </div>
     <div class="flex flex-col gap-2">
-      <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" onclick="onNavMarketplaceClick()">Marketplace</a>
-      <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" onclick="showScreen('price')">Mandi Rates</a>
-      <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" onclick="showScreen('about')">About Us</a>
+      <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" data-action="nav-marketplace">Marketplace</a>
+      <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" data-action="show-screen" data-screen="price">Mandi Rates</a>
+      <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" data-action="show-screen" data-screen="about">About Us</a>
     </div>
     <div class="flex flex-col gap-2">
-      <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" onclick="showScreen('orders')">Orders Tracking</a>
-      <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" onclick="onFooterAuthClick()">Login / Register</a>
+      <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" data-action="show-screen" data-screen="orders">Orders Tracking</a>
+      <a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary underline" href="#" data-action="footer-auth">Login / Register</a>
     </div>
   </div>
 </footer>
@@ -2188,7 +2188,7 @@ function notify(msg, type = 'info') {
         <span>${icon}</span>
         <span>${cleanMsg}</span>
       </div>
-      <button onclick="this.parentElement.remove()" class="text-soil-brown font-bold text-xs hover:text-primary">✕</button>
+      <button data-action="close-parent" class="text-soil-brown font-bold text-xs hover:text-primary">✕</button>
     `;
 
     container.appendChild(notif);
@@ -2213,6 +2213,463 @@ function notify(msg, type = 'info') {
     }
   }
 }
+
+
+// ============================================================================
+// CSP-COMPLIANT EVENT DELEGATION & LISTENER ARCHITECTURE
+// Eliminates inline event handlers to strictly satisfy Content Security Policy
+// ('script-src-attr none') while preserving security and UI interactivity.
+// ============================================================================
+
+// Global capture listener for image fallbacks (replaces inline onerror)
+window.addEventListener('error', function(e) {
+  if (e.target && e.target.tagName === 'IMG' && !e.target.dataset.fallbackApplied) {
+    e.target.dataset.fallbackApplied = 'true';
+    e.target.src = 'images/logo.png';
+  }
+}, true);
+
+// Global click event dispatcher for data-action elements
+document.addEventListener('click', function(event) {
+  const el = event.target.closest('[data-action]');
+  if (!el) return;
+  const action = el.getAttribute('data-action');
+
+  switch (action) {
+    // Navigation / Screen routing
+    case 'show-screen':
+      if (typeof showScreen === 'function') showScreen(el.dataset.screen);
+      break;
+    case 'nav-dashboard':
+      if (typeof onNavDashboardClick === 'function') onNavDashboardClick();
+      break;
+    case 'nav-marketplace':
+      if (typeof onNavMarketplaceClick === 'function') onNavMarketplaceClick();
+      break;
+    case 'nav-cart':
+      if (typeof onNavCartClick === 'function') onNavCartClick();
+      break;
+    case 'detect-location':
+      if (typeof detectMyLocation === 'function') detectMyLocation();
+      break;
+    case 'toggle-notifications':
+      if (typeof toggleNotificationsDropdown === 'function') toggleNotificationsDropdown();
+      break;
+    case 'mark-all-read':
+      if (typeof markAllNotificationsRead === 'function') markAllNotificationsRead();
+      break;
+    case 'request-notification-permission':
+      if (window.BackgroundNotificationManager && typeof BackgroundNotificationManager.requestPermission === 'function') {
+        BackgroundNotificationManager.requestPermission();
+      }
+      break;
+    case 'trigger-test-alert':
+      if (typeof triggerTestBackgroundAlert === 'function') triggerTestBackgroundAlert(Number(el.dataset.seconds || 3));
+      break;
+    case 'toggle-alert-sound':
+      if (typeof toggleAlertSound === 'function') toggleAlertSound();
+      break;
+    case 'open-quick-checkup':
+      if (typeof openQuickCheckupModal === 'function') openQuickCheckupModal();
+      break;
+    case 'close-quick-checkup':
+      if (typeof closeQuickCheckupModal === 'function') closeQuickCheckupModal();
+      break;
+    case 'run-quick-checkup':
+      if (typeof runPlatformQuickCheckup === 'function') runPlatformQuickCheckup();
+      break;
+    case 'open-auth-modal':
+      if (typeof openAuthModal === 'function') openAuthModal();
+      break;
+    case 'close-auth-modal':
+      if (typeof closeAuthModal === 'function') closeAuthModal();
+      break;
+    case 'auth-tab':
+      if (typeof setAuthTab === 'function') setAuthTab(el.dataset.tab);
+      break;
+    case 'auth-role':
+      if (typeof selectAuthRole === 'function') selectAuthRole(el.dataset.role);
+      break;
+    case 'toggle-password':
+      if (typeof togglePasswordVisibility === 'function') togglePasswordVisibility(el.dataset.target, el);
+      break;
+    case 'submit-auth':
+      if (typeof submitAuthModal === 'function') submitAuthModal();
+      break;
+    case 'verify-otp':
+      if (typeof verifyRegistrationOtp === 'function') verifyRegistrationOtp();
+      break;
+    case 'resend-otp':
+      if (typeof resendRegistrationOtp === 'function') resendRegistrationOtp();
+      break;
+    case 'footer-auth':
+      if (typeof onFooterAuthClick === 'function') onFooterAuthClick();
+      break;
+    case 'toggle-mobile-menu':
+      if (typeof toggleMobileMenu === 'function') toggleMobileMenu();
+      break;
+    case 'mobile-nav': {
+      if (typeof toggleMobileMenu === 'function') toggleMobileMenu();
+      const sub = el.dataset.subaction;
+      if (sub === 'dashboard' && typeof onNavDashboardClick === 'function') onNavDashboardClick();
+      else if (sub === 'marketplace' && typeof onNavMarketplaceClick === 'function') onNavMarketplaceClick();
+      else if (sub === 'screen' && typeof showScreen === 'function') showScreen(el.dataset.screen);
+      else if (sub === 'feedback' && typeof openFeedbackModal === 'function') openFeedbackModal();
+      break;
+    }
+    case 'explore-click':
+      if (typeof onExploreClick === 'function') onExploreClick();
+      break;
+    case 'sell-click':
+      if (typeof onSellClick === 'function') onSellClick();
+      break;
+    case 'load-seller-reviews':
+      if (typeof loadSellerReviews === 'function') loadSellerReviews();
+      break;
+    case 'checkout-cart':
+      if (typeof checkoutCart === 'function') checkoutCart();
+      break;
+    case 'publish-product':
+      if (typeof publishProduct === 'function') publishProduct();
+      break;
+    case 'orders-tab':
+      if (typeof switchOrdersTab === 'function') switchOrdersTab(el.dataset.tab);
+      break;
+    case 'filter-orders-status':
+      if (typeof filterOrdersByStatus === 'function') filterOrdersByStatus(el.dataset.status, el);
+      break;
+    case 'refresh-mandi':
+      if (typeof loadMarketPrices === 'function') loadMarketPrices(true);
+      break;
+    case 'mandi-timeframe':
+      if (typeof setMandiTimeframe === 'function') setMandiTimeframe(el.dataset.tf);
+      break;
+    case 'chart-metric':
+      if (typeof setChartMetric === 'function') setChartMetric(el.dataset.metric);
+      break;
+    case 'open-feedback':
+      if (typeof openFeedbackModal === 'function') openFeedbackModal();
+      break;
+    case 'close-feedback':
+      if (typeof closeFeedbackModal === 'function') closeFeedbackModal();
+      break;
+    case 'submit-feedback':
+      if (typeof submitFeedbackForm === 'function') submitFeedbackForm();
+      break;
+    case 'close-delivery-address':
+      if (typeof closeDeliveryAddressModal === 'function') closeDeliveryAddressModal();
+      break;
+    case 'reopen-delivery-address':
+      if (typeof reopenDeliveryAddressModal === 'function') reopenDeliveryAddressModal();
+      break;
+    case 'close-payment-checkout':
+      if (typeof closePaymentCheckoutModal === 'function') closePaymentCheckoutModal();
+      break;
+    case 'switch-payment-method':
+      if (typeof switchPaymentMethod === 'function') switchPaymentMethod(el.dataset.method);
+      break;
+    case 'share-payment-proof':
+      if (typeof sharePaymentProofAction === 'function') sharePaymentProofAction();
+      break;
+    case 'confirm-payment':
+      if (typeof confirmPaymentAndPlaceOrder === 'function') confirmPaymentAndPlaceOrder(el.dataset.method);
+      break;
+    case 'star-rating':
+      if (typeof selectStarRating === 'function') selectStarRating(Number(el.dataset.rating));
+      break;
+    case 'open-rate-product':
+      if (typeof openRateProductModal === 'function') openRateProductModal(el.dataset.productId, el.dataset.orderId, el.dataset.productName);
+      break;
+    case 'close-rate-product':
+      if (typeof closeRateProductModal === 'function') closeRateProductModal();
+      break;
+    case 'submit-product-review':
+      if (typeof submitProductReview === 'function') submitProductReview();
+      break;
+    case 'close-parent':
+      if (el.parentElement) el.parentElement.remove();
+      break;
+    case 'open-product-details':
+      if (typeof openProductDetailsModal === 'function') openProductDetailsModal(el.dataset.id);
+      break;
+    case 'close-product-details':
+      if (typeof closeProductDetailsModal === 'function') closeProductDetailsModal();
+      break;
+    case 'view-seller':
+      if (typeof viewSellerModal === 'function') viewSellerModal(el.dataset.sellerId);
+      break;
+    case 'close-seller-modal':
+      if (typeof closeSellerModal === 'function') closeSellerModal();
+      break;
+    case 'delete-product':
+      if (typeof deleteProduct === 'function') deleteProduct(el.dataset.id);
+      break;
+    case 'add-to-cart':
+      if (typeof addToCart === 'function') addToCart(el.dataset.id, el);
+      break;
+    case 'add-custom-qty-to-cart':
+      if (typeof addCustomQtyToCart === 'function') addCustomQtyToCart(el.dataset.id);
+      break;
+    case 'close-seller-and-add-to-cart':
+      if (typeof closeSellerModal === 'function') closeSellerModal();
+      if (typeof addToCart === 'function') addToCart(el.dataset.id);
+      break;
+    case 'close-details-and-delete-product':
+      if (typeof closeProductDetailsModal === 'function') closeProductDetailsModal();
+      if (typeof deleteProduct === 'function') deleteProduct(el.dataset.id);
+      break;
+    case 'close-details-and-rate-product':
+      if (typeof closeOrderDetailsModal === 'function') closeOrderDetailsModal();
+      if (typeof openRateProductModal === 'function') openRateProductModal(el.dataset.productId, el.dataset.orderId, el.dataset.productName);
+      break;
+    case 'change-cart-qty':
+      if (typeof changeCartQty === 'function') changeCartQty(el.dataset.id, Number(el.dataset.delta));
+      break;
+    case 'remove-cart-item':
+      if (typeof removeCartItem === 'function') removeCartItem(el.dataset.id);
+      break;
+    case 'adjust-detail-qty':
+      if (typeof adjustDetailModalQty === 'function') adjustDetailModalQty(Number(el.dataset.delta), Number(el.dataset.max || 100));
+      break;
+    case 'notification-click':
+      if (typeof onNotificationClick === 'function') onNotificationClick(el.dataset.id, el.dataset.orderId || '');
+      break;
+    case 'share-order-proof':
+      if (typeof shareOrderProof === 'function') shareOrderProof(el.dataset.orderId, el.dataset.txId || '', Number(el.dataset.total || 0));
+      break;
+    case 'seller-payment-verify':
+      if (typeof handleSellerPaymentVerification === 'function') handleSellerPaymentVerification(el.dataset.id, el.dataset.decision, el);
+      break;
+    case 'advance-order-status':
+      if (typeof advanceOrderStatus === 'function') advanceOrderStatus(el.dataset.id, el.dataset.status, el);
+      break;
+    case 'resubmit-payment-proof':
+      if (typeof resubmitPaymentProof === 'function') resubmitPaymentProof(el.dataset.id);
+      break;
+    case 'open-order-details':
+      if (typeof openOrderDetailsModal === 'function') openOrderDetailsModal(el.dataset.id);
+      break;
+    case 'dispute-ai-summary':
+      if (typeof triggerDisputeAiSummary === 'function') triggerDisputeAiSummary(el.dataset.disputeId, el);
+      break;
+    case 'remove-dispute-ai-modal': {
+      const m = $('disputeAiModal');
+      if (m) m.remove();
+      break;
+    }
+    case 'close-order-details':
+      if (typeof closeOrderDetailsModal === 'function') closeOrderDetailsModal();
+      break;
+    case 'toggle-admin-sidebar': {
+      const sb = $('adminSidebar');
+      if (sb) sb.classList.toggle('hidden');
+      break;
+    }
+    case 'load-admin-dashboard':
+      if (typeof loadAdminDashboard === 'function') loadAdminDashboard();
+      break;
+    case 'admin-logout':
+      if (window.AuthService && typeof AuthService.logout === 'function') AuthService.logout();
+      if (typeof showScreen === 'function') showScreen('buyer-market');
+      break;
+    case 'switch-admin-tab':
+      if (typeof switchAdminTab === 'function') switchAdminTab(el.dataset.tab);
+      break;
+    case 'inspect-admin-table':
+      if (typeof inspectSelectedAdminTable === 'function') inspectSelectedAdminTable();
+      break;
+    case 'load-admin-trust':
+      if (typeof loadAdminTrustMetrics === 'function') loadAdminTrustMetrics();
+      break;
+    case 'hide-admin-reason-modal': {
+      const m = $('adminReasonModal');
+      if (m) m.classList.add('hidden');
+      break;
+    }
+    case 'submit-admin-reason':
+      if (typeof submitAccountActionWithReason === 'function') submitAccountActionWithReason();
+      break;
+    case 'hide-admin-emergency-modal': {
+      const m = $('adminEmergencyOverrideModal');
+      if (m) m.classList.add('hidden');
+      break;
+    }
+    case 'submit-admin-emergency':
+      if (typeof submitEmergencyAdminOverride === 'function') submitEmergencyAdminOverride();
+      break;
+    case 'hide-admin-seller-verif-modal': {
+      const m = $('adminSellerVerifModal');
+      if (m) m.classList.add('hidden');
+      break;
+    }
+    case 'submit-admin-seller-verif':
+      if (typeof submitSellerVerificationDecision === 'function') submitSellerVerificationDecision();
+      break;
+    case 'hide-admin-user-drawer': {
+      const d = $('adminUserProfileDrawer');
+      if (d) d.classList.add('hidden');
+      break;
+    }
+    case 'open-admin-user-drawer':
+      if (typeof openAdminUserProfileDrawer === 'function') openAdminUserProfileDrawer(el.dataset.id);
+      break;
+    case 'prompt-account-action':
+      if (typeof promptAccountAction === 'function') promptAccountAction(el.dataset.id, el.dataset.status);
+      break;
+    case 'review-seller-verification':
+      if (typeof reviewSellerVerification === 'function') reviewSellerVerification(el.dataset.id, el.dataset.name, el.dataset.contact);
+      break;
+    case 'remove-admin-product':
+      if (typeof removeAdminProduct === 'function') removeAdminProduct(el.dataset.id);
+      break;
+    case 'open-admin-emergency-modal':
+      if (typeof openEmergencyAdminOverrideModal === 'function') openEmergencyAdminOverrideModal(el.dataset.id);
+      break;
+    case 'update-admin-payment-status':
+      if (typeof updateAdminPaymentStatus === 'function') updateAdminPaymentStatus(el.dataset.id, el.dataset.status);
+      break;
+    case 'delete-admin-review':
+      if (typeof deleteAdminReview === 'function') deleteAdminReview(el.dataset.id);
+      break;
+    case 'admin-drawer-account-action': {
+      const d = $('adminUserProfileDrawer');
+      if (d) d.classList.add('hidden');
+      if (typeof promptAccountAction === 'function') promptAccountAction(el.dataset.id, el.dataset.status);
+      break;
+    }
+    default:
+      console.warn('[CSP Event Dispatcher] Unhandled action:', action);
+  }
+});
+
+// Change event dispatcher for dynamic templates
+document.addEventListener('change', function(e) {
+  const target = e.target.closest('[data-action-change="detail-qty-change"]');
+  if (target) {
+    const price = Number(target.dataset.price);
+    const max = Number(target.dataset.max || 100);
+    if (typeof onDetailModalQtyChange === 'function') {
+      onDetailModalQtyChange(price, max);
+    }
+  }
+});
+
+// Static element event listeners (attached once DOM is ready)
+function attachStaticEventListeners() {
+  const pwdInput = $('modalPasswordInput');
+  if (pwdInput) {
+    pwdInput.addEventListener('input', function(e) {
+      if (typeof evaluatePasswordStrength === 'function') evaluatePasswordStrength(e.target.value);
+    });
+  }
+  const confirmInput = $('modalConfirmInput');
+  if (confirmInput) {
+    confirmInput.addEventListener('input', function() {
+      if (typeof checkConfirmPasswordMatch === 'function') checkConfirmPasswordMatch();
+    });
+  }
+
+  const marketSearch = $('marketSearchInput');
+  if (marketSearch) {
+    marketSearch.addEventListener('input', function() {
+      if (typeof filterMarketProducts === 'function') filterMarketProducts();
+    });
+  }
+  const marketCat = $('marketCategoryFilter');
+  if (marketCat) {
+    marketCat.addEventListener('change', function() {
+      if (typeof renderProducts === 'function') renderProducts();
+    });
+  }
+  const marketSort = $('marketSortFilter');
+  if (marketSort) {
+    marketSort.addEventListener('change', function() {
+      if (typeof filterMarketProducts === 'function') filterMarketProducts();
+    });
+  }
+
+  const prodGrade = $('prodGrade');
+  if (prodGrade) {
+    prodGrade.addEventListener('change', function(e) {
+      if (typeof handleProductGradeChange === 'function') handleProductGradeChange(e.target.value);
+    });
+  }
+  const prodImg = $('prodImageInput');
+  if (prodImg) {
+    prodImg.addEventListener('change', function(e) {
+      if (typeof previewProductImage === 'function') previewProductImage(e);
+    });
+  }
+
+  const mandiCommodity = $('mandiCommodity');
+  if (mandiCommodity) {
+    mandiCommodity.addEventListener('change', function() {
+      if (typeof loadMarketPrices === 'function') loadMarketPrices();
+    });
+  }
+  const mandiState = $('mandiState');
+  if (mandiState) {
+    mandiState.addEventListener('change', function() {
+      if (typeof onMandiStateChange === 'function') onMandiStateChange();
+    });
+  }
+  const mandiDistrict = $('mandiDistrict');
+  if (mandiDistrict) {
+    mandiDistrict.addEventListener('change', function() {
+      if (typeof loadMarketPrices === 'function') loadMarketPrices();
+    });
+  }
+
+  const adminSearch = $('adminGlobalSearchInput');
+  if (adminSearch) {
+    adminSearch.addEventListener('keyup', function(e) {
+      if (e.key === 'Enter' && typeof executeAdminGlobalSearch === 'function') executeAdminGlobalSearch();
+    });
+  }
+  const adminExport = $('adminCsvExportSelect');
+  if (adminExport) {
+    adminExport.addEventListener('change', function(e) {
+      if (e.target.value && typeof exportAdminCsv === 'function') {
+        exportAdminCsv(e.target.value);
+        e.target.value = '';
+      }
+    });
+  }
+  const adminAnalytics = $('analyticsDateRange');
+  if (adminAnalytics) {
+    adminAnalytics.addEventListener('change', function(e) {
+      if (typeof loadAdminAnalytics === 'function') loadAdminAnalytics(e.target.value);
+    });
+  }
+  const adminUsers = $('adminUserFilter');
+  if (adminUsers) {
+    adminUsers.addEventListener('change', function() {
+      if (typeof loadAdminUsers === 'function') loadAdminUsers();
+    });
+  }
+  const adminExpForm = $('adminExpenseForm');
+  if (adminExpForm) {
+    adminExpForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (typeof recordAdminExpense === 'function') recordAdminExpense();
+    });
+  }
+
+  const deliveryForm = $('deliveryAddressForm');
+  if (deliveryForm) {
+    deliveryForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (typeof submitDeliveryAddressAndProceed === 'function') submitDeliveryAddressAndProceed();
+    });
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', attachStaticEventListeners);
+} else {
+  attachStaticEventListeners();
+}
+
 
 function openAuthModal() {
   $('authModal').classList.remove('hidden');
@@ -2659,8 +3116,8 @@ function renderProductCard(p, isMyListing = false) {
   const isOutOfStock = (Number(p.quantity) || 0) <= 0 || p.status === 'out_of_stock';
 
   const imgHtml = p.image_url 
-    ? `<img src="${p.image_url}" class="w-full h-36 object-cover rounded-lg mb-3 border border-border-subtle cursor-pointer ${isOutOfStock ? 'grayscale opacity-75' : ''}" onclick="openProductDetailsModal('${p.id}')" alt="${p.name}">`
-    : `<div class="w-full h-36 bg-surface rounded-lg flex items-center justify-center text-4xl mb-3 border border-border-subtle cursor-pointer ${isOutOfStock ? 'opacity-60' : ''}" onclick="openProductDetailsModal('${p.id}')">${emoji(p.name)}</div>`;
+    ? `<img src="${p.image_url}" class="w-full h-36 object-cover rounded-lg mb-3 border border-border-subtle cursor-pointer ${isOutOfStock ? 'grayscale opacity-75' : ''}" data-action="open-product-details" data-id="${p.id}" alt="${p.name}">`
+    : `<div class="w-full h-36 bg-surface rounded-lg flex items-center justify-center text-4xl mb-3 border border-border-subtle cursor-pointer ${isOutOfStock ? 'opacity-60' : ''}" data-action="open-product-details" data-id="${p.id}">${emoji(p.name)}</div>`;
 
   const sellerAvatar = getSellerAvatarHtml(p.sellerName, p.sellerPhoto);
 
@@ -2678,9 +3135,9 @@ function renderProductCard(p, isMyListing = false) {
         ${imgHtml}
         <div class="flex justify-between items-center mb-1">
           ${stockBadge}
-          <button class="text-[10px] font-bold text-soil-brown hover:text-primary flex items-center gap-1.5" onclick="viewSellerModal('${p.seller_id}')" type="button">${sellerAvatar} <span class="hover:underline">${p.sellerName || 'Verified Seller ✓'}</span></button>
+          <button class="text-[10px] font-bold text-soil-brown hover:text-primary flex items-center gap-1.5" data-action="view-seller" data-seller-id="${p.seller_id}" type="button">${sellerAvatar} <span class="hover:underline">${p.sellerName || 'Verified Seller ✓'}</span></button>
         </div>
-        <h4 class="font-bold text-on-surface text-base cursor-pointer hover:text-primary" onclick="openProductDetailsModal('${p.id}')">${p.name}</h4>
+        <h4 class="font-bold text-on-surface text-base cursor-pointer hover:text-primary" data-action="open-product-details" data-id="${p.id}">${p.name}</h4>
         <p class="text-xs text-soil-brown mt-1 line-clamp-2">${p.description || 'Fresh direct farm product'}</p>
         <div class="text-xs text-soil-brown mt-2">
           📍 ${distStr} · <b class="${isOutOfStock ? 'text-error' : 'text-on-surface'}">${isOutOfStock ? 'OUT OF STOCK' : (p.quantity || 100) + ' kg available'}</b>
@@ -2691,14 +3148,14 @@ function renderProductCard(p, isMyListing = false) {
           ${priceHtml}
         </div>
         <div class="flex items-center gap-2">
-          <button class="bg-surface text-primary border border-primary/20 px-2.5 py-1.5 rounded-lg text-[11px] font-bold hover:bg-primary hover:text-white transition-colors" onclick="openProductDetailsModal('${p.id}')" type="button">Details</button>
+          <button class="bg-surface text-primary border border-primary/20 px-2.5 py-1.5 rounded-lg text-[11px] font-bold hover:bg-primary hover:text-white transition-colors" data-action="open-product-details" data-id="${p.id}" type="button">Details</button>
           ${isOwner 
-            ? `<button class="bg-error-container text-on-error-container px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-error/10" onclick="deleteProduct('${p.id}')" type="button">Delete</button>`
+            ? `<button class="bg-error-container text-on-error-container px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-error/10" data-action="delete-product" data-id="${p.id}" type="button">Delete</button>`
             : isSeller 
               ? `<span class="text-[10px] text-soil-brown font-semibold">View Only</span>`
               : isOutOfStock
                 ? `<button disabled class="bg-slate-100 text-slate-400 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-bold cursor-not-allowed">OUT OF STOCK</button>`
-                : `<button class="bg-primary text-white px-3.5 py-1.5 rounded-lg text-xs font-bold hover:bg-primary-container shadow-sm transition-all" onclick="addToCart('${p.id}', this)" type="button">+ CART</button>`
+                : `<button class="bg-primary text-white px-3.5 py-1.5 rounded-lg text-xs font-bold hover:bg-primary-container shadow-sm transition-all" data-action="add-to-cart" data-id="${p.id}" type="button">+ CART</button>`
           }
         </div>
       </div>
@@ -2966,7 +3423,7 @@ async function addToCart(productId, btnElem, qty = 1) {
 }
 
 async function updateCartBadge() {
-  if (currentRole !== 'customer') {
+  if (currentRole !== 'customer' || !AuthService.getToken()) {
     const badge = $('cartCountBadge');
     if (badge) badge.textContent = '0';
     return;
@@ -2994,7 +3451,7 @@ async function renderCartScreen() {
         <span class="text-4xl block mb-3">🛒</span>
         <h4 class="text-lg font-bold text-primary mb-1">Please Sign In to Access Your Cart</h4>
         <p class="text-xs text-soil-brown mb-6 max-w-md mx-auto">Sign in to your KrishiSetu buyer account to view saved produce, adjust quantities, and place direct farm orders.</p>
-        <button class="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-xs hover:bg-primary-container transition-colors shadow-md flex items-center justify-center gap-1.5 mx-auto" onclick="openAuthModal()">
+        <button class="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-xs hover:bg-primary-container transition-colors shadow-md flex items-center justify-center gap-1.5 mx-auto" data-action="open-auth-modal">
           <span>Sign In / Register</span>
           <span class="material-symbols-outlined text-sm">login</span>
         </button>
@@ -3030,7 +3487,7 @@ async function renderCartScreen() {
           <span class="text-4xl block mb-3">🛒</span>
           <h4 class="text-lg font-bold text-primary mb-1">Your Cart is Empty</h4>
           <p class="text-xs text-soil-brown mb-6">Browse fresh agricultural products and add items to your cart.</p>
-          <button class="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-xs hover:bg-primary-container" onclick="showScreen('buyer-market')">Browse Products</button>
+          <button class="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-xs hover:bg-primary-container" data-action="show-screen" data-screen="buyer-market">Browse Products</button>
         </div>
       `;
       $('cartCheckoutBtn').disabled = true;
@@ -3059,11 +3516,11 @@ async function renderCartScreen() {
         </div>
         <div class="flex items-center gap-3">
           <div class="flex items-center border border-border-subtle rounded-lg bg-input-bg">
-            <button class="px-3 py-1 font-bold text-primary text-sm hover:bg-white active:bg-input-bg transition-colors" onclick="changeCartQty('${i.id}', -1)" type="button" title="Decrease quantity">-</button>
+            <button class="px-3 py-1 font-bold text-primary text-sm hover:bg-white active:bg-input-bg transition-colors" data-action="change-cart-qty" data-id="${i.id}" data-delta="-1" type="button" title="Decrease quantity">-</button>
             <span id="cartQty_${i.id}" data-qty="${parsedQty}" data-price="${unitPrice}" class="px-3 font-bold text-xs text-on-surface select-none">${parsedQty} kg</span>
-            <button class="px-3 py-1 font-bold text-primary text-sm hover:bg-white active:bg-input-bg transition-colors" onclick="changeCartQty('${i.id}', 1)" type="button" title="Increase quantity">+</button>
+            <button class="px-3 py-1 font-bold text-primary text-sm hover:bg-white active:bg-input-bg transition-colors" data-action="change-cart-qty" data-id="${i.id}" data-delta="1" type="button" title="Increase quantity">+</button>
           </div>
-          <button class="text-error font-bold text-sm px-2 py-1 hover:bg-error-container rounded-lg" onclick="removeCartItem('${i.id}')" title="Remove item" type="button">✕</button>
+          <button class="text-error font-bold text-sm px-2 py-1 hover:bg-error-container rounded-lg" data-action="remove-cart-item" data-id="${i.id}" title="Remove item" type="button">✕</button>
         </div>
       </div>
     `;
@@ -3075,7 +3532,7 @@ async function renderCartScreen() {
           <span class="text-4xl block mb-3">🛒</span>
           <h4 class="text-lg font-bold text-primary mb-1">Please Sign In to Access Your Cart</h4>
           <p class="text-xs text-soil-brown mb-6">Your session may have expired. Please sign in to view your cart items.</p>
-          <button class="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-xs hover:bg-primary-container transition-colors shadow-md flex items-center justify-center gap-1.5 mx-auto" onclick="openAuthModal()">
+          <button class="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-xs hover:bg-primary-container transition-colors shadow-md flex items-center justify-center gap-1.5 mx-auto" data-action="open-auth-modal">
             <span>Sign In / Register</span>
             <span class="material-symbols-outlined text-sm">login</span>
           </button>
@@ -3814,7 +4271,7 @@ function updateNotificationUi(notifs = []) {
     const timeStr = new Date(n.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     return `
-      <div onclick="onNotificationClick('${n.id}', '${n.order_id || ''}')" class="p-2.5 rounded-xl ${cardBg} hover:bg-surface cursor-pointer transition-all flex items-start gap-2.5">
+      <div data-action="notification-click" data-id="${n.id}" data-order-id="${n.order_id || ''}" class="p-2.5 rounded-xl ${cardBg} hover:bg-surface cursor-pointer transition-all flex items-start gap-2.5">
         <div class="w-7 h-7 rounded-lg bg-white shadow-xs flex items-center justify-center flex-shrink-0 mt-0.5">
           <span class="material-symbols-outlined text-base ${iconColor}">${icon}</span>
         </div>
@@ -4098,7 +4555,7 @@ async function viewSellerModal(sellerId) {
     const prods = res.products || [];
 
     content.innerHTML = `
-      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" onclick="closeSellerModal()" type="button">✕</button>
+      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary" data-action="close-seller-modal" type="button">✕</button>
       <div class="flex items-center gap-4 pb-4 mb-4 border-b border-border-subtle">
         <div class="w-16 h-16 bg-surface text-primary rounded-2xl flex items-center justify-center text-3xl font-bold border border-primary/20">👨‍🌾</div>
         <div>
@@ -4116,7 +4573,7 @@ async function viewSellerModal(sellerId) {
               <b class="text-on-surface block">${p.name}</b>
               <span class="text-soil-brown">₹${p.price} / kg</span>
             </div>
-            <button class="bg-primary text-white px-3 py-1 rounded-lg font-bold text-[10px]" onclick="closeSellerModal(); addToCart('${p.id}');">ADD</button>
+            <button class="bg-primary text-white px-3 py-1 rounded-lg font-bold text-[10px]" data-action="close-seller-and-add-to-cart" data-id="${p.id}">ADD</button>
           </div>
         `).join('')}
       </div>
@@ -4182,7 +4639,7 @@ async function openProductDetailsModal(productId, event) {
 
   modal.classList.remove('hidden');
   content.innerHTML = `
-    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" onclick="closeProductDetailsModal()" type="button">✕</button>
+    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" data-action="close-product-details" type="button">✕</button>
     <div class="text-center py-8 text-soil-brown flex flex-col items-center justify-center gap-2">
       <div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
       <span>Loading product details...</span>
@@ -4227,7 +4684,7 @@ async function openProductDetailsModal(productId, event) {
     `).join('') : '<p class="text-xs text-soil-brown italic py-2">No verified reviews for this product yet.</p>';
 
     content.innerHTML = `
-      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" onclick="closeProductDetailsModal()" type="button">✕</button>
+      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" data-action="close-product-details" type="button">✕</button>
       <div>
         ${imgHtml}
         <div class="flex justify-between items-start mb-2">
@@ -4302,9 +4759,9 @@ async function openProductDetailsModal(productId, event) {
               <span class="text-[10px] text-soil-brown">Max Available: ${p.quantity || 100} kg</span>
             </div>
             <div class="flex items-center gap-2">
-              <button class="w-8 h-8 rounded-lg bg-white border border-border-subtle font-black text-sm text-primary flex items-center justify-center hover:bg-surface" onclick="adjustDetailModalQty(-1, ${p.quantity || 100})" type="button">−</button>
-              <input type="number" id="detailModalQtyInput" value="1" min="1" max="${p.quantity || 100}" class="w-14 text-center py-1 text-xs font-bold bg-white border border-border-subtle rounded-lg" onchange="onDetailModalQtyChange(${p.price}, ${p.quantity || 100})">
-              <button class="w-8 h-8 rounded-lg bg-white border border-border-subtle font-black text-sm text-primary flex items-center justify-center hover:bg-surface" onclick="adjustDetailModalQty(1, ${p.quantity || 100})" type="button">+</button>
+              <button class="w-8 h-8 rounded-lg bg-white border border-border-subtle font-black text-sm text-primary flex items-center justify-center hover:bg-surface" data-action="adjust-detail-qty" data-delta="-1" data-max="${p.quantity || 100}" type="button">−</button>
+              <input type="number" id="detailModalQtyInput" value="1" min="1" max="${p.quantity || 100}" class="w-14 text-center py-1 text-xs font-bold bg-white border border-border-subtle rounded-lg" data-action-change="detail-qty-change" data-price="${p.price}" data-max="${p.quantity || 100}">
+              <button class="w-8 h-8 rounded-lg bg-white border border-border-subtle font-black text-sm text-primary flex items-center justify-center hover:bg-surface" data-action="adjust-detail-qty" data-delta="1" data-max="${p.quantity || 100}" type="button">+</button>
               <span class="text-xs font-semibold text-soil-brown">kg</span>
             </div>
           </div>
@@ -4313,11 +4770,11 @@ async function openProductDetailsModal(productId, event) {
         <!-- ACTION BUTTONS -->
         <div class="pt-3 border-t border-border-subtle flex justify-end gap-3">
           ${isOwner ? `
-            <button class="bg-error-container text-error px-4 py-2 rounded-xl text-xs font-bold hover:bg-error/20" onclick="closeProductDetailsModal(); deleteProduct('${p.id}');" type="button">Delete Listing</button>
+            <button class="bg-error-container text-error px-4 py-2 rounded-xl text-xs font-bold hover:bg-error/20" data-action="close-details-and-delete-product" data-id="${p.id}" type="button">Delete Listing</button>
           ` : isSeller ? `
             <span class="text-xs text-soil-brown font-semibold py-2">View Only (Seller Account)</span>
           ` : `
-            <button id="detailModalAddToCartBtn" class="w-full bg-primary text-white py-3 rounded-xl font-bold text-sm hover:bg-primary-container shadow-md transition-all" onclick="addCustomQtyToCart('${p.id}');" type="button">+ ADD 1 KG TO CART (₹${p.price})</button>
+            <button id="detailModalAddToCartBtn" class="w-full bg-primary text-white py-3 rounded-xl font-bold text-sm hover:bg-primary-container shadow-md transition-all" data-action="add-custom-qty-to-cart" data-id="${p.id}" type="button">+ ADD 1 KG TO CART (₹${p.price})</button>
           `}
         </div>
       </div>
@@ -4325,7 +4782,7 @@ async function openProductDetailsModal(productId, event) {
     currentDetailModalProduct = p;
   } catch (err) {
     content.innerHTML = `
-      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" onclick="closeProductDetailsModal()" type="button">✕</button>
+      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" data-action="close-product-details" type="button">✕</button>
       <div class="text-center py-6 text-error font-semibold">Failed to load product details: ${err.message}</div>
     `;
   }
@@ -4483,7 +4940,7 @@ async function openOrderDetailsModal(orderId) {
 
   modal.classList.remove('hidden');
   content.innerHTML = `
-    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" onclick="closeOrderDetailsModal()" type="button">✕</button>
+    <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" data-action="close-order-details" type="button">✕</button>
     <div class="py-12 text-center text-soil-brown">
       <div class="inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-2"></div>
       <p class="text-xs font-bold">Loading order details...</p>
@@ -4498,7 +4955,7 @@ async function openOrderDetailsModal(orderId) {
     const isCompleted = order.status === 'Completed' || order.status === 'Delivered';
 
     content.innerHTML = `
-      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" onclick="closeOrderDetailsModal()" type="button">✕</button>
+      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" data-action="close-order-details" type="button">✕</button>
       
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-3 border-b border-border-subtle mb-4 gap-2">
         <div>
@@ -4610,12 +5067,12 @@ async function openOrderDetailsModal(orderId) {
 
       <!-- Modal Footer Actions -->
       <div class="flex flex-wrap gap-2 pt-3 border-t border-border-subtle justify-between items-center">
-        <button class="bg-surface text-primary border border-primary/20 hover:bg-primary/5 text-xs font-bold px-4 py-2 rounded-xl transition-colors flex items-center gap-1.5" onclick="shareOrderProof('${escapeHtml(order.id)}', '${escapeHtml(order.transaction_id || '')}', ${order.total_amount || 0})" type="button">
+        <button class="bg-surface text-primary border border-primary/20 hover:bg-primary/5 text-xs font-bold px-4 py-2 rounded-xl transition-colors flex items-center gap-1.5" data-action="share-order-proof" data-order-id="${escapeHtml(order.id)}" data-tx-id="${escapeHtml(order.transaction_id || '')}" data-total="${order.total_amount || 0}" type="button">
           <span>📤 Share Receipt / Proof</span>
         </button>
 
         ${isCompleted ? `
-          <button class="bg-primary text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-primary-container transition-colors shadow-sm flex items-center gap-1" onclick="closeOrderDetailsModal(); openRateProductModal('${items[0]?.product_id || ''}', '${order.id}', '${escapeHtml(items[0]?.product_name_snapshot || 'Produce')}')" type="button">
+          <button class="bg-primary text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-primary-container transition-colors shadow-sm flex items-center gap-1" data-action="close-details-and-rate-product" data-product-id="${items[0]?.product_id || ''}" data-order-id="${order.id}" data-product-name="${escapeHtml(items[0]?.product_name_snapshot || 'Produce')}" type="button">
             <span>★ Rate Produce</span>
           </button>
         ` : ''}
@@ -4623,7 +5080,7 @@ async function openOrderDetailsModal(orderId) {
     `;
   } catch (err) {
     content.innerHTML = `
-      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" onclick="closeOrderDetailsModal()" type="button">✕</button>
+      <button class="absolute top-4 right-4 text-soil-brown font-bold text-lg hover:text-primary z-10" data-action="close-order-details" type="button">✕</button>
       <div class="py-8 text-center text-error text-xs">
         <p class="font-bold">Failed to load order details</p>
         <p class="text-soil-brown mt-1">${escapeHtml(err.message)}</p>
@@ -4868,8 +5325,8 @@ async function renderOrders() {
               </div>
               <p class="text-soil-brown text-[11px] mb-2.5">Confirm receipt of <b class="text-primary">₹${o.total}</b> in your UPI app with reference <b>${escapeHtml(o.transaction_id || 'N/A')}</b>.</p>
               <div class="flex gap-2">
-                <button class="bg-success-emerald text-white text-xs font-bold px-3 py-2 rounded-xl hover:bg-primary transition-colors flex-1" onclick="handleSellerPaymentVerification('${o.dbId || o.id}', 'approve', this)" type="button">Payment Received ✓</button>
-                <button class="bg-error text-white text-xs font-bold px-3 py-2 rounded-xl hover:opacity-90 transition-colors flex-1" onclick="handleSellerPaymentVerification('${o.dbId || o.id}', 'reject', this)" type="button">Payment Not Received ✕</button>
+                <button class="bg-success-emerald text-white text-xs font-bold px-3 py-2 rounded-xl hover:bg-primary transition-colors flex-1" data-action="seller-payment-verify" data-id="${o.dbId || o.id}" data-decision="approve" type="button">Payment Received ✓</button>
+                <button class="bg-error text-white text-xs font-bold px-3 py-2 rounded-xl hover:opacity-90 transition-colors flex-1" data-action="seller-payment-verify" data-id="${o.dbId || o.id}" data-decision="reject" type="button">Payment Not Received ✕</button>
               </div>
             </div>
           `;
@@ -4900,16 +5357,16 @@ async function renderOrders() {
       // Seller fulfillment progression
       if (o.status === 'Order Placed') {
         if (isCod) {
-          actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" onclick="advanceOrderStatus('${o.id}', 'Farmer Confirmed', this)">Accept Order (COD)</button>`;
+          actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" data-action="advance-order-status" data-id="${o.id}" data-status="Farmer Confirmed">Accept Order (COD)</button>`;
         } else if (o.payment_status === 'verified') {
-          actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" onclick="advanceOrderStatus('${o.id}', 'Farmer Confirmed', this)">Confirm Order</button>`;
+          actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" data-action="advance-order-status" data-id="${o.id}" data-status="Farmer Confirmed">Confirm Order</button>`;
         }
       } else if (o.status === 'Farmer Confirmed') {
-        actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" onclick="advanceOrderStatus('${o.id}', 'Preparing', this)">Start Preparing</button>`;
+        actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" data-action="advance-order-status" data-id="${o.id}" data-status="Preparing">Start Preparing</button>`;
       } else if (o.status === 'Preparing') {
-        actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" onclick="advanceOrderStatus('${o.id}', 'Ready', this)">Mark Ready</button>`;
+        actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary-container transition-colors mt-3" data-action="advance-order-status" data-id="${o.id}" data-status="Ready">Mark Ready</button>`;
       } else if (o.status === 'Ready') {
-        actionBtn = `<button class="bg-success-emerald text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary transition-colors mt-3" onclick="advanceOrderStatus('${o.id}', 'Completed', this)">Mark Completed ${isCod ? '(Payment Collected)' : ''}</button>`;
+        actionBtn = `<button class="bg-success-emerald text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-primary transition-colors mt-3" data-action="advance-order-status" data-id="${o.id}" data-status="Completed">Mark Completed ${isCod ? '(Payment Collected)' : ''}</button>`;
       }
     } else {
       // Buyer view
@@ -4921,7 +5378,7 @@ async function renderOrders() {
                 <span class="font-bold text-amber-800 dark:text-amber-300 block">⏳ Payment Submitted — Awaiting Farmer Confirmation</span>
                 <span class="text-[11px] text-soil-brown font-mono">UTR: <b>${escapeHtml(o.transaction_id || 'Submitted')}</b></span>
               </div>
-              <button class="bg-surface text-primary border border-primary/30 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary/5 transition-colors flex items-center gap-1" onclick="shareOrderProof('${escapeHtml(o.id)}', '${escapeHtml(o.transaction_id || '')}', ${o.total})" type="button">
+              <button class="bg-surface text-primary border border-primary/30 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary/5 transition-colors flex items-center gap-1" data-action="share-order-proof" data-order-id="${escapeHtml(o.id)}" data-tx-id="${escapeHtml(o.transaction_id || '')}" data-total="${o.total}" type="button">
                 <span>📤 Share Proof</span>
               </button>
             </div>
@@ -4930,7 +5387,7 @@ async function renderOrders() {
           paymentWorkflowHtml = `
             <div class="mt-2.5 p-2.5 bg-success-emerald/10 border border-success-emerald/20 rounded-xl text-xs flex justify-between items-center text-success-emerald font-bold">
               <span>✓ Payment Verified & Confirmed by Farmer</span>
-              <button class="text-primary underline text-[11px] font-semibold" onclick="shareOrderProof('${escapeHtml(o.id)}', '${escapeHtml(o.transaction_id || '')}', ${o.total})" type="button">Share Receipt</button>
+              <button class="text-primary underline text-[11px] font-semibold" data-action="share-order-proof" data-order-id="${escapeHtml(o.id)}" data-tx-id="${escapeHtml(o.transaction_id || '')}" data-total="${o.total}" type="button">Share Receipt</button>
             </div>
           `;
         } else if (o.payment_status === 'rejected') {
@@ -4939,7 +5396,7 @@ async function renderOrders() {
               <div class="text-error font-bold mb-1">✕ Payment was not confirmed by farmer. Please re-enter your 12-digit UTR:</div>
               <div class="flex gap-2 mt-1.5">
                 <input id="resubmitTxnInput_${o.dbId || o.id}" type="text" placeholder="Enter correct 12-digit UTR" class="flex-1 px-3 py-1.5 border border-border-subtle rounded-lg text-xs font-mono bg-white" maxlength="100">
-                <button class="bg-primary text-white font-bold px-3.5 py-1.5 rounded-lg text-xs hover:bg-primary-container" onclick="resubmitPaymentProof('${o.dbId || o.id}')" type="button">Submit UTR</button>
+                <button class="bg-primary text-white font-bold px-3.5 py-1.5 rounded-lg text-xs hover:bg-primary-container" data-action="resubmit-payment-proof" data-id="${o.dbId || o.id}" type="button">Submit UTR</button>
               </div>
             </div>
           `;
@@ -4949,7 +5406,7 @@ async function renderOrders() {
               <div class="text-amber-800 font-bold mb-1">⚠️ Payment Proof Pending: Enter your 12-digit UTR below:</div>
               <div class="flex gap-2 mt-1.5">
                 <input id="resubmitTxnInput_${o.dbId || o.id}" type="text" placeholder="Enter 12-digit UTR" class="flex-1 px-3 py-1.5 border border-border-subtle rounded-lg text-xs font-mono bg-white" maxlength="100">
-                <button class="bg-primary text-white font-bold px-3.5 py-1.5 rounded-lg text-xs hover:bg-primary-container" onclick="resubmitPaymentProof('${o.dbId || o.id}')" type="button">Submit UTR</button>
+                <button class="bg-primary text-white font-bold px-3.5 py-1.5 rounded-lg text-xs hover:bg-primary-container" data-action="resubmit-payment-proof" data-id="${o.dbId || o.id}" type="button">Submit UTR</button>
               </div>
             </div>
           `;
@@ -5035,16 +5492,16 @@ async function renderOrders() {
         <div class="mt-3 pt-3 border-t border-border-subtle flex flex-wrap gap-2 items-center justify-between">
           <div class="flex flex-wrap gap-2">
             ${actionBtn}
-            <button class="bg-surface text-primary border border-primary/20 hover:bg-primary/5 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1" onclick="openOrderDetailsModal('${escapeHtml(o.dbId || o.id)}')" type="button">
+            <button class="bg-surface text-primary border border-primary/20 hover:bg-primary/5 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1" data-action="open-order-details" data-id="${escapeHtml(o.dbId || o.id)}"" type="button">
               <span>🔍 View Order Details</span>
             </button>
             ${(!isSellerView && isCompleted) ? `
-              <button class="bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1" onclick="openRateProductModal('${escapeHtml(o.items && o.items[0] ? (o.items[0].productId || o.items[0].product_id) : (o.product_id || ''))}', '${escapeHtml(o.dbId || o.id)}', '${escapeHtml(o.product || 'Produce')}')" type="button">
+              <button class="bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1" data-action="open-rate-product" data-product-id="${escapeHtml(o.items && o.items[0] ? (o.items[0].productId || o.items[0].product_id) : (o.product_id || ''))}" data-order-id="${escapeHtml(o.dbId || o.id)}" data-product-name="${escapeHtml(o.product || 'Produce')}" type="button">
                 <span>★ Rate Produce</span>
               </button>
             ` : ''}
           </div>
-          <button class="bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1.5" onclick="triggerDisputeAiSummary('${escapeHtml(o.dispute_id || o.id)}', this)" type="button">
+          <button class="bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1.5" data-action="dispute-ai-summary" data-dispute-id="${escapeHtml(o.dispute_id || o.id)}" type="button">
             <span>⚖️ Dispute AI Summary</span>
           </button>
         </div>
@@ -5085,7 +5542,7 @@ function openDisputeAiModal(summary) {
           <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 border border-indigo-200">AI-GENERATED SUMMARY (NON-BINDING)</span>
           <h3 class="text-base font-bold text-primary mt-1">Impartial Evidence Synthesis</h3>
         </div>
-        <button class="text-soil-brown hover:text-primary font-bold text-lg" onclick="$('disputeAiModal').remove()">✕</button>
+        <button class="text-soil-brown hover:text-primary font-bold text-lg" data-action="remove-dispute-ai-modal">✕</button>
       </div>
       <div class="bg-slate-50 p-3.5 rounded-xl font-mono text-xs text-slate-800 whitespace-pre-wrap leading-relaxed border border-slate-200 mb-4">
 ${escapeHtml(summary.aiSummary || 'No dispute evidence has been recorded for this order.')}
@@ -5093,7 +5550,7 @@ ${escapeHtml(summary.aiSummary || 'No dispute evidence has been recorded for thi
       <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-amber-900 mb-4">
         <b>Notice:</b> ${escapeHtml(summary.disclaimer || 'This synthesis is non-binding and prepared to assist human review. Platform arbiters hold final authority.')}
       </div>
-      <button class="w-full py-2.5 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-container" onclick="$('disputeAiModal').remove()">Close Summary</button>
+      <button class="w-full py-2.5 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-container" data-action="remove-dispute-ai-modal">Close Summary</button>
     </div>
   `;
 }
@@ -5661,7 +6118,7 @@ async function loadCustomerDashboard() {
             <div class="text-3xl mb-2">📦</div>
             <h4 class="font-bold text-primary text-sm">No Active Orders Right Now</h4>
             <p class="text-xs text-soil-brown mt-1 mb-4">You have no shipments currently in progress. Order farm-fresh produce directly with zero middleman markup.</p>
-            <button class="bg-primary text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-primary-container transition-colors shadow-sm" onclick="showScreen('buyer-market')" type="button">Browse Produce Marketplace →</button>
+            <button class="bg-primary text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-primary-container transition-colors shadow-sm" data-action="show-screen" data-screen="buyer-market" type="button">Browse Produce Marketplace →</button>
           </div>
         `;
       } else {
@@ -5685,7 +6142,7 @@ async function loadCustomerDashboard() {
               </div>
               <div class="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2">
                 <span class="font-black text-primary text-base">₹${Math.round(o.total || 0)}</span>
-                <button class="text-xs font-bold text-primary hover:underline" onclick="showScreen('orders')" type="button">Track Status →</button>
+                <button class="text-xs font-bold text-primary hover:underline" data-action="show-screen" data-screen="orders" type="button">Track Status →</button>
               </div>
             </div>
           `;
@@ -5736,7 +6193,7 @@ async function loadCustomerDashboard() {
 
       if (items.length > 0) {
         mandiContainer.innerHTML = items.map(c => `
-          <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface border border-border-subtle hover:border-primary/30 transition-colors cursor-pointer" onclick="showScreen('price')">
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-surface border border-border-subtle hover:border-primary/30 transition-colors cursor-pointer" data-action="show-screen" data-screen="price">
             <div class="flex items-center gap-2">
               <span class="text-base">${emoji(c.name)}</span>
               <div>
@@ -5754,7 +6211,7 @@ async function loadCustomerDashboard() {
         mandiContainer.innerHTML = `
           <div class="p-3 text-center text-xs text-soil-brown bg-surface rounded-xl border border-border-subtle">
             <span>Market rates currently unavailable.</span>
-            <button class="block mx-auto mt-1 text-[10px] font-bold text-primary underline" onclick="showScreen('price')" type="button">Open Mandi Terminal</button>
+            <button class="block mx-auto mt-1 text-[10px] font-bold text-primary underline" data-action="show-screen" data-screen="price" type="button">Open Mandi Terminal</button>
           </div>
         `;
       }
@@ -5762,7 +6219,7 @@ async function loadCustomerDashboard() {
       mandiContainer.innerHTML = `
         <div class="p-3 text-center text-xs text-soil-brown bg-surface rounded-xl border border-border-subtle">
           <span>Live market arrival data unavailable.</span>
-          <button class="block mx-auto mt-1 text-[10px] font-bold text-primary underline" onclick="showScreen('price')" type="button">Check Mandi Rates</button>
+          <button class="block mx-auto mt-1 text-[10px] font-bold text-primary underline" data-action="show-screen" data-screen="price" type="button">Check Mandi Rates</button>
         </div>
       `;
     }
@@ -5780,16 +6237,16 @@ async function loadCustomerDashboard() {
         featuredGrid.innerHTML = products.map(p => `
           <div class="bg-white p-3.5 rounded-xl border border-border-subtle shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
             <div>
-              <div class="w-full h-28 bg-surface rounded-lg flex items-center justify-center text-4xl mb-2 cursor-pointer" onclick="openProductDetailsModal('${p.id}')">
+              <div class="w-full h-28 bg-surface rounded-lg flex items-center justify-center text-4xl mb-2 cursor-pointer" data-action="open-product-details" data-id="${p.id}">
                 ${p.image_url ? `<img src="${p.image_url}" class="w-full h-full object-cover rounded-lg" alt="${p.name}">` : emoji(p.name)}
               </div>
               <span class="text-[9px] font-bold text-success-emerald bg-surface px-1.5 py-0.5 rounded border border-success-emerald/20 uppercase">${p.category || 'Produce'}</span>
-              <h5 class="font-bold text-xs text-primary mt-1 cursor-pointer hover:underline" onclick="openProductDetailsModal('${p.id}')">${p.name}</h5>
+              <h5 class="font-bold text-xs text-primary mt-1 cursor-pointer hover:underline" data-action="open-product-details" data-id="${p.id}">${p.name}</h5>
               <span class="text-[10px] text-soil-brown block mt-0.5">By ${p.sellerName || 'Local Farmer'}</span>
             </div>
             <div class="flex items-center justify-between mt-3 pt-2 border-t border-border-subtle">
               <span class="font-black text-sm text-primary">₹${p.price}<span class="text-[10px] font-normal text-soil-brown">/kg</span></span>
-              <button class="bg-primary text-white text-[10px] font-bold px-2.5 py-1 rounded-lg hover:bg-primary-container transition-colors shadow-sm" onclick="addToCart('${p.id}', this)" type="button">+ Add</button>
+              <button class="bg-primary text-white text-[10px] font-bold px-2.5 py-1 rounded-lg hover:bg-primary-container transition-colors shadow-sm" data-action="add-to-cart" data-id="${p.id}" type="button">+ Add</button>
             </div>
           </div>
         `).join('');
@@ -5881,13 +6338,13 @@ async function loadSellerDashboard() {
       ordersConsole.innerHTML = sellerOrders.slice(0, 5).map(o => {
         let actionBtn = '';
         if (o.status === 'Order Placed') {
-          actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary-container transition-colors shadow-sm" onclick="advanceOrderStatus('${o.dbId || o.id}', 'Farmer Confirmed', this)" type="button">Confirm Order ✓</button>`;
+          actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary-container transition-colors shadow-sm" data-action="advance-order-status" data-id="${o.dbId || o.id}" data-status="Farmer Confirmed" type="button">Confirm Order ✓</button>`;
         } else if (o.status === 'Farmer Confirmed') {
-          actionBtn = `<button class="bg-harvest-gold text-inverse-surface text-xs font-bold px-3 py-1.5 rounded-lg hover:opacity-90 transition-colors shadow-sm" onclick="advanceOrderStatus('${o.dbId || o.id}', 'Preparing', this)" type="button">Pack Harvest 📦</button>`;
+          actionBtn = `<button class="bg-harvest-gold text-inverse-surface text-xs font-bold px-3 py-1.5 rounded-lg hover:opacity-90 transition-colors shadow-sm" data-action="advance-order-status" data-id="${o.dbId || o.id}" data-status="Preparing" type="button">Pack Harvest 📦</button>`;
         } else if (o.status === 'Preparing') {
-          actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary-container transition-colors shadow-sm" onclick="advanceOrderStatus('${o.dbId || o.id}', 'Ready', this)" type="button">Ready for Dispatch 🚚</button>`;
+          actionBtn = `<button class="bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary-container transition-colors shadow-sm" data-action="advance-order-status" data-id="${o.dbId || o.id}" data-status="Ready" type="button">Ready for Dispatch 🚚</button>`;
         } else if (o.status === 'Ready') {
-          actionBtn = `<button class="bg-success-emerald text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary transition-colors shadow-sm" onclick="advanceOrderStatus('${o.dbId || o.id}', 'Completed', this)" type="button">Mark Delivered ✓</button>`;
+          actionBtn = `<button class="bg-success-emerald text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-primary transition-colors shadow-sm" data-action="advance-order-status" data-id="${o.dbId || o.id}" data-status="Completed" type="button">Mark Delivered ✓</button>`;
         } else {
           actionBtn = `<span class="text-xs font-bold text-success-emerald bg-surface px-2.5 py-1 rounded border border-success-emerald/20">Fulfilled ✓</span>`;
         }
@@ -5935,7 +6392,7 @@ async function loadSellerDashboard() {
           <tr class="border-b border-border-subtle hover:bg-surface/50 transition-colors">
             <td class="py-3 px-2 font-bold text-primary flex items-center gap-2">
               <span>${emoji(p.name)}</span>
-              <span class="cursor-pointer hover:underline" onclick="openProductDetailsModal('${p.id}')">${escapeHtml(p.name)}</span>
+              <span class="cursor-pointer hover:underline" data-action="open-product-details" data-id="${p.id}">${escapeHtml(p.name)}</span>
             </td>
             <td class="py-3 px-2 text-soil-brown">${escapeHtml(p.category || 'Produce')}</td>
             <td class="py-3 px-2"><span class="bg-input-bg px-2 py-0.5 rounded text-[10px] font-bold text-soil-brown">${escapeHtml(p.grade || 'Grade A')}</span></td>
@@ -5943,7 +6400,7 @@ async function loadSellerDashboard() {
             <td class="py-3 px-2 font-bold ${isLowStock ? 'text-error' : 'text-on-surface'}">${p.quantity || 0} kg</td>
             <td class="py-3 px-2">${statusBadge}</td>
             <td class="py-3 px-2 text-right">
-              <button class="text-error font-bold text-[11px] hover:underline" onclick="deleteProduct('${p.id}')" type="button">Remove</button>
+              <button class="text-error font-bold text-[11px] hover:underline" data-action="delete-product" data-id="${p.id}" type="button">Remove</button>
             </td>
           </tr>
         `;
@@ -6630,7 +7087,7 @@ async function loadAdminUsers() {
       <tr class="border-b border-border-subtle hover:bg-surface">
         <td class="py-2.5 font-bold text-primary flex items-center gap-2">
           ${getSellerAvatarHtml(u.name, u.profile_photo, 'w-6 h-6')}
-          <button type="button" class="font-bold text-primary hover:underline text-left cursor-pointer" onclick="openAdminUserProfileDrawer('${escapeHtml(u.id)}')">${escapeHtml(u.name)}</button>
+          <button type="button" class="font-bold text-primary hover:underline text-left cursor-pointer" data-action="open-admin-user-drawer" data-id="${escapeHtml(u.id)}"">${escapeHtml(u.name)}</button>
         </td>
         <td class="py-2.5 text-soil-brown">${escapeHtml(u.contact)}</td>
         <td class="py-2.5 uppercase font-semibold text-soil-brown text-[10px]">${escapeHtml(u.role)}</td>
@@ -6639,11 +7096,11 @@ async function loadAdminUsers() {
         </td>
         <td class="py-2.5 flex items-center gap-1.5">
           ${u.account_status === 'active'
-            ? `<button class="bg-error-container text-error px-2.5 py-1 rounded text-[10px] font-bold hover:bg-error/20" onclick="promptAccountAction('${escapeHtml(u.id)}', 'frozen')" type="button">Freeze</button>
-               <button class="bg-harvest-gold/20 text-harvest-gold px-2.5 py-1 rounded text-[10px] font-bold hover:bg-harvest-gold/30" onclick="promptAccountAction('${escapeHtml(u.id)}', 'suspended')" type="button">Suspend</button>`
-            : `<button class="bg-surface text-success-emerald border border-success-emerald/20 px-2.5 py-1 rounded text-[10px] font-bold hover:bg-success-emerald hover:text-white" onclick="promptAccountAction('${escapeHtml(u.id)}', 'active')" type="button">Reactivate</button>`
+            ? `<button class="bg-error-container text-error px-2.5 py-1 rounded text-[10px] font-bold hover:bg-error/20" data-action="prompt-account-action" data-id="${escapeHtml(u.id)}" data-status="frozen" type="button">Freeze</button>
+               <button class="bg-harvest-gold/20 text-harvest-gold px-2.5 py-1 rounded text-[10px] font-bold hover:bg-harvest-gold/30" data-action="prompt-account-action" data-id="${escapeHtml(u.id)}" data-status="suspended" type="button">Suspend</button>`
+            : `<button class="bg-surface text-success-emerald border border-success-emerald/20 px-2.5 py-1 rounded text-[10px] font-bold hover:bg-success-emerald hover:text-white" data-action="prompt-account-action" data-id="${escapeHtml(u.id)}" data-status="active" type="button">Reactivate</button>`
           }
-          <button class="bg-slate-700 text-slate-200 hover:bg-slate-600 px-2 py-1 rounded text-[10px] font-bold" onclick="openAdminUserProfileDrawer('${escapeHtml(u.id)}')" type="button">Profile</button>
+          <button class="bg-slate-700 text-slate-200 hover:bg-slate-600 px-2 py-1 rounded text-[10px] font-bold" data-action="open-admin-user-drawer" data-id="${escapeHtml(u.id)}"" type="button">Profile</button>
         </td>
       </tr>
     `).join('') : '<tr><td colspan="5" class="py-4 text-center text-soil-brown">No user accounts found.</td></tr>';
@@ -6707,8 +7164,8 @@ async function loadAdminSellers() {
         <td class="py-2.5 font-bold text-harvest-gold">⭐ ${s.rating}</td>
         <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${s.accountStatus === 'active' ? 'bg-surface text-success-emerald' : 'bg-error-container text-error'}">${escapeHtml(s.accountStatus)}</span></td>
         <td class="py-2.5 flex items-center gap-1.5">
-          <button class="bg-surface text-primary border border-primary/20 px-2 py-1 rounded text-[10px] font-bold hover:bg-primary hover:text-white" onclick="promptAccountAction('${escapeHtml(s.id)}', '${s.accountStatus === 'active' ? 'suspended' : 'active'}')">${s.accountStatus === 'active' ? 'Suspend' : 'Reactivate'}</button>
-          <button class="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1 rounded text-[10px] font-bold" onclick="reviewSellerVerification('${escapeHtml(s.id)}', '${escapeHtml(s.businessName || s.name)}', '${escapeHtml(s.contact)}')">Review</button>
+          <button class="bg-surface text-primary border border-primary/20 px-2 py-1 rounded text-[10px] font-bold hover:bg-primary hover:text-white" data-action="prompt-account-action" data-id="${escapeHtml(s.id)}" data-status="${s.accountStatus === 'active' ? 'suspended' : 'active'}">${s.accountStatus === 'active' ? 'Suspend' : 'Reactivate'}</button>
+          <button class="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1 rounded text-[10px] font-bold" data-action="review-seller-verification" data-id="${escapeHtml(s.id)}" data-name="${escapeHtml(s.businessName || s.name)}" data-contact="${escapeHtml(s.contact)}">Review</button>
         </td>
       </tr>
     `).join('') : '<tr><td colspan="9" class="py-4 text-center text-soil-brown">No registered sellers.</td></tr>';
@@ -6736,7 +7193,7 @@ async function loadAdminCustomers() {
         <td class="py-2.5 font-bold text-primary">₹${(c.totalSpending || 0).toLocaleString()}</td>
         <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.accountStatus === 'active' ? 'bg-surface text-success-emerald' : 'bg-error-container text-error'}">${escapeHtml(c.accountStatus)}</span></td>
         <td class="py-2.5">
-          <button class="bg-surface text-primary border border-primary/20 px-2 py-1 rounded text-[10px] font-bold hover:bg-primary hover:text-white" onclick="promptAccountAction('${escapeHtml(c.id)}', '${c.accountStatus === 'active' ? 'frozen' : 'active'}')">${c.accountStatus === 'active' ? 'Freeze' : 'Unfreeze'}</button>
+          <button class="bg-surface text-primary border border-primary/20 px-2 py-1 rounded text-[10px] font-bold hover:bg-primary hover:text-white" data-action="prompt-account-action" data-id="${escapeHtml(c.id)}" data-status="${c.accountStatus === 'active' ? 'frozen' : 'active'}">${c.accountStatus === 'active' ? 'Freeze' : 'Unfreeze'}</button>
         </td>
       </tr>
     `).join('') : '<tr><td colspan="7" class="py-4 text-center text-soil-brown">No registered customers.</td></tr>';
@@ -6904,7 +7361,7 @@ async function loadAdminProducts() {
         <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${p.status === 'active' ? 'bg-surface text-success-emerald' : 'bg-input-bg text-soil-brown'}">${escapeHtml(p.status)}</span></td>
         <td class="py-2.5">
           ${p.status === 'active' 
-            ? `<button class="bg-error-container text-error px-2.5 py-1 rounded text-[10px] font-bold hover:bg-error/20" onclick="removeAdminProduct('${escapeHtml(p.id)}')" type="button">Deactivate</button>`
+            ? `<button class="bg-error-container text-error px-2.5 py-1 rounded text-[10px] font-bold hover:bg-error/20" data-action="remove-admin-product" data-id="${escapeHtml(p.id)}"" type="button">Deactivate</button>`
             : `<span class="text-[10px] text-soil-brown">Deactivated</span>`
           }
         </td>
@@ -6952,7 +7409,7 @@ async function loadAdminOrders() {
           <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-surface text-success-emerald border border-success-emerald/20">${escapeHtml(o.status)}</span>
         </td>
         <td class="py-2.5">
-          <button class="bg-error-container text-error px-2 py-1 rounded text-[10px] font-bold hover:bg-error/20" onclick="openEmergencyAdminOverrideModal('${escapeHtml(o.id)}')" type="button">🚨 Emergency Override</button>
+          <button class="bg-error-container text-error px-2 py-1 rounded text-[10px] font-bold hover:bg-error/20" data-action="open-admin-emergency-modal" data-id="${escapeHtml(o.id)}"" type="button">🚨 Emergency Override</button>
         </td>
       </tr>
     `).join('') : '<tr><td colspan="8" class="py-4 text-center text-soil-brown">No orders found.</td></tr>';
@@ -7090,8 +7547,8 @@ async function loadAdminPayments() {
           <span class="px-2 py-0.5 rounded text-[10px] font-bold ${p.payment_status === 'verified' ? 'bg-surface text-success-emerald border border-success-emerald/20' : p.payment_status === 'submitted' ? 'bg-harvest-gold/20 text-harvest-gold' : 'bg-input-bg text-soil-brown'}">${p.payment_status || 'pending'}</span>
         </td>
         <td class="py-2.5 flex items-center gap-1.5">
-          <button class="bg-surface text-success-emerald border border-success-emerald/20 px-2 py-1 rounded text-[10px] font-bold hover:bg-success-emerald hover:text-white" onclick="updateAdminPaymentStatus('${p.id}', 'verified')" type="button">Verify</button>
-          <button class="bg-error-container text-error px-2 py-1 rounded text-[10px] font-bold hover:bg-error/20" onclick="updateAdminPaymentStatus('${p.id}', 'rejected')" type="button">Reject</button>
+          <button class="bg-surface text-success-emerald border border-success-emerald/20 px-2 py-1 rounded text-[10px] font-bold hover:bg-success-emerald hover:text-white" data-action="update-admin-payment-status" data-id="${p.id}" data-status="verified" type="button">Verify</button>
+          <button class="bg-error-container text-error px-2 py-1 rounded text-[10px] font-bold hover:bg-error/20" data-action="update-admin-payment-status" data-id="${p.id}" data-status="rejected" type="button">Reject</button>
         </td>
       </tr>
     `).join('') : '<tr><td colspan="6" class="py-4 text-center text-soil-brown">No payment submissions.</td></tr>';
@@ -7162,7 +7619,7 @@ async function loadAdminReviews() {
           <span class="text-soil-brown text-[11px] block">By: ${r.buyerName || r.buyer_id}</span>
           <p class="text-soil-brown mt-2">${r.comment || ''}</p>
         </div>
-        <button class="bg-error-container text-error px-2.5 py-1 rounded text-[10px] font-bold hover:bg-error/20 shrink-0" onclick="deleteAdminReview('${r.id}')" type="button">Delete</button>
+        <button class="bg-error-container text-error px-2.5 py-1 rounded text-[10px] font-bold hover:bg-error/20 shrink-0" data-action="delete-admin-review" data-id="${r.id}" type="button">Delete</button>
       </div>
     `).join('') : '<div class="p-4 text-center text-soil-brown">No customer reviews found.</div>';
   } catch (err) {
@@ -7297,9 +7754,9 @@ async function openAdminUserProfileDrawer(userId) {
       </div>
 
       <div class="pt-4 border-t border-slate-800 flex gap-2">
-        <button class="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded-xl text-xs" onclick="$('adminUserProfileDrawer').classList.add('hidden'); promptAccountAction('${escapeHtml(u.id)}', 'frozen');">Freeze Account</button>
-        <button class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2 rounded-xl text-xs" onclick="$('adminUserProfileDrawer').classList.add('hidden'); promptAccountAction('${escapeHtml(u.id)}', 'suspended');">Suspend Account</button>
-        <button class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs" onclick="$('adminUserProfileDrawer').classList.add('hidden'); promptAccountAction('${escapeHtml(u.id)}', 'active');">Reactivate</button>
+        <button class="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded-xl text-xs" data-action="admin-drawer-account-action" data-id="${escapeHtml(u.id)}" data-status="frozen">Freeze Account</button>
+        <button class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2 rounded-xl text-xs" data-action="admin-drawer-account-action" data-id="${escapeHtml(u.id)}" data-status="suspended">Suspend Account</button>
+        <button class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs" data-action="admin-drawer-account-action" data-id="${escapeHtml(u.id)}" data-status="active">Reactivate</button>
       </div>
     `;
   } catch (err) {
