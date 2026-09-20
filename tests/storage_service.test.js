@@ -161,3 +161,105 @@ describe('StorageService — Unit & Validation Tests', () => {
     assert.strictEqual(mockProvider.getReadUrl(key), 'http://localhost:3000/media/media/product/P1/uuid.jpg');
   });
 });
+
+describe('LambdaStorageProvider — Unit & Security Tests', () => {
+  const LambdaStorageProvider = require('../services/storage/lambdaStorageProvider');
+
+  test('9. Throws if AWS_LAMBDA_STORAGE_URL is missing', () => {
+    const orig = process.env.AWS_LAMBDA_STORAGE_URL;
+    delete process.env.AWS_LAMBDA_STORAGE_URL;
+    try {
+      assert.throws(
+        () => new LambdaStorageProvider(),
+        /AWS_LAMBDA_STORAGE_URL configuration is required/
+      );
+    } finally {
+      if (orig) process.env.AWS_LAMBDA_STORAGE_URL = orig;
+    }
+  });
+
+  test('10. Sends key, contentType, expiresIn to Lambda Function URL and returns presigned object', async () => {
+    const origFetch = global.fetch;
+    let interceptedRequest = null;
+    global.fetch = async (url, options) => {
+      interceptedRequest = { url, options };
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          success: true,
+          uploadUrl: 'https://krishisetu-evidence-2026.s3.ap-south-1.amazonaws.com/media/product/P1/test.jpg?mock-presigned',
+          key: 'media/product/P1/test.jpg',
+          expiresIn: 900
+        })
+      };
+    };
+
+    try {
+      const provider = new LambdaStorageProvider({ functionUrl: 'https://mock-lambda.on.aws' });
+      const result = await provider.getPresignedUploadUrl({
+        key: 'media/product/P1/test.jpg',
+        contentType: 'image/jpeg',
+        expiresIn: 900
+      });
+
+      assert.strictEqual(interceptedRequest.url, 'https://mock-lambda.on.aws');
+      const payload = JSON.parse(interceptedRequest.options.body);
+      assert.strictEqual(payload.key, 'media/product/P1/test.jpg');
+      assert.strictEqual(payload.contentType, 'image/jpeg');
+      assert.strictEqual(payload.expiresIn, 900);
+
+      assert.strictEqual(result.provider, 'lambda');
+      assert.strictEqual(result.method, 'PUT');
+      assert.strictEqual(result.key, 'media/product/P1/test.jpg');
+      assert.ok(result.uploadUrl.includes('krishisetu-evidence-2026'));
+    } finally {
+      global.fetch = origFetch;
+    }
+  });
+
+  test('11. Security check: rejects response if Lambda returns a different storage key', async () => {
+    const origFetch = global.fetch;
+    global.fetch = async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        success: true,
+        uploadUrl: 'https://krishisetu-evidence-2026.s3.ap-south-1.amazonaws.com/media/hijacked.jpg',
+        key: 'media/hijacked.jpg',
+        expiresIn: 900
+      })
+    });
+
+    try {
+      const provider = new LambdaStorageProvider({ functionUrl: 'https://mock-lambda.on.aws' });
+      await assert.rejects(
+        () => provider.getPresignedUploadUrl({
+          key: 'media/product/P1/test.jpg',
+          contentType: 'image/jpeg',
+          expiresIn: 900
+        }),
+        /Lambda storage service returned a different storage key/
+      );
+    } finally {
+      global.fetch = origFetch;
+    }
+  });
+
+  test('12. StorageService selects LambdaStorageProvider when STORAGE_PROVIDER=lambda', () => {
+    const origProvider = process.env.STORAGE_PROVIDER;
+    const origUrl = process.env.AWS_LAMBDA_STORAGE_URL;
+    process.env.STORAGE_PROVIDER = 'lambda';
+    process.env.AWS_LAMBDA_STORAGE_URL = 'https://mock-lambda.on.aws';
+
+    try {
+      const service = new StorageService();
+      assert.strictEqual(service.provider instanceof LambdaStorageProvider, true);
+    } finally {
+      if (origProvider !== undefined) process.env.STORAGE_PROVIDER = origProvider;
+      else delete process.env.STORAGE_PROVIDER;
+      if (origUrl !== undefined) process.env.AWS_LAMBDA_STORAGE_URL = origUrl;
+      else delete process.env.AWS_LAMBDA_STORAGE_URL;
+    }
+  });
+});
