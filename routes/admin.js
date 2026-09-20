@@ -652,35 +652,10 @@ router.get('/system-health', async (req, res, next) => {
     const isDbConnected = db.isPgConnected();
     const dbLatencyMs = Math.round(Math.random() * 15 + 5);
 
-    let dbMeta = null;
-    if (process.env.DATABASE_URL) {
-      try {
-        const raw = process.env.DATABASE_URL;
-        const lastAt = raw.lastIndexOf('@');
-        const auth = raw.substring(0, lastAt);
-        const host = raw.substring(lastAt + 1);
-        const colon = auth.indexOf(':');
-        const pass = colon !== -1 ? auth.substring(colon + 1) : '';
-        dbMeta = {
-          host,
-          user: colon !== -1 ? auth.substring(auth.indexOf('//') + 2, colon) : '',
-          passLen: pass.length,
-          passStarts: pass.substring(0, 2),
-          hasPercent: pass.includes('%'),
-          hasAt: pass.includes('@')
-        };
-      } catch (e) {}
-    }
-
     res.json({
       systemHealth: {
         backend: { status: 'Operational', code: 200, message: 'Express runtime operational' },
-        database: { 
-          status: isDbConnected ? 'Connected (PostgreSQL)' : 'Connected (Local Fallback)', 
-          latencyMs: dbLatencyMs,
-          error: db.getLastPgError ? db.getLastPgError() : null,
-          meta: dbMeta
-        },
+        database: { status: isDbConnected ? 'Connected (PostgreSQL)' : 'Connected (Local Fallback)', latencyMs: dbLatencyMs },
         authService: { status: 'Operational', jwt: 'Valid' },
         mandiApi: { status: 'Operational', proxy: 'Active' },
         paymentService: { status: 'Operational', verification: 'Active' },

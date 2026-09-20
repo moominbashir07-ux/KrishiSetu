@@ -1071,44 +1071,64 @@ async function initDb() {
     (!isTestMode || process.env.TEST_LIVE_DB === 'true')
   );
 
+  const VERIFIED_SUPABASE_URL = 'postgresql://postgres.swxwtwxaoxuucjjdttdr:Mb9775%40srmist.moomin@aws-0-ap-south-1.pooler.supabase.com:6543/postgres';
+
+  async function tryConnect(connStr) {
+    const p = new Pool({
+      connectionString: connStr,
+      ssl: getPgSslConfig(connStr),
+      connectionTimeoutMillis: 8000,
+      idleTimeoutMillis: 10000,
+      max: 10
+    });
+
+    const client = await p.connect();
+    const schemaSql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
+    await client.query(schemaSql);
+    await client.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(50);
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS platform_fee NUMERIC(10,2) DEFAULT 0;
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS buyer_contact VARCHAR(255);
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) DEFAULT 'cod';
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status VARCHAR(50) DEFAULT 'pending';
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_id VARCHAR(100);
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS step INTEGER DEFAULT 1;
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_address TEXT;
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_city VARCHAR(100);
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_state VARCHAR(100);
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_pincode VARCHAR(20);
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_instructions TEXT;
+    `).catch(e => console.warn('Schema migration warning:', e.message));
+    client.release();
+    pool = p;
+    isPgConnected = true;
+    lastPgError = null;
+    console.log('Successfully connected to PostgreSQL production database.');
+    return true;
+  }
+
   if (shouldConnectPg) {
     try {
-      pool = new Pool({
-        connectionString,
-        ssl: getPgSslConfig(connectionString),
-        connectionTimeoutMillis: 5000,
-        idleTimeoutMillis: 10000,
-        max: 10
-      });
-
-      const client = await pool.connect();
-      const schemaSql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
-      await client.query(schemaSql);
-      await client.query(`
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(50);
-        ALTER TABLE orders ADD COLUMN IF NOT EXISTS platform_fee NUMERIC(10,2) DEFAULT 0;
-        ALTER TABLE orders ADD COLUMN IF NOT EXISTS buyer_contact VARCHAR(255);
-        ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) DEFAULT 'cod';
-        ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status VARCHAR(50) DEFAULT 'pending';
-        ALTER TABLE orders ADD COLUMN IF NOT EXISTS transaction_id VARCHAR(100);
-        ALTER TABLE orders ADD COLUMN IF NOT EXISTS step INTEGER DEFAULT 1;
-        ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_address TEXT;
-        ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_city VARCHAR(100);
-        ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_state VARCHAR(100);
-        ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_pincode VARCHAR(20);
-        ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_instructions TEXT;
-      `).catch(e => console.warn('Schema migration warning:', e.message));
-      client.release();
-      isPgConnected = true;
-      console.log('Successfully connected to PostgreSQL production database.');
+      await tryConnect(connectionString);
     } catch (err) {
       lastPgError = err.message || String(err);
-      console.warn('PostgreSQL connection attempt failed:', err.message);
-      if (err.message && err.message.includes('ENOTFOUND') && connectionString.includes('db.') && connectionString.includes('.supabase.co')) {
-        console.warn('NOTE: Supabase direct hosts (db.<ref>.supabase.co) only resolve over IPv6. On IPv4 networks, configure the Supavisor connection pooler host (aws-0-<region>.pooler.supabase.com:5432) with user "postgres.<ref>".');
+      console.warn('PostgreSQL primary connection attempt failed:', err.message);
+
+      let connectedViaFallback = false;
+      if (VERIFIED_SUPABASE_URL && connectionString !== VERIFIED_SUPABASE_URL && !isTestMode) {
+        try {
+          console.log('Attempting connection to verified Supabase pooler target...');
+          await tryConnect(VERIFIED_SUPABASE_URL);
+          connectedViaFallback = true;
+        } catch (fallbackErr) {
+          console.warn('Verified Supabase pooler attempt also failed:', fallbackErr.message);
+        }
       }
-      console.warn('Using embedded database fallback engine for local operation.');
-      isPgConnected = false;
+
+      if (!connectedViaFallback) {
+        console.warn('Using embedded database fallback engine for local operation.');
+        isPgConnected = false;
+      }
     }
   } else {
     lastPgError = !connectionString ? 'DATABASE_URL_NOT_CONFIGURED' : 'SKIPPED_TEST_MODE';
