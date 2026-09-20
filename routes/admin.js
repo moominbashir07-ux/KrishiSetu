@@ -655,7 +655,11 @@ router.get('/system-health', async (req, res, next) => {
     res.json({
       systemHealth: {
         backend: { status: 'Operational', code: 200, message: 'Express runtime operational' },
-        database: { status: isDbConnected ? 'Connected (PostgreSQL)' : 'Connected (Local Fallback)', latencyMs: dbLatencyMs },
+        database: { 
+          status: isDbConnected ? 'Connected (PostgreSQL)' : 'Connected (Local Fallback)', 
+          latencyMs: dbLatencyMs,
+          error: db.getLastPgError ? db.getLastPgError() : null
+        },
         authService: { status: 'Operational', jwt: 'Valid' },
         mandiApi: { status: 'Operational', proxy: 'Active' },
         paymentService: { status: 'Operational', verification: 'Active' },
