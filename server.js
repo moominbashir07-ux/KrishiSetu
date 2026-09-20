@@ -2,6 +2,23 @@ const express = require('express');
 const path = require('path');
 require('dotenv').config();
 
+// Production environment defaults for Render service
+if (!process.env.APP_URL) {
+  process.env.APP_URL = process.env.RENDER_EXTERNAL_URL || 'https://krishisetu-dj4j.onrender.com';
+}
+if (!process.env.STORAGE_PROVIDER) {
+  process.env.STORAGE_PROVIDER = 'lambda';
+}
+if (!process.env.AWS_LAMBDA_STORAGE_URL) {
+  process.env.AWS_LAMBDA_STORAGE_URL = 'https://rwaiukrlq3cnacgkybwrbrtmoa0bljdm.lambda-url.ap-south-1.on.aws/';
+}
+if (!process.env.AWS_S3_MEDIA_BUCKET) {
+  process.env.AWS_S3_MEDIA_BUCKET = 'krishisetu-evidence-2026';
+}
+if (!process.env.AWS_REGION) {
+  process.env.AWS_REGION = 'ap-south-1';
+}
+
 const db = require('./db/db');
 const { initDb } = db;
 const { apiLimiter, securityHeaders, corsOptions, errorHandler, requestIdMiddleware, requestLogger } = require('./middleware/security');

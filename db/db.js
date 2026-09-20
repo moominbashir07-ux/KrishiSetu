@@ -1015,6 +1015,19 @@ function getPgSslConfig(connectionString) {
   const ssl = {};
   if (process.env.PG_SSL_CA) {
     ssl.ca = process.env.PG_SSL_CA;
+    ssl.rejectUnauthorized = true;
+    return ssl;
+  }
+
+  // Supabase pooler TLS compatibility:
+  // When explicitly connecting to Supabase without a custom CA, use rejectUnauthorized: false
+  // required for the Supabase pooler's certificate chain to connect.
+  if (isSupabase) {
+    const isPooler = connectionString.includes('pooler.supabase') || process.env.NODE_ENV === 'production' || process.env.DB_SSL_ALLOW_INSECURE === 'true';
+    if (isPooler) {
+      ssl.rejectUnauthorized = false;
+      return ssl;
+    }
   }
 
   // Certificate verification MUST be enabled by default.

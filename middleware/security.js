@@ -77,6 +77,15 @@ function getAllowedOrigins() {
     configured.push(process.env.APP_URL.trim());
   }
 
+  if (process.env.RENDER_EXTERNAL_URL && !configured.includes(process.env.RENDER_EXTERNAL_URL.trim())) {
+    configured.push(process.env.RENDER_EXTERNAL_URL.trim());
+  }
+
+  const productionOrigin = 'https://krishisetu-dj4j.onrender.com';
+  if (!configured.includes(productionOrigin)) {
+    configured.push(productionOrigin);
+  }
+
   // Local development origins
   if (process.env.NODE_ENV !== 'production') {
     if (!configured.includes('http://localhost:3000')) configured.push('http://localhost:3000');
