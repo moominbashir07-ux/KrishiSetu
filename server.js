@@ -104,6 +104,8 @@ app.get(['/api/health', '/health'], async (req, res) => {
     res.status(statusCode).json({
       status: isDegraded ? 'degraded' : 'ok',
       database: dbStatus,
+      hasDbUrl: Boolean(process.env.DATABASE_URL),
+      dbError: db.getLastPgError ? db.getLastPgError() : null,
       uptime: Math.round(process.uptime()),
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development',

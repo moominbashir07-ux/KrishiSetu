@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 
 let pool = null;
 let isPgConnected = false;
+let lastPgError = null;
 
 // Fallback in-memory relational store (Phase 5B)
 class LocalFallbackDB {
@@ -1083,6 +1084,7 @@ async function initDb() {
       isPgConnected = true;
       console.log('Successfully connected to PostgreSQL production database.');
     } catch (err) {
+      lastPgError = err.message || String(err);
       console.warn('PostgreSQL connection attempt failed:', err.message);
       if (err.message && err.message.includes('ENOTFOUND') && connectionString.includes('db.') && connectionString.includes('.supabase.co')) {
         console.warn('NOTE: Supabase direct hosts (db.<ref>.supabase.co) only resolve over IPv6. On IPv4 networks, configure the Supavisor connection pooler host (aws-0-<region>.pooler.supabase.com:5432) with user "postgres.<ref>".');
@@ -1091,6 +1093,7 @@ async function initDb() {
       isPgConnected = false;
     }
   } else {
+    lastPgError = !connectionString ? 'DATABASE_URL_NOT_CONFIGURED' : 'SKIPPED_TEST_MODE';
     console.warn('DATABASE_URL is required for PostgreSQL database access.');
     console.warn('No DATABASE_URL configured. Using embedded database fallback engine.');
     isPgConnected = false;
@@ -1183,5 +1186,6 @@ module.exports = {
   isPgConnected: () => isPgConnected,
   pingDb,
   fallbackDb,
-  getPgSslConfig
+  getPgSslConfig,
+  getLastPgError: () => lastPgError
 };
