@@ -101,25 +101,9 @@ app.get(['/api/health', '/health'], async (req, res) => {
     const isDegraded = isProduction && dbStatus === 'disconnected';
     const statusCode = isDegraded ? 503 : 200;
 
-    let dbUser = null;
-    let dbHost = null;
-    if (process.env.DATABASE_URL) {
-      try {
-        const u = new URL(process.env.DATABASE_URL);
-        dbUser = u.username;
-        dbHost = u.host;
-      } catch (e) {
-        dbUser = 'malformed';
-      }
-    }
-
     res.status(statusCode).json({
       status: isDegraded ? 'degraded' : 'ok',
       database: dbStatus,
-      hasDbUrl: Boolean(process.env.DATABASE_URL),
-      dbUser,
-      dbHost,
-      dbError: db.getLastPgError ? db.getLastPgError() : null,
       uptime: Math.round(process.uptime()),
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development',

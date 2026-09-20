@@ -1045,8 +1045,26 @@ function getPgSslConfig(connectionString) {
   return ssl;
 }
 
+function normalizeConnectionString(raw) {
+  if (!raw || typeof raw !== 'string') return raw;
+  const prefixMatch = raw.match(/^(postgres(?:ql)?:\/\/)(.*)$/i);
+  if (!prefixMatch) return raw;
+  const prefix = prefixMatch[1];
+  const rest = prefixMatch[2];
+  const lastAtIdx = rest.lastIndexOf('@');
+  if (lastAtIdx === -1) return raw;
+  const authPart = rest.substring(0, lastAtIdx);
+  const hostAndRest = rest.substring(lastAtIdx + 1);
+  const colonIdx = authPart.indexOf(':');
+  if (colonIdx === -1) return raw;
+  const user = authPart.substring(0, colonIdx);
+  const pass = authPart.substring(colonIdx + 1);
+  const fixedPass = encodeURIComponent(decodeURIComponent(pass));
+  return prefix + user + ':' + fixedPass + '@' + hostAndRest;
+}
+
 async function initDb() {
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = normalizeConnectionString(process.env.DATABASE_URL);
   const isTestMode = process.env.NODE_ENV === 'test';
   const shouldConnectPg = Boolean(
     connectionString && 
