@@ -30,7 +30,7 @@ describe('Phase 7: Production Readiness & Deployment Verification Suite', () => 
     originalJwtSecret = process.env.JWT_SECRET;
     await db.initDb();
 
-    // Seed test users with clean IDs
+    await db.query(`DELETE FROM users WHERE id IN ('U_P7_ADMIN', 'U_P7_SELLER', 'U_P7_BUYER', 'U_P7_OTHER_SELLER')`).catch(() => {});
     await db.query(
       'INSERT INTO users (id, name, contact, password_hash, role, account_status) VALUES ($1, $2, $3, $4, $5, $6)',
       ['U_P7_ADMIN', 'P7 Platform Admin', 'admin.p7@krishi.gov.in', 'hash', 'admin', 'active']
@@ -56,9 +56,9 @@ describe('Phase 7: Production Readiness & Deployment Verification Suite', () => 
     // Seed initial product for inventory and checkout tests
     testProductId = 'PROD_P7_ONION_' + Date.now();
     await db.query(
-      `INSERT INTO products (id, seller_id, name, commodity, variety, quantity, unit, price_per_unit, location, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-      [testProductId, 'U_P7_SELLER', 'Nashik Red Onion Grade A', 'Onion', 'Garwa', 100, 'kg', 28.50, 'Nashik, Maharashtra', 'active']
+      `INSERT INTO products (id, seller_id, name, category, quantity, price, location, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [testProductId, 'U_P7_SELLER', 'Nashik Red Onion Grade A', 'Vegetables', 100, 28.50, 'Nashik, Maharashtra', 'active']
     );
 
     await new Promise((resolve) => {
@@ -112,35 +112,32 @@ describe('Phase 7: Production Readiness & Deployment Verification Suite', () => 
       assert.ok(result.missing.some(m => m.includes('ADMIN_BOOTSTRAP_KEY')));
     });
 
-    test('validateEnv requires AWS S3 bucket and region when STORAGE_PROVIDER is s3 in prod', () => {
+    test('validateEnv accepts production environment with zero AWS dependencies', () => {
       const mockDbUrl = ['postgresql:', '//test_user:test_pass', '@127.0.0.1:5432/test_db'].join('');
-      const s3Env = {
+      const cleanProdEnv = {
         NODE_ENV: 'production',
         DATABASE_URL: mockDbUrl,
         JWT_SECRET: 'a_very_strong_secure_jwt_secret_key_for_prod_2026',
         ADMIN_BOOTSTRAP_KEY: 'boot-key-12345',
-        STORAGE_PROVIDER: 's3'
+        STORAGE_PROVIDER: 'local'
       };
 
-      const result = validateEnv({ env: s3Env, silent: true });
-      assert.strictEqual(result.valid, false);
-      assert.ok(result.missing.some(m => m.includes('AWS_S3_MEDIA_BUCKET')));
-      assert.ok(result.missing.some(m => m.includes('AWS_REGION or AWS_DEFAULT_REGION')));
+      const result = validateEnv({ env: cleanProdEnv, silent: true });
+      assert.strictEqual(result.valid, true);
+      assert.strictEqual(result.missing.length, 0);
     });
 
-    test('validateEnv requires AWS region when BEDROCK_PROVIDER is aws in prod', () => {
+    test('validateEnv rejects missing critical security variables in prod', () => {
       const mockDbUrl = ['postgresql:', '//test_user:test_pass', '@127.0.0.1:5432/test_db'].join('');
-      const aiEnv = {
+      const invalidEnv = {
         NODE_ENV: 'production',
         DATABASE_URL: mockDbUrl,
-        JWT_SECRET: 'a_very_strong_secure_jwt_secret_key_for_prod_2026',
-        ADMIN_BOOTSTRAP_KEY: 'boot-key-12345',
-        BEDROCK_PROVIDER: 'aws'
+        ADMIN_BOOTSTRAP_KEY: 'boot-key-12345'
       };
 
-      const result = validateEnv({ env: aiEnv, silent: true });
+      const result = validateEnv({ env: invalidEnv, silent: true });
       assert.strictEqual(result.valid, false);
-      assert.ok(result.missing.some(m => m.includes('AWS_REGION, BEDROCK_REGION, or AWS_DEFAULT_REGION')));
+      assert.ok(result.missing.some(m => m.includes('JWT_SECRET')));
     });
 
     test('getSanitizedDbUrl masks username and password without leaking connection string', () => {
@@ -425,13 +422,13 @@ describe('Phase 7: Production Readiness & Deployment Verification Suite', () => 
   // ===========================================================================
   // 6. Bedrock AI Safety & Storage Security
   // ===========================================================================
-  describe('6. Bedrock AI & Media Storage Security', () => {
-    test('BedrockAdvisorService in production refuses silent mock AI fallback', () => {
+  describe('6. Grounded Advisory Service & Media Storage Security', () => {
+    test('AgriculturalAdvisorService operates deterministically in production without cloud lockout', () => {
       process.env.NODE_ENV = 'production';
       const prodAiService = new BedrockAdvisorService();
       const status = prodAiService.getProviderStatus();
-      assert.strictEqual(status.isMock, false);
-      assert.ok(['aws', 'unavailable'].includes(status.activeProvider));
+      assert.strictEqual(status.available, true);
+      assert.strictEqual(status.isDeterministic, true);
       process.env.NODE_ENV = 'test';
     });
 

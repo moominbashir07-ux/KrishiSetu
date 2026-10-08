@@ -378,7 +378,7 @@ class DisputeService {
    * Generates a neutral, non-binding AI summary for a dispute without mutating state.
    * Authorized for claimant, respondent, or admin.
    */
-  async generateAiSummary(disputeId, user, bedrockService = null) {
+  async generateAiSummary(disputeId, user, advisorService = null) {
     const dispute = await this.getDispute(disputeId, user);
 
     let order = null;
@@ -391,8 +391,8 @@ class DisputeService {
       }
     }
 
-    const { BedrockAdvisorService } = require('../ai/bedrockAdvisorService');
-    const aiService = bedrockService || new BedrockAdvisorService();
+    const { AgriculturalAdvisorService } = require('../ai/agriculturalAdvisorService');
+    const aiService = advisorService || new AgriculturalAdvisorService();
 
     const orderInfo = {
       id: dispute.orderId,

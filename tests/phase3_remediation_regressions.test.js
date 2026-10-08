@@ -6,8 +6,7 @@ const app = require('../server');
 const db = require('../db/db');
 const { JWT_SECRET } = require('../middleware/auth');
 const { StorageService } = require('../services/storage/storageService');
-const { BedrockAdvisorService } = require('../services/ai/bedrockAdvisorService');
-const AwsBedrockProvider = require('../services/ai/awsBedrockProvider');
+const { BedrockAdvisorService, DeterministicAdvisoryProvider } = require('../services/ai/agriculturalAdvisorService');
 const { ProductQualityService } = require('../services/quality/productQualityService');
 const { validateEnv } = require('../config/env');
 const fs = require('fs');
@@ -64,6 +63,7 @@ test('KrishiSetu Phase 3 Remediation Regression Test Suite', async (t) => {
     customerId = 'U_CUST_' + suffix;
     sellerId = 'U_SELLER_' + suffix;
 
+    await db.query("DELETE FROM users WHERE contact IN ('admin_rem@test.com', 'cust_rem@test.com', 'sell_rem@test.com')").catch(() => {});
     await db.query(
       `INSERT INTO users (id, name, contact, password_hash, role, account_status, email_verified)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
@@ -236,35 +236,30 @@ test('KrishiSetu Phase 3 Remediation Regression Test Suite', async (t) => {
     assert.ok(result.data.disclaimer.includes('Client-declared prices are unverified'));
   });
 
-  await t.test('ISSUE 14, 17, 19: Provider selection, region source, and production mock rejection', async () => {
-    // 14: AwsBedrockProvider checks this.region against supported regions
-    const validRegionProvider = new AwsBedrockProvider({ region: 'ap-south-1' });
-    assert.equal(validRegionProvider.isAvailable(), true);
+  await t.test('ISSUE 14, 17, 19: Provider selection and production determinism without cloud dependencies', async () => {
+    // 14: DeterministicAdvisoryProvider initializes safely with local rule engine
+    const localProvider = new DeterministicAdvisoryProvider();
+    assert.equal(localProvider.isAvailable(), true);
+    assert.ok(localProvider.engineId.includes('deterministic'));
 
-    const invalidRegionProvider = new AwsBedrockProvider({ region: 'invalid-region-9' });
-    assert.equal(invalidRegionProvider.isAvailable(), false);
-
-    // 17 & 19: Coherence and production mock rejection
+    // 17 & 19: Coherence and production execution without cloud lockout
     const originalEnv = process.env.NODE_ENV;
-    const originalKey = process.env.AWS_ACCESS_KEY_ID;
     try {
       process.env.NODE_ENV = 'production';
-      delete process.env.AWS_ACCESS_KEY_ID; // Missing AWS credentials
 
       const advisorProd = new BedrockAdvisorService();
       const status = advisorProd.getProviderStatus();
 
-      // Status must not say Mock when in production without credentials
-      assert.equal(status.isMock, false, 'Production provider status must not be mock');
-      assert.equal(status.selectedProvider, 'aws');
+      // Status operates deterministically in production
+      assert.equal(status.available, true, 'Production provider must be available');
+      assert.equal(status.selectedProvider, 'local_deterministic');
 
-      // Generating advice must fail-fast with 503 rather than silently mocking
-      await assert.rejects(async () => {
-        await advisorProd.getFarmerAdvice({ commodity: 'Wheat' });
-      }, (err) => err.code === 'AI_SERVICE_UNAVAILABLE' || err.message.includes('Amazon Bedrock'));
+      // Generating advice operates successfully and deterministically without AWS credentials
+      const advice = await advisorProd.getFarmerAdvice({ commodity: 'Wheat', quantity: '50 kg' });
+      assert.ok(advice.data.adviceText.includes('Wheat'));
+      assert.equal(advice.isDeterministic, true);
     } finally {
       process.env.NODE_ENV = originalEnv;
-      if (originalKey) process.env.AWS_ACCESS_KEY_ID = originalKey;
     }
   });
 
@@ -274,7 +269,7 @@ test('KrishiSetu Phase 3 Remediation Regression Test Suite', async (t) => {
     await db.query(
       `INSERT INTO orders (id, order_number, customer_id, seller_id, status, total_amount)
        VALUES ($1, $2, $3, $4, $5, $6)`,
-      [orderId, 'KS-2026-DISP', customerId, sellerId, 'Delivered', 200]
+      [orderId, 'KS-2026-DISP', customerId, sellerId, 'Completed', 200]
     );
 
     // Customer opens dispute

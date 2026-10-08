@@ -180,28 +180,104 @@ router.post('/presigned-url', authenticateUser, async (req, res, next) => {
   }
 });
 
-// Mock upload endpoint for local testing (Strictly disabled in production)
-router.all('/mock-upload', (req, res) => {
+const path = require('path');
+const LocalStorageProvider = require('../services/storage/localStorageProvider');
+
+// Production-safe local media upload endpoint (Zero AWS dependency)
+// Hardened with cryptographic HMAC signature verification and path traversal rejection
+const handleLocalUpload = (req, res) => {
+  const query = req.query || {};
+  const body = req.body || {};
+  const key = query.key || body.key;
+  const expires = query.expires || body.expires;
+  const signature = query.signature || body.signature;
+
+  // 1. Key validation
+  if (!key || typeof key !== 'string') {
+    return res.status(400).json({ error: 'Missing object key in storage upload.' });
+  }
+
+  // Path traversal & unauthorized object paths protection
+  let decodedKey = key;
+  try {
+    decodedKey = decodeURIComponent(key);
+  } catch {
+    return res.status(400).json({ error: 'Malformed encoded object key.' });
+  }
+
+  if (
+    decodedKey.includes('..') ||
+    key.includes('..') ||
+    /%2e%2e/i.test(key) ||
+    path.isAbsolute(decodedKey) ||
+    decodedKey.startsWith('/') ||
+    decodedKey.startsWith('\\') ||
+    decodedKey.includes('\0') ||
+    /^[a-zA-Z]:/.test(decodedKey) ||
+    !/^media\/(product|verification|dispute|quality|profile)\//.test(decodedKey)
+  ) {
+    return res.status(400).json({ error: 'Illegal path traversal or unauthorized object key.' });
+  }
+
+  // Executable / script blocking on key extension
+  const blockedExtensions = ['.exe', '.sh', '.bat', '.cmd', '.js', '.ts', '.py', '.php', '.pl', '.vbs', '.scr'];
+  const ext = path.extname(decodedKey).toLowerCase();
+  if (blockedExtensions.includes(ext)) {
+    return res.status(400).json({ error: 'Executable and script file uploads are strictly blocked.' });
+  }
+
+  // 2. Expiry validation
+  if (!expires) {
+    return res.status(400).json({ error: 'Missing expiration timestamp in storage upload.' });
+  }
+  const expiryNum = Number(expires);
+  if (isNaN(expiryNum)) {
+    return res.status(400).json({ error: 'Invalid expiration timestamp.' });
+  }
+  if (Date.now() > expiryNum) {
+    return res.status(403).json({ error: 'Pre-signed upload URL has expired.' });
+  }
+
+  // 3. Cryptographic HMAC Signature verification
+  if (!signature) {
+    return res.status(403).json({ error: 'Missing cryptographic HMAC signature.' });
+  }
+
+  const isValidSig = LocalStorageProvider.verifySignature(key, expires, signature);
+  if (!isValidSig) {
+    return res.status(403).json({ error: 'Invalid or tampered upload signature.' });
+  }
+
+  // 4. File restrictions (size limit: 5MB) if headers are supplied
+  if (req.headers['content-length']) {
+    const contentLength = Number(req.headers['content-length']);
+    if (contentLength > 5 * 1024 * 1024) {
+      return res.status(413).json({ error: 'Uploaded file exceeds 5MB size limit.' });
+    }
+  }
+
+  if (defaultStorageService.provider && defaultStorageService.provider.markObjectUploaded) {
+    defaultStorageService.provider.markObjectUploaded(key);
+  }
+  return res.status(200).json({ success: true, message: 'Upload successful', key });
+};
+
+router.all('/local-upload', handleLocalUpload);
+router.all('/mock-upload', (req, res, next) => {
   if (process.env.NODE_ENV === 'production') {
     return res.status(403).json({
       error: {
         code: 'MOCK_STORAGE_DISABLED_IN_PRODUCTION',
-        message: 'Mock upload endpoint is disabled in production environments.'
+        message: 'Mock storage upload endpoint is disabled in production environments.'
       }
     });
   }
-  const key = req.query.key;
-  if (!key) {
-    return res.status(400).json({ error: 'Missing object key in mock upload.' });
-  }
-  if (defaultStorageService.provider.markObjectUploaded) {
-    defaultStorageService.provider.markObjectUploaded(key);
-  }
-  res.status(200).json({ success: true, message: 'Mock upload successful', key });
+  return handleLocalUpload(req, res);
 });
 
 module.exports = {
   storageRouter: router,
   defaultStorageService,
-  authorizeStorageEntity
+  authorizeStorageEntity,
+  handleLocalUpload
 };

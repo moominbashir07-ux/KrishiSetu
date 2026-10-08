@@ -25,43 +25,44 @@ KrishiSetu 2.0 answers every one of these questions with structural guarantees:
 | **Data Trust** | Opaque, unverified, or fabricated market prices. | Strict data contracts citing official sources (AGMARKNET/data.gov.in), arrival observation dates, and real-time freshness badges (`LIVE`, `RECENT`, `STALE`). Dedicated, isolated mock adapters for local testing—never mixed with production data. |
 | **Quality Trust** | False "Grade A" claims without proof or accountability. | Explicit three-tier grading taxonomy (Seller-Declared vs AI-Assisted Estimate vs Certified AGMARK), supported by mandatory photographic batch proof before publishing. |
 | **Transaction Trust** | Buyers left stranded when deliveries don't match declarations. | Complete, auditable order lifecycle backed by a 48-hour inspection window, an immutable evidence timeline, and a formal return/dispute state machine. |
-| **AI Decision Support** | Hallucinated pricing and generic chatbots. | Amazon Bedrock (Claude 3.5 Sonnet) decision-support engine strictly grounded in verified real-time mandi data and active platform listings with zero price fabrication. |
+| **AI Decision Support** | Hallucinated pricing and generic chatbots. | Grounded Deterministic Advisory Engine strictly reasoning over verified real-time mandi snapshots and active platform listings with zero price fabrication. |
 
 ---
 
 ## 🏗 System Architecture
 
-KrishiSetu 2.0 is engineered as an **AWS-Native Serverless Architecture**:
+KrishiSetu is engineered as a **Self-Contained Zero-Cloud-Dependency Architecture**:
 
 ```
 +-----------------------------------------------------------------------------------------+
 |                                  CLIENT LAYER (SPA / PWA)                               |
 |        Farmer Control Center  |  Buyer Marketplace  |  Mandi Intelligence Terminal      |
+|               Multilingual AI Voice Assistant (English, Hindi, Marathi, Punjabi, Telugu)  |
 +-----------------------------------------------------------------------------------------+
                                              │
                                              ▼
 +-----------------------------------------------------------------------------------------+
 |                                EDGE & SECURITY PERIMETER                                |
-|        Amazon CloudFront CDN  |  AWS WAF  |  Amazon Cognito (RBAC JWT Auth)             |
+|        Helmet Security Headers | Rate Limiting | JWT-Based RBAC (Farmer, Buyer, Admin)   |
 +-----------------------------------------------------------------------------------------+
                                              │
                                              ▼
 +-----------------------------------------------------------------------------------------+
 |                                INGRESS & API GATEWAY                                    |
-|                       Amazon API Gateway (REST API Router & Validations)                |
+|                       Express.js REST API Router & Contract Validation                  |
 +-----------------------------------------------------------------------------------------+
                                              │
                                              ▼
 +-----------------------------------------------------------------------------------------+
-|                              COMPUTE LAYER: AWS LAMBDA                                  |
+|                                    APPLICATION SERVICES                                 |
 |   AuthService  |  CatalogService  |  OrderService  |  DisputeService  |  MandiIngestion |
 +-----------------------------------------------------------------------------------------+
                      │                                   │                       │
                      ▼                                   ▼                       ▼
 +---------------------------------------+   +-------------------------+   +---------------+
-|     Amazon DynamoDB (Single-Table)    |   |    Amazon S3 (Media)    |   | Amazon Bedrock|
-|  - Users, Products, Orders, Disputes  |   |  - Harvest Proof        |   | - Advisory    |
-|  - Sub-10ms queries, TransactWrites   |   |  - Dispute Photos       |   | - Summarizer  |
+|     PostgreSQL / Embedded Engine      |   |   Local Secure Storage  |   | Deterministic |
+|  - Users, Products, Orders, Disputes  |   |  - Harvest Proof        |   | Advisory Eng. |
+|  - ACID Transactions, Constraints     |   |  - Dispute Photos       |   | - 5 Languages |
 +---------------------------------------+   +-------------------------+   +---------------+
 ```
 
@@ -89,11 +90,12 @@ cp .env.example .env
 
 Review `.env.example` to configure:
 - Server configuration (`PORT`, `NODE_ENV`)
-- AWS Credentials & Region (`AWS_REGION`, `AWS_DYNAMODB_TABLE`, `AWS_S3_MEDIA_BUCKET`)
-- Amazon Bedrock Model ID
+- Storage Provider (`STORAGE_PROVIDER=local`)
+- Database Connection (`DATABASE_URL`)
+- Security (`JWT_SECRET`, `ADMIN_BOOTSTRAP_KEY`)
 - Government Open Data API Key (`DATA_GOV_IN_API_KEY`)
 
-*Note: Never commit secrets, tokens, or API keys into git.*
+*Note: Zero AWS account, AWS SDK, or AWS credentials are required.*
 
 ---
 

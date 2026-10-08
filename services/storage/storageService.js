@@ -4,9 +4,8 @@
  */
 
 const crypto = require('crypto');
+const LocalStorageProvider = require('./localStorageProvider');
 const MockStorageProvider = require('./mockStorageProvider');
-const S3StorageProvider = require('./s3StorageProvider');
-const LambdaStorageProvider = require('./lambdaStorageProvider');
 
 const ALLOWED_MIME_TYPES = {
   'image/jpeg': '.jpg',
@@ -31,36 +30,8 @@ class StorageService {
       return;
     }
 
-    const providerType = (process.env.STORAGE_PROVIDER || '').toLowerCase();
-
-    // AWS Lambda → S3
-    if (providerType === 'lambda' && process.env.AWS_LAMBDA_STORAGE_URL) {
-      try {
-        this.provider = new LambdaStorageProvider();
-        return;
-      } catch (err) {
-        console.warn(
-          '[StorageService] Lambda provider failed, falling back:',
-          err.message
-        );
-      }
-    }
-
-    // Direct S3 provider
-    if (providerType === 's3' && process.env.AWS_S3_MEDIA_BUCKET) {
-      try {
-        this.provider = new S3StorageProvider();
-        return;
-      } catch (err) {
-        console.warn(
-          '[StorageService] S3 provider failed, falling back:',
-          err.message
-        );
-      }
-    }
-
-    // Local/mock fallback
-    this.provider = new MockStorageProvider(
+    // Zero AWS: LocalStorageProvider operates safely in all environments
+    this.provider = new LocalStorageProvider(
       process.env.APP_URL || 'http://localhost:3000'
     );
   }

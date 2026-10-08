@@ -198,6 +198,15 @@ class LocalFallbackDB {
 
     // 15. REVIEWS
     if (q.startsWith('INSERT INTO reviews')) {
+      const existingIdx = this.tables.reviews.findIndex(
+        r => (r.buyer_id === params[2] && r.order_id === params[3] && r.product_id === params[1]) || r.id === params[0]
+      );
+      if (existingIdx !== -1) {
+        this.tables.reviews[existingIdx].rating = Number(params[4]);
+        this.tables.reviews[existingIdx].comment = params[5];
+        this.tables.reviews[existingIdx].updated_at = new Date().toISOString();
+        return { rows: [{ ...this.tables.reviews[existingIdx] }] };
+      }
       const rev = {
         id: params[0], product_id: params[1], buyer_id: params[2], order_id: params[3],
         rating: Number(params[4]), comment: params[5], created_at: new Date().toISOString()
@@ -206,20 +215,27 @@ class LocalFallbackDB {
       return { rows: [{ ...rev }] };
     }
 
-    if (q.includes('FROM reviews')) {
+    if (q.startsWith('DELETE FROM reviews')) {
+      const id = params[0];
+      this.tables.reviews = this.tables.reviews.filter(r => r.id !== id);
+      return { rows: [] };
+    }
+
+    if (q.includes('FROM reviews') && !q.startsWith('DELETE')) {
       let revs = [...this.tables.reviews];
       if (q.includes('seller_id = $1') || q.includes('p.seller_id = $1')) {
         const sellerId = params[0];
         const sellerProductIds = this.tables.products.filter(p => p.seller_id === sellerId).map(p => p.id);
         revs = revs.filter(r => sellerProductIds.includes(r.product_id));
-      }
-      if (q.includes('product_id = $1')) {
+      } else if (q.includes('product_id = $1') || q.includes('r.product_id = $1')) {
         const prodId = params[0];
         revs = revs.filter(r => r.product_id === prodId);
-      }
-      if (q.includes('buyer_id = $1')) {
+      } else if (q.includes('buyer_id = $1') || q.includes('r.buyer_id = $1')) {
         const buyerId = params[0];
         revs = revs.filter(r => r.buyer_id === buyerId);
+      } else if (/\b(r\.)?id\s*=\s*\$1/i.test(q)) {
+        const revId = params[0];
+        revs = revs.filter(r => r.id === revId);
       }
 
       const enriched = revs.map(r => {
@@ -230,16 +246,11 @@ class LocalFallbackDB {
           buyerName: buyer.name || 'Verified Buyer',
           productName: prod.name || 'Produce Item',
           productCategory: prod.category || 'Produce',
+          seller_id: prod.seller_id || null,
           verifiedPurchase: true
         };
       });
       return { rows: enriched };
-    }
-
-    if (q.startsWith('DELETE FROM reviews')) {
-      const id = params[0];
-      this.tables.reviews = this.tables.reviews.filter(r => r.id !== id);
-      return { rows: [] };
     }
 
     // 16. FEEDBACK
@@ -622,6 +633,17 @@ class LocalFallbackDB {
           (!excludeId || o.id !== excludeId) && 
           o.payment_status !== 'rejected'
         );
+      } else if (q.includes('JOIN order_items') || q.includes('oi.product_id')) {
+        const custId = params[0];
+        const prodId = params[1];
+        const suppId = params[2];
+        found = this.tables.orders.filter(o => {
+          if (o.customer_id !== custId) return false;
+          if (suppId && o.id !== suppId && o.order_number !== suppId) return false;
+          if (['Cancelled', 'Rejected'].includes(o.status)) return false;
+          const hasItem = this.tables.order_items.some(oi => oi.order_id === o.id && oi.product_id === prodId);
+          return hasItem;
+        });
       } else if (q.includes('seller_id = $1')) {
         found = this.tables.orders.filter(o => o.seller_id === userId);
       } else if (q.includes('customer_id = $1')) {

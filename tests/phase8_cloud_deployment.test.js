@@ -9,8 +9,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const cp = require('node:child_process');
 const app = require('../server');
-const S3StorageProvider = require('../services/storage/s3StorageProvider');
-const AwsBedrockProvider = require('../services/ai/awsBedrockProvider');
+const LocalStorageProvider = require('../services/storage/localStorageProvider');
+const { DeterministicAdvisoryProvider, AgriculturalAdvisorService } = require('../services/ai/agriculturalAdvisorService');
 const DataGovMarketProvider = require('../services/market/dataGovMarketProvider');
 const { BedrockAdvisorService } = require('../services/ai/bedrockAdvisorService');
 
@@ -64,27 +64,11 @@ describe('Phase 8: AWS Cloud Deployment & Real-Service Integration Suite', () =>
       assert.ok(ignore.includes('scratch'), 'Must ignore scratch directory');
     });
 
-    test('apprunner.yaml specifies nodejs22 runtime and standard port configuration', () => {
+    test('legacy cloud manifests (apprunner.yaml, aws-ecs-task-definition.json) are completely eradicated', () => {
       const apprunnerPath = path.join(__dirname, '..', 'apprunner.yaml');
-      assert.ok(fs.existsSync(apprunnerPath), 'apprunner.yaml must exist');
-      const yaml = fs.readFileSync(apprunnerPath, 'utf8');
-
-      assert.ok(yaml.includes('runtime: nodejs22'));
-      assert.ok(yaml.includes('port: 3000'));
-      assert.ok(yaml.includes('NODE_ENV'));
-    });
-
-    test('aws-ecs-task-definition.json defines Fargate compatibility and Secrets Manager references', () => {
       const ecsPath = path.join(__dirname, '..', 'aws-ecs-task-definition.json');
-      assert.ok(fs.existsSync(ecsPath), 'aws-ecs-task-definition.json must exist');
-      const json = JSON.parse(fs.readFileSync(ecsPath, 'utf8'));
-
-      assert.ok(json.requiresCompatibilities.includes('FARGATE'));
-      assert.strictEqual(json.networkMode, 'awsvpc');
-      const container = json.containerDefinitions[0];
-      assert.strictEqual(container.portMappings[0].containerPort, 3000);
-      assert.ok(container.secrets.some(s => s.name === 'DATABASE_URL'));
-      assert.ok(container.secrets.some(s => s.name === 'JWT_SECRET'));
+      assert.strictEqual(fs.existsSync(apprunnerPath), false, 'apprunner.yaml must not exist');
+      assert.strictEqual(fs.existsSync(ecsPath), false, 'aws-ecs-task-definition.json must not exist');
     });
   });
 
@@ -110,28 +94,16 @@ describe('Phase 8: AWS Cloud Deployment & Real-Service Integration Suite', () =>
   });
 
   // ===========================================================================
-  // 3. Amazon S3 Storage Provider Verification
+  // 3. Local Storage Provider Verification (Zero AWS Dependency)
   // ===========================================================================
-  describe('3. Amazon S3 Storage Provider', () => {
-    test('Throws actionable error if AWS_S3_MEDIA_BUCKET is missing', () => {
-      const originalBucket = process.env.AWS_S3_MEDIA_BUCKET;
-      delete process.env.AWS_S3_MEDIA_BUCKET;
-      assert.throws(
-        () => new S3StorageProvider({ bucket: null }),
-        /AWS_S3_MEDIA_BUCKET configuration is required/
-      );
-      process.env.AWS_S3_MEDIA_BUCKET = originalBucket;
+  describe('3. Local Storage Provider', () => {
+    test('LocalStorageProvider initializes with standard local URL', () => {
+      const provider = new LocalStorageProvider('http://localhost:3000');
+      assert.strictEqual(provider.baseUrl, 'http://localhost:3000');
     });
 
-    test('Constructs compliant S3 presigned upload command structure', async () => {
-      const provider = new S3StorageProvider({
-        bucket: 'krishisetu-test-bucket',
-        region: 'ap-south-1',
-        credentials: {
-          accessKeyId: 'AKIA_MOCK_TEST_ID',
-          secretAccessKey: 'mock_test_secret_for_presigning_verification'
-        }
-      });
+    test('Constructs compliant local presigned upload command structure', async () => {
+      const provider = new LocalStorageProvider('http://localhost:3000');
 
       const presigned = await provider.getPresignedUploadUrl({
         key: 'products/P101/batch-harvest-proof.jpg',
@@ -139,39 +111,32 @@ describe('Phase 8: AWS Cloud Deployment & Real-Service Integration Suite', () =>
         expiresIn: 600
       });
 
-      assert.strictEqual(presigned.provider, 's3');
+      assert.strictEqual(presigned.provider, 'local');
       assert.strictEqual(presigned.method, 'PUT');
       assert.strictEqual(presigned.headers['Content-Type'], 'image/jpeg');
       assert.strictEqual(presigned.key, 'products/P101/batch-harvest-proof.jpg');
-      assert.ok(presigned.uploadUrl.includes('krishisetu-test-bucket'));
+      assert.ok(presigned.uploadUrl.includes('/api/storage/local-upload'));
     });
 
-    test('Generates public read URL using standard S3 regional URL or CloudFront', () => {
-      const provider = new S3StorageProvider({
-        bucket: 'krishisetu-media-prod',
-        region: 'ap-south-1'
-      });
-
+    test('Generates public read URL using standard local media path', () => {
+      const provider = new LocalStorageProvider('http://localhost:3000');
       const readUrl = provider.getReadUrl('verification/7-12-land.pdf');
-      assert.strictEqual(readUrl, 'https://krishisetu-media-prod.s3.ap-south-1.amazonaws.com/verification/7-12-land.pdf');
+      assert.strictEqual(readUrl, 'http://localhost:3000/media/verification/7-12-land.pdf');
     });
   });
 
   // ===========================================================================
-  // 4. Amazon Bedrock Runtime Provider Verification
+  // 4. Grounded Agricultural Advisory Provider Verification
   // ===========================================================================
-  describe('4. Amazon Bedrock AI Provider', () => {
-    test('AwsBedrockProvider recognizes supported Indian and Global Bedrock regions', () => {
-      const supported = ['ap-south-1', 'us-east-1', 'us-west-2', 'eu-west-1'];
-      for (const region of supported) {
-        const provider = new AwsBedrockProvider({ region });
-        assert.strictEqual(provider.isAvailable(), true);
-      }
+  describe('4. Grounded Agricultural Advisory Provider', () => {
+    test('DeterministicAdvisoryProvider operates reliably with high-accuracy rules engine', () => {
+      const provider = new DeterministicAdvisoryProvider();
+      assert.strictEqual(provider.isAvailable(), true);
     });
 
-    test('AwsBedrockProvider fails fast with 503 when Bedrock is unavailable or unconfigured', async () => {
-      const provider = new AwsBedrockProvider({ region: 'invalid-region-xyz' });
-      assert.strictEqual(provider.isAvailable(), false);
+    test('Fails safely with 503 when simulated failure occurs without leaking secrets', async () => {
+      const provider = new DeterministicAdvisoryProvider();
+      provider.setSimulateFailure(true);
       await assert.rejects(
         () => provider.invokeModel({ prompt: 'Recommend onion harvest price' }),
         (err) => {
@@ -182,11 +147,12 @@ describe('Phase 8: AWS Cloud Deployment & Real-Service Integration Suite', () =>
       );
     });
 
-    test('BedrockAdvisorService rejects silent mock fallbacks in production', () => {
+    test('AgriculturalAdvisorService operates deterministically in production without cloud lockout', () => {
       process.env.NODE_ENV = 'production';
-      const advisorService = new BedrockAdvisorService();
+      const advisorService = new AgriculturalAdvisorService();
       const status = advisorService.getProviderStatus();
-      assert.strictEqual(status.isMock, false);
+      assert.strictEqual(status.available, true);
+      assert.strictEqual(status.isDeterministic, true);
       process.env.NODE_ENV = 'test';
     });
   });

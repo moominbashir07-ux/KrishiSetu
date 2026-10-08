@@ -7,16 +7,7 @@ if (!process.env.APP_URL) {
   process.env.APP_URL = process.env.RENDER_EXTERNAL_URL || 'https://krishisetu-dj4j.onrender.com';
 }
 if (!process.env.STORAGE_PROVIDER) {
-  process.env.STORAGE_PROVIDER = 'lambda';
-}
-if (!process.env.AWS_LAMBDA_STORAGE_URL) {
-  process.env.AWS_LAMBDA_STORAGE_URL = 'https://rwaiukrlq3cnacgkybwrbrtmoa0bljdm.lambda-url.ap-south-1.on.aws/';
-}
-if (!process.env.AWS_S3_MEDIA_BUCKET) {
-  process.env.AWS_S3_MEDIA_BUCKET = 'krishisetu-evidence-2026';
-}
-if (!process.env.AWS_REGION) {
-  process.env.AWS_REGION = 'ap-south-1';
+  process.env.STORAGE_PROVIDER = 'local';
 }
 
 const db = require('./db/db');
@@ -37,7 +28,7 @@ const { disputesRouter } = require('./routes/disputes');
 const { aiRouter } = require('./routes/ai');
 
 const app = express();
-// Enable single-hop reverse proxy trust for AWS App Runner, CloudFront, and ALB
+// Enable single-hop reverse proxy trust for standard reverse proxies (Render, NGINX, Cloudflare)
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 const API_KEY = process.env.DATA_GOV_IN_API_KEY || '';
@@ -133,19 +124,23 @@ app.get(['/api/ready', '/ready'], async (req, res) => {
       }
     }
 
-    // Storage check
-    const storageProvider = (process.env.STORAGE_PROVIDER || '').toLowerCase();
-    const storageStatus = storageProvider === 's3'
-      ? (process.env.AWS_S3_MEDIA_BUCKET ? 'ok' : 'unconfigured')
-      : 'ok';
+    // Storage check (Zero AWS LocalStorageProvider)
+    let storageStatus = 'ok';
+    try {
+      const LocalStorageProvider = require('./services/storage/localStorageProvider');
+      const testProvider = new LocalStorageProvider(process.env.APP_URL || 'http://localhost:3000');
+      storageStatus = (testProvider && typeof testProvider.getPresignedUploadUrl === 'function') ? 'ok' : 'unconfigured';
+    } catch {
+      storageStatus = 'unconfigured';
+    }
 
-    // AI advisor check
+    // AI advisor check (AgriculturalAdvisorService local deterministic rules engine)
     let aiStatus = 'configured';
     try {
-      const { BedrockAdvisorService } = require('./services/ai/bedrockAdvisorService');
-      const aiService = new BedrockAdvisorService();
+      const { AgriculturalAdvisorService } = require('./services/ai/agriculturalAdvisorService');
+      const aiService = new AgriculturalAdvisorService();
       const status = aiService.getProviderStatus();
-      if (status.activeProvider === 'aws' && !status.available) {
+      if (!status.available) {
         aiStatus = 'degraded';
       } else if (status.activeProvider === 'unavailable') {
         aiStatus = 'unconfigured';
@@ -202,6 +197,10 @@ app.use('/api/auth', authRouter);
 app.get('/api/sellers/:id', (req, res, next) => {
   req.url = '/sellers/' + req.params.id;
   authRouter(req, res, next);
+});
+app.get('/api/products/:id/reviews', (req, res, next) => {
+  req.url = '/products/' + req.params.id;
+  reviewsRouter(req, res, next);
 });
 app.use('/api/products', productsRouter);
 app.use('/api/cart', cartRouter);

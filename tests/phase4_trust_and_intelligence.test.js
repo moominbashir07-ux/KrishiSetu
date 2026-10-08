@@ -29,6 +29,12 @@ describe('Phase 4: Trust, Market Intelligence & AI Decision Layer Suite', () => 
 
   before(async () => {
     await db.initDb();
+    await db.query(`INSERT INTO users (id, name, contact, password_hash, role, account_status)
+      VALUES 
+      ('S101', 'Farmer Ramesh', 's101@example.com', 'hash', 'seller', 'active'),
+      ('C101', 'Customer Priya', 'c101@example.com', 'hash', 'customer', 'active'),
+      ('C102', 'Unrelated User', 'c102@example.com', 'hash', 'customer', 'active')
+      ON CONFLICT (id) DO NOTHING`).catch(() => {});
     adminToken = generateToken({ id: 'U_ADMIN_DEFAULT', name: 'Master Admin', role: 'admin' });
     sellerToken = generateToken({ id: 'S101', name: 'Farmer Ramesh', role: 'seller' });
     buyerToken = generateToken({ id: 'C101', name: 'Customer Priya', role: 'customer' });

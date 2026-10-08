@@ -7,9 +7,6 @@
     "test": "node -r ./tests/setup.js --test tests/*.test.js"
   },
   "dependencies": {
-    "@aws-sdk/client-bedrock-runtime": "^3.1133.0",
-    "@aws-sdk/client-s3": "^3.1133.0",
-    "@aws-sdk/s3-request-presigner": "^3.1133.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^16.4.5",

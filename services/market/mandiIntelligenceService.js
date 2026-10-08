@@ -44,6 +44,7 @@ class MandiIntelligenceService {
     if (isNaN(observed.getTime())) return allowUnavailable ? 'UNAVAILABLE' : 'STALE';
 
     const diffHours = (now.getTime() - observed.getTime()) / (1000 * 60 * 60);
+    if (diffHours < 0) return 'UNAVAILABLE';
     if (diffHours <= 24) return 'LIVE';
     if (diffHours <= 48) return 'RECENT';
     return 'STALE';

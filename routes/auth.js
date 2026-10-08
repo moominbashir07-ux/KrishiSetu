@@ -456,7 +456,7 @@ router.post('/verify-phone', authenticateUser, async (req, res, next) => {
 router.get('/sellers/:id', async (req, res, next) => {
   try {
     const sellerRes = await db.query(
-      'SELECT id, name, contact, role, email_verified, phone, phone_verified, show_phone, profile_photo, location, created_at FROM users WHERE id = $1 AND role = \'seller\'',
+      'SELECT id, name, contact, role, email_verified, phone, phone_verified, show_phone, profile_photo, created_at FROM users WHERE id = $1 AND role = \'seller\'',
       [req.params.id]
     );
     if (!sellerRes.rows.length) return res.status(404).json({ error: 'Seller not found.' });

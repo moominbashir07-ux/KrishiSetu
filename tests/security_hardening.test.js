@@ -14,7 +14,7 @@ const { getPgSslConfig } = require('../db/db');
 const { generateToken } = require('../middleware/auth');
 const { authorizeStorageEntity } = require('../routes/storage');
 const { MandiIntelligenceService } = require('../services/market/mandiIntelligenceService');
-const AwsBedrockProvider = require('../services/ai/awsBedrockProvider');
+const { DeterministicAdvisoryProvider } = require('../services/ai/agriculturalAdvisorService');
 const MockBedrockProvider = require('../services/ai/mockBedrockProvider');
 const { BedrockAdvisorService } = require('../services/ai/bedrockAdvisorService');
 
@@ -259,15 +259,13 @@ test('Phase 1.5 Security Hardening & Pre-Deployment Suite', async (t) => {
   });
 
   // ===========================================================================
-  // 6. BEDROCK CONFIGURABILITY & SAFE DEGRADATION
+  // 6. ADVISORY ENGINE CONFIGURABILITY & SAFE DEGRADATION
   // ===========================================================================
-  await t.test('6.1. Reads model ID and AWS region from environment dynamically', () => {
-    const provider = new AwsBedrockProvider({
-      modelId: 'anthropic.claude-3-haiku-20240307-v1:0',
-      region: 'ap-south-1'
+  await t.test('6.1. Reads engine ID dynamically without cloud configuration', () => {
+    const provider = new DeterministicAdvisoryProvider({
+      engineId: 'custom-advisory-engine-v1'
     });
-    assert.equal(provider.modelId, 'anthropic.claude-3-haiku-20240307-v1:0');
-    assert.equal(provider.region, 'ap-south-1');
+    assert.equal(provider.engineId, 'custom-advisory-engine-v1');
   });
 
   await t.test('6.2. Fails safely with 503 when Bedrock is unavailable', async () => {
